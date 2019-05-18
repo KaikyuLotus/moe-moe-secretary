@@ -1,24 +1,23 @@
 package core.settings;
 
 import core.Main;
+import core.entities.FileWatcher;
 
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.*;
+import java.nio.file.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static java.nio.file.StandardWatchEventKinds.*;
 
 public class Settings {
 
-    private static final String configPath = "config/config.properties";
+    public static final String configPath = "config/config.properties";
 
     private static final Map<String, String> data = new HashMap<>();
 
@@ -49,20 +48,35 @@ public class Settings {
         }
     }
 
-    private static void init() throws Exception {
-        InputStream s;
+    private static void loadBase() {
+        try {
 
-        System.out.println("Loading default config first");
-        s = Main.class.getClassLoader().getResourceAsStream(configPath);
-        if (s != null) {
-            load(s);
-        }
+            data.clear();
 
-        Path config = Paths.get(configPath);
-        if (config.toFile().exists()) {
-            System.out.println("Found custom config file, loading it...");
-            load(new ByteArrayInputStream(Files.readAllBytes(config)));
+            InputStream s;
+
+            System.out.println("Loading default config first");
+            s = Main.class.getClassLoader().getResourceAsStream(configPath);
+            if (s != null) {
+                load(s);
+            }
+
+            Path config = Paths.get(configPath);
+            if (config.toFile().exists()) {
+                System.out.println("Found custom config file, loading it...");
+                load(new ByteArrayInputStream(Files.readAllBytes(config)));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
+
+    private static void init() {
+        loadBase();
+    }
+
+    public static void reload() {
+        loadBase();
     }
 
     public static Color get(String key, Color defaultValue) {

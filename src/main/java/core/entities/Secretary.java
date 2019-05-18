@@ -24,32 +24,21 @@ import java.util.Random;
 
 public class Secretary extends JFrame implements MouseListener, MouseMotionListener, MouseWheelListener {
 
-    // Various
-    private static final boolean mirrored       = Settings.get("ship.mirrored", false);
-    private static final boolean offline        = Settings.get("ship.offline", false);
-    private static final boolean welcomeEnabled = Settings.get("ship.welcome.enabled", true);
-    private static final int     welcomeDelay   = Settings.get("ship.welcome.delay", 5000);
-    private static final int     maxHeight      = Settings.get("ship.height", 800);
-    private static final int     shipSkinIndex  = Settings.get("ship.skinIndex", 0);
-
-    // Floating
-    private static final boolean floatingEnabled = Settings.get("floating.enabled", true);
-
-    // Voice
-    private static final boolean voiceEnabled = Settings.get("voice.enabled", true);
-    private static final int     voiceVolume  = Settings.get("voice.volume", 50);
-
-    // Dialogs
-    private static final boolean dialogsEnabled        = Settings.get("dialogs.enabled", true);
-    private static final boolean dialogsOnClickEnabled = Settings.get("dialogs.onClick", true);
-    private static final boolean dialogsOnIdleEnabled  = Settings.get("dialogs.onIdle", true);
-
-    private static final int baloonDurationNoVoice = Settings.get("dialogs.baloon.noVoiceDuration", 3000);
-
-    // Cache
-    private static final boolean cacheSaveLocal = Settings.get("dialogs.enabled", true);
-    private static final boolean cacheAudios    = Settings.get("dialogs.onClick", true);
-    private static final boolean cacheImages    = Settings.get("dialogs.onIdle", true);
+    private static final String MAX_HEIGHT               = "ship.height";
+    private static final String MIRRORED                 = "ship.mirrored";
+    private static final String OFFLINE                  = "ship.offline";
+    private static final String WELCOME_ENABLED          = "ship.welcome.enabled";
+    private static final String WELCOME_DELAY            = "ship.welcome.delay";
+    private static final String FLOAT_ENABLED            = "floating.enabled";
+    private static final String VOICE_ENABLED            = "voice.enabled";
+    private static final String VOICE_VOLUME             = "voice.volume";
+    private static final String DIALOGS_ENABLED          = "dialogs.enabled";
+    private static final String DIALOGS_ON_CLICK_ENABLED = "dialogs.onClick";
+    private static final String DIALOGS_ON_IDLE_ENABLED  = "dialogs.onIdle";
+    private static final String BALOON_DURATION_NO_VOICE = "dialogs.baloon.noVoiceDuration";
+    private static final String CACHE_SAVE_LOCAL         = "dialogs.enabled";
+    private static final String CACHE_AUDIOS             = "dialogs.onClick";
+    private static final String CACHE_IMAGES             = "dialogs.onIdle";
 
     private final AudioManager audioManager = new AudioManager();
 
@@ -79,15 +68,15 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
         swingSetup();
 
-        if (floatingEnabled) {
+        if (Settings.get(FLOAT_ENABLED, true)) {
             secretaryLabel.startFloating();
         }
 
-        if (dialogsOnIdleEnabled) {
+        if (Settings.get(DIALOGS_ON_IDLE_ENABLED, true)) {
             idle();
         }
 
-        if (welcomeEnabled) {
+        if (Settings.get(WELCOME_ENABLED, true)) {
             onLogin(); // Say Hi!
         }
 
@@ -106,13 +95,13 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     private void onLogin() {
         new Thread(() -> {
-            Util.sleep(welcomeDelay);
+            Util.sleep(Settings.get(WELCOME_DELAY, 5000));
             speak(ship.getPhrases().get("Login"), false);
         }).start();
     }
 
     private byte[] getShipImage(Ship ship) throws IOException {
-        Path imgPath = Paths.get("resources/" + ship.getName() + "_" + shipSkinIndex + ".png");
+        Path imgPath = Paths.get("resources/" + ship.getName() + "_" + Settings.get("ship.skinIndex", 0) + ".png");
 
         byte[] imgData;
 
@@ -126,7 +115,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
                 throw new IOException("Cannot save temp img...");
             }
             try (FileOutputStream fos = new FileOutputStream(imgPath.toFile().getAbsolutePath())) {
-                List<azurlane.entities.Image> set = ship.getImageSizeSet(shipSkinIndex);
+                List<azurlane.entities.Image> set = ship.getImageSizeSet(Settings.get("ship.skinIndex", 0));
                 imgData = set.get(set.size() - 1).download();
                 fos.write(imgData);
             }
@@ -140,11 +129,11 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         byte[] imgData = getShipImage(ship);
 
         BufferedImage buffImage = ImageIO.read(new ByteArrayInputStream(imgData));
-        if (mirrored) {
+        if (Settings.get(MIRRORED, false)) {
             buffImage = Util.flipImage(buffImage);
         }
 
-        icn = buffImage.getScaledInstance(-1, maxHeight, Image.SCALE_AREA_AVERAGING);
+        icn = buffImage.getScaledInstance(-1, Settings.get(MAX_HEIGHT, 800), Image.SCALE_AREA_AVERAGING);
 
         setTitle(ship.getName());
 
@@ -180,7 +169,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     }
 
     public void speak(List<Dialog> dialogs, boolean withJump) {
-        if (secretaryLabel.isSpeaking() || !dialogsEnabled) {
+        if (secretaryLabel.isSpeaking() || !Settings.get(DIALOGS_ENABLED, true) || !running) {
             return;
         }
         Random rand = new Random();
@@ -194,10 +183,10 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             //baloon.setText("Oh");
             baloon.toggle(true);
             new Thread(() -> {
-                if (voiceEnabled) {
-                    audioManager.play(dialog.getAudio(), voiceVolume);
+                if (Settings.get(VOICE_ENABLED, true)) {
+                    audioManager.play(dialog.getAudio(), Settings.get(VOICE_VOLUME, 50));
                 } else {
-                    Util.sleep(baloonDurationNoVoice);
+                    Util.sleep(Settings.get(BALOON_DURATION_NO_VOICE, 3000));
                 }
 
                 baloon.toggle(false);
@@ -207,8 +196,12 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     }
 
 
+    public void close() {
+        this.running = false;
+    }
+
     private void onClick() {
-        if (dialogsOnClickEnabled) {
+        if (Settings.get(DIALOGS_ON_CLICK_ENABLED, true)) {
             speak(phrases.get("Secretary (Touch)"));
         }
     }

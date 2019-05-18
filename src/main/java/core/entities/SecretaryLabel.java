@@ -8,21 +8,17 @@ import java.awt.*;
 
 public class SecretaryLabel extends JLabel {
 
-    // Talk
-    private static final int   talkJumpsCount     = Settings.get("talk.jump.count", 2);
-    private static final int   talkJumpStepsCount = Settings.get("talk.jump.stepsCount", 30);
-    private static final int   talkJumpStep       = Settings.get("talk.jump.step", 1);
-    private static final float talkJumpStepSleep  = Settings.get("talk.jump.stepSleep", 5.0f);
-    private static final float talkJumpSwapSleep  = Settings.get("talk.jump.swapSleep", 80.0f);
-
-    private static final boolean highQuality = Settings.get("ship.highQuality", true);
-
-    private static final int   floatingAmplitude = Settings.get("floating.amplitude", 20);
-    private static final int   floatingStep      = Settings.get("floating.step", 1);
-    private static final float floatingStepSleep = Settings.get("floating.stepSleep", 40.0f);
-    private static final float floatingSwapSleep = Settings.get("floating.swapSleep", 700.0f);
-
-    private static final int idleDialogWait = Settings.get("dialogs.idle.frequency", 120000);
+    private static final String TALK_JUMP_COUNT       = "talk.jump.count";
+    private static final String TALK_JUMP_STEPS_COUNT = "talk.jump.stepsCount";
+    private static final String TALK_JUMP_STEP        = "talk.jump.step";
+    private static final String TALK_JUMP_STEP_SLEEP  = "talk.jump.stepSleep";
+    private static final String TALK_JUMP_SWAP_SLEEP  = "talk.jump.swapSleep";
+    private static final String HIGH_QUALITY          = "ship.highQuality";
+    private static final String FLOATING_AMPLITUDE    = "floating.amplitude";
+    private static final String FLOATING_STEP         = "floating.step";
+    private static final String FLOATING_STEP_SLEEP   = "floating.stepSleep";
+    private static final String FLOATING_SWAP_SLEEP   = "floating.swapSleep";
+    private static final String IDLE_DIALOG_WAIT      = "dialogs.idle.frequency";
 
     private boolean isSpeaking = false;
     private boolean isJumping  = false;
@@ -46,27 +42,27 @@ public class SecretaryLabel extends JLabel {
 
     public void startFloating() {
         new Thread(() -> {
-            long times     = 0;
-            int  increment = floatingStep;
+            long times = 0;
+            int increment = Settings.get(FLOATING_STEP, 1);
 
             while (running) {
 
                 waitJump();
 
-                if (times > floatingAmplitude) {
+                if (times > Settings.get(FLOATING_AMPLITUDE, 20)) {
                     if (increment < 0) {
 
-                        setLocation(0,0);
+                        setLocation(0, 0);
                     }
                     times = 0;
                     increment *= -1;
-                    Util.sleep(floatingSwapSleep);
+                    Util.sleep(Settings.get(FLOATING_SWAP_SLEEP, 700.0f));
 
                 }
 
                 // yPosition += increment;
                 setLocation(getX(), getY() + increment);
-                Util.sleep(floatingStepSleep);
+                Util.sleep(Settings.get(FLOATING_STEP_SLEEP, 40.0f));
                 times += 1;
             }
         }).start();
@@ -82,13 +78,13 @@ public class SecretaryLabel extends JLabel {
         new Thread(() -> {
             int order = -1;
 
-            for (int i = 0; i < talkJumpsCount * 2; i++) {
-                for (int i2 = 0; i2 < talkJumpStepsCount; i2++) {
-                    setLocation(getX(), getY() + (talkJumpStep * order));
-                    Util.sleep(talkJumpStepSleep);
+            for (int i = 0; i < Settings.get(TALK_JUMP_COUNT, 2) * 2; i++) {
+                for (int i2 = 0; i2 < Settings.get(TALK_JUMP_STEPS_COUNT, 30); i2++) {
+                    setLocation(getX(), getY() + (Settings.get(TALK_JUMP_STEP, 1) * order));
+                    Util.sleep(Settings.get(TALK_JUMP_STEP_SLEEP, 5.0f));
                 }
                 order *= -1;
-                Util.sleep(talkJumpSwapSleep);
+                Util.sleep(Settings.get(TALK_JUMP_SWAP_SLEEP, 80.0f));
             }
 
             isJumping = false;
@@ -96,8 +92,8 @@ public class SecretaryLabel extends JLabel {
     }
 
     public void waitIdle() {
-        int times    = 0;
-        int dialWait = idleDialogWait / 10;
+        int times = 0;
+        int dialWait = Settings.get(IDLE_DIALOG_WAIT, 120000) / 10;
         while (running && times < dialWait) {
             for (int i = 0; i < dialWait; i++) {
                 Util.sleep(10);
@@ -126,6 +122,6 @@ public class SecretaryLabel extends JLabel {
 
     @Override
     public void paint(Graphics g) {
-        super.paint(highQuality ? Util.setHighQuality((Graphics2D) g) : g);
+        super.paint(Settings.get(HIGH_QUALITY, true) ? Util.setHighQuality((Graphics2D) g) : g);
     }
 }
