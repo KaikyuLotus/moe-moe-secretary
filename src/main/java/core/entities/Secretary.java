@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class Secretary extends JFrame implements MouseListener, MouseMotionListener, MouseWheelListener {
+public class Secretary extends JFrame implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 
     private static final String MAX_HEIGHT               = "ship.height";
     private static final String MIRRORED                 = "ship.mirrored";
@@ -50,9 +50,9 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     private boolean running;
 
+    private int skinIndex = 0;
 
     private Baloon         baloon;
-    private Image          icn;
     private SecretaryLabel secretaryLabel;
 
     /**
@@ -63,7 +63,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
      */
     public Secretary(String shipName) throws Exception {
 
-        ship = Ship.get(shipName);
+        ship = new Ship(shipName);
         phrases = ship.getPhrases();
 
         swingSetup();
@@ -100,8 +100,8 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         }).start();
     }
 
-    private byte[] getShipImage(Ship ship) throws IOException {
-        Path imgPath = Paths.get("resources/" + ship.getName() + "_" + Settings.get("ship.skinIndex", 0) + ".png");
+    private byte[] getShipImage(Ship ship, int skinIndex) throws IOException {
+        Path imgPath = Paths.get("resources/" + ship.getName() + "_" + skinIndex + ".png");
 
         byte[] imgData;
 
@@ -115,7 +115,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
                 throw new IOException("Cannot save temp img...");
             }
             try (FileOutputStream fos = new FileOutputStream(imgPath.toFile().getAbsolutePath())) {
-                List<azurlane.entities.Image> set = ship.getImageSizeSet(Settings.get("ship.skinIndex", 0));
+                List<azurlane.entities.Image> set = ship.getImageSizeSet(skinIndex);
                 imgData = set.get(set.size() - 1).download();
                 fos.write(imgData);
             }
@@ -124,16 +124,33 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         return imgData;
     }
 
-    private void swingSetup() throws IOException {
 
-        byte[] imgData = getShipImage(ship);
+    private Image loadSkin(int index) throws IOException {
+
+        if (index < 0) {
+            index = ship.getSkinCount() - 1;
+            skinIndex = index;
+        } else if (index == ship.getSkinCount()) {
+            skinIndex = 0;
+            index = 0;
+        }
+
+        byte[] imgData = getShipImage(ship, index);
 
         BufferedImage buffImage = ImageIO.read(new ByteArrayInputStream(imgData));
         if (Settings.get(MIRRORED, false)) {
             buffImage = Util.flipImage(buffImage);
         }
 
-        icn = buffImage.getScaledInstance(-1, Settings.get(MAX_HEIGHT, 800), Image.SCALE_AREA_AVERAGING);
+        Image i = buffImage.getScaledInstance(-1, Settings.get(MAX_HEIGHT, 800), Image.SCALE_AREA_AVERAGING);
+
+        setSize(i.getWidth(null), i.getHeight(null) + 100);
+        setLocation(0, Util.getYStartPosition(getHeight()));
+        return i;
+    }
+
+    private void swingSetup() throws IOException {
+
 
         setTitle(ship.getName());
 
@@ -143,16 +160,15 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         addMouseListener(this);
         addMouseMotionListener(this);
         addMouseWheelListener(this);
+        addKeyListener(this);
 
         setLayout(new FlowLayout());
         setUndecorated(true);
         setBackground(new Color(0, 0, 0, 0));
 
-        secretaryLabel = new SecretaryLabel(new ImageIcon(icn));
+        secretaryLabel = new SecretaryLabel(new ImageIcon(loadSkin(Settings.get("ship.skinIndex", 0))));
 
         setContentPane(secretaryLabel);
-        setSize(icn.getWidth(null), icn.getHeight(null) + 100);
-        setLocation(0, Util.getYStartPosition(getHeight()));
 
         baloon = new Baloon(getWidth(), getHeight());
         add(baloon);
@@ -163,6 +179,9 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         running = true;
     }
 
+    public void reloadSkin() throws IOException {
+        secretaryLabel.setIcon(new ImageIcon(loadSkin(skinIndex)));
+    }
 
     public void speak(List<Dialog> dialogs) {
         speak(dialogs, true);
@@ -246,6 +265,40 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+        try {
+
+            System.out.println("Key: " + e.getKeyChar());
+
+            switch (e.getKeyChar()) {
+                case 'k':
+                    skinIndex++;
+                    reloadSkin();
+                    break;
+                case 'j':
+                    skinIndex--;
+                    reloadSkin();
+                    break;
+            }
+
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+
     }
 
     // Endregion
