@@ -64,7 +64,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     public Secretary(String shipName) throws Exception {
 
         ship = new Ship(shipName);
-        phrases = ship.getPhrases();
+        phrases = ship.getDialogs();
 
         swingSetup();
 
@@ -87,7 +87,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             Util.sleep(5000); // Wait 5 seconds before starting idle loop
             while (running) {
                 secretaryLabel.waitIdle();
-                speak(ship.getPhrases().get("Secretary (Idle)"));
+                speak(ship.getDialogs().get("Secretary (Idle)"));
                 secretaryLabel.waitSpeak();
             }
         }).start();
@@ -96,7 +96,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     private void onLogin() {
         new Thread(() -> {
             Util.sleep(Settings.get(WELCOME_DELAY, 5000));
-            speak(ship.getPhrases().get("Login"), false);
+            speak(ship.getDialogs().get("Login"), false);
         }).start();
     }
 
@@ -177,6 +177,10 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         System.out.println("Swing setup done");
 
         running = true;
+    }
+
+    public void setAlwaysOnTop() {
+
     }
 
     public void reloadSkin() throws IOException {
@@ -282,6 +286,9 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
                 case 'j':
                     skinIndex--;
                     reloadSkin();
+                    break;
+                case 't':
+
                     break;
             }
 

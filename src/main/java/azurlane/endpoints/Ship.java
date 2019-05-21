@@ -15,11 +15,21 @@ import java.util.stream.Collectors;
 
 public class Ship implements IEndpoint {
 
+    private static final String LANGUAGE    = "ship.language";
+    private static final String NATIVE_LANG = "ship.language.useNative";
+
     private static final String IMAGES_SELECTOR = ".adaptiveratioimg > a > img";
-    private static final String TABLE_ROWS      = "div[title='Chinese Server'] > table:nth-child(3) > * tr";
+    private static final String TABLE_ROWS_JAP  = "div[title='Japanese Server'] > table:nth-child(3) > * tr";
+    private static final String TABLE_ROWS_CN   = "div[title='Chinese Server'] > table:nth-child(3) > * tr";
     private static final String SKIN_NAMES      = ".azl_box_body > .tabber > div[title]";
 
+    private static final String AUDIO_COL         = "td:nth-child(2) > a";
+    private static final String EVENT_COL         = "td:nth-child(1)";
+    private static final String DIALOG_NATIVE_COL = "td:nth-child(3)";
+    private static final String DIALOG_TRANSL_COL = "td:nth-child(4)";
+
     private List<String> skinNames;
+    private Map<String, List<Dialog>> dialogs;
 
     private Document mainDoc;
     private Document quotesDoc;
@@ -35,6 +45,7 @@ public class Ship implements IEndpoint {
 
         this.name = name;
         this.skinNames = getSkinNames();
+        this.dialogs = loadDialogs();
     }
 
 
@@ -67,8 +78,7 @@ public class Ship implements IEndpoint {
             l.add(new Image(BASEURL + images.get(0).attr("href")));
             return l;
         }
-        System.out.println(images.size());
-        System.out.println(images.get(skinNumber).attr("srcset"));
+
         return Arrays.stream(images.get(skinNumber).attr("srcset")
                 .split(","))
                 .map(s -> BASEURL + s.trim().split(" ")[0])
@@ -76,46 +86,38 @@ public class Ship implements IEndpoint {
                 .collect(Collectors.toList());
     }
 
-    public Map<String, List<Dialog>> getPhrases() {
+    public Map<String, List<Dialog>> getDialogs() {
+        return dialogs;
+    }
+
+    private Map<String, List<Dialog>> loadDialogs() {
 
         Map<String, List<Dialog>> phrasesMap = new HashMap<>();
 
-        Elements rows = Selector.select(TABLE_ROWS, quotesDoc);
-        rows.remove(0);
-        rows.remove(0);
+        String lang = Settings.get(LANGUAGE, "Chinese");
+        boolean useNative = Settings.get(NATIVE_LANG, false);
+
+        // If language is set to Chinese use chinese otherwise Japanese
+        String rowSelector = lang.equalsIgnoreCase("chinese") ? TABLE_ROWS_CN : TABLE_ROWS_JAP;
+
+        Elements rows = Selector.select(rowSelector, quotesDoc);
+        // Remove header row
         rows.remove(0);
 
         for (Element row : rows) {
+            Element audioElem = row.select(AUDIO_COL).first();
+            String audioUrl = audioElem != null ? audioElem.attr("href") : "";
+            String eventText = row.selectFirst(EVENT_COL).text().trim();
+            String dialogText = row.selectFirst(useNative ? DIALOG_NATIVE_COL : DIALOG_TRANSL_COL).text();
 
-            List<Dialog> dials = new ArrayList<>();
-            List<String> stringDials = new ArrayList<>();
+            Dialog dialog = new Dialog(dialogText, eventText, audioUrl);
 
-            List<String> audios = row.select("td:nth-child(2) > a")
-                    .stream()
-                    .map(a -> a.attr("href"))
-                    .collect(Collectors.toList());
-
-            String event = row.selectFirst("td:nth-child(1)").text().trim();
-
-            Element dialogCell = row.selectFirst("td:nth-child(4)");
-            String allDialogs = dialogCell.text();
-            Elements moreDialogs = dialogCell.select("p");
-            stringDials.add("tmp");
-            for (Element dial : moreDialogs) {
-                String dialText = dial.text();
-                stringDials.add(dialText);
-                allDialogs = allDialogs.replace(dialText, ""); // Ugh...
+            // Initialize if not already present
+            if (!phrasesMap.containsKey(eventText)) {
+                phrasesMap.put(eventText, new ArrayList<>());
             }
-            stringDials.set(0, allDialogs);
 
-            for (int i = 0; i < audios.size(); i++) {
-                try {
-                    dials.add(new Dialog(stringDials.get(i), event, audios.get(i)));
-                } catch (IndexOutOfBoundsException e) {
-                    // Ignore
-                }
-            }
-            phrasesMap.put(event, dials);
+            phrasesMap.get(eventText).add(dialog);
         }
 
         return phrasesMap;
