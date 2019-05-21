@@ -39,13 +39,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-
-        System.out.println("Starting...");
-
-        inizialize();
-
         new FileWatcher(Paths.get(Settings.configPath), Main::inizialize).watch();
-
-        System.out.println("Done!");
+        inizialize();
     }
 }

@@ -26,7 +26,6 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     private static final String MAX_HEIGHT               = "ship.height";
     private static final String MIRRORED                 = "ship.mirrored";
-    private static final String OFFLINE                  = "ship.offline";
     private static final String WELCOME_ENABLED          = "ship.welcome.enabled";
     private static final String WELCOME_DELAY            = "ship.welcome.delay";
     private static final String FLOAT_ENABLED            = "floating.enabled";
@@ -36,9 +35,12 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     private static final String DIALOGS_ON_CLICK_ENABLED = "dialogs.onClick";
     private static final String DIALOGS_ON_IDLE_ENABLED  = "dialogs.onIdle";
     private static final String BALOON_DURATION_NO_VOICE = "dialogs.baloon.noVoiceDuration";
-    private static final String CACHE_SAVE_LOCAL         = "dialogs.enabled";
-    private static final String CACHE_AUDIOS             = "dialogs.onClick";
-    private static final String CACHE_IMAGES             = "dialogs.onIdle";
+    private static final String ALWAYS_ON_TOP            = "ship.alwaysOnTop";
+    private static final String BALOON_TEXT_FORMAT_HTML  = "baloon.formatString";
+    // private static final String OFFLINE               = "ship.offline";
+    // private static final String CACHE_SAVE_LOCAL      = "dialogs.enabled";
+    // private static final String CACHE_AUDIOS          = "dialogs.onClick";
+    // private static final String CACHE_IMAGES          = "dialogs.onIdle";
 
     private final AudioManager audioManager = new AudioManager();
 
@@ -49,6 +51,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     private int    xClickPosition;
 
     private boolean running;
+    private boolean alwaysOnTop = Settings.get(ALWAYS_ON_TOP, false);
 
     private int skinIndex = 0;
 
@@ -173,14 +176,16 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         baloon = new Baloon(getWidth(), getHeight());
         add(baloon);
 
+        setAlwaysOnTop(alwaysOnTop);
         setVisible(true);
         System.out.println("Swing setup done");
 
         running = true;
     }
 
-    public void setAlwaysOnTop() {
-
+    public void toggleAlwaysOnTop() {
+        alwaysOnTop = !alwaysOnTop;
+        setAlwaysOnTop(alwaysOnTop);
     }
 
     public void reloadSkin() throws IOException {
@@ -202,9 +207,12 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         SwingUtilities.invokeLater(() -> {
             secretaryLabel.speak(true);
 
-            baloon.setText("<html><div style='text-align: center';><p style='padding-left: 16px; padding-right: 16px;'><br>" + dialog.getDialog() + "</p></div></html>");
-            //baloon.setText("Oh");
-            baloon.toggle(true);
+            baloon.setText(
+                    Settings.get(BALOON_TEXT_FORMAT_HTML, "[[text]]")
+                            .replace("[[text]]", dialog.getDialog())
+            );
+            // Activate baloon only if there is text to show
+            baloon.toggle(!dialog.getDialog().equals(""));
             new Thread(() -> {
                 if (Settings.get(VOICE_ENABLED, true)) {
                     audioManager.play(dialog.getAudio(), Settings.get(VOICE_VOLUME, 50));
@@ -288,7 +296,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
                     reloadSkin();
                     break;
                 case 't':
-
+                    toggleAlwaysOnTop();
                     break;
             }
 

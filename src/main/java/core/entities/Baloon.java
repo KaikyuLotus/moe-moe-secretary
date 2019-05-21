@@ -22,6 +22,7 @@ public class Baloon extends JLabel {
 
     private boolean isVisible = false;
 
+    // TODO fix this mess
     public Baloon(int windowWidth, int windowHeight) {
 
         setSize(Settings.get(BALOON_WIDTH, 400), Settings.get(BALOON_HEIGHT, 100));
@@ -41,7 +42,6 @@ public class Baloon extends JLabel {
 
     public void toggle(boolean visible) {
         isVisible = visible;
-        System.out.println("Baloon " + (visible ? "enabled" : "disabled"));
     }
 
     @Override

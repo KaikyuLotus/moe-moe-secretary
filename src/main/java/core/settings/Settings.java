@@ -21,7 +21,7 @@ public class Settings {
 
     private static final Map<String, String> data = new HashMap<>();
 
-    private static void load(InputStream is) throws Exception {
+    private static void load(InputStream is) {
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
 
@@ -45,11 +45,12 @@ public class Settings {
                 data.put(parts[0].trim(), parts[1].trim());
 
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     private static void loadBase() {
-        try {
 
             data.clear();
 
@@ -64,15 +65,12 @@ public class Settings {
             Path config = Paths.get(configPath);
             if (config.toFile().exists()) {
                 System.out.println("Found custom config file, loading it...");
-                load(new ByteArrayInputStream(Files.readAllBytes(config)));
+                try {
+                    load(new ByteArrayInputStream(Files.readAllBytes(config)));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void init() {
-        loadBase();
     }
 
     public static void reload() {
@@ -160,14 +158,5 @@ public class Settings {
             return new double[0];
         }
         return Arrays.stream(data.get(key).split(divider)).mapToDouble(Double::parseDouble).toArray();
-    }
-
-    static {
-        try {
-            init();
-        } catch (Exception e) {
-            System.out.println("Cannot load configuration...");
-            e.printStackTrace();
-        }
     }
 }

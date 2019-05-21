@@ -54,7 +54,6 @@ public class AudioManager {
             }
             // Range / 100 * % + minimum
             volume = (gainControl.getMaximum() - -30.0f) / 100.0f * value + -30.0f;
-            System.out.println("Volume set to " + volume + "db (" + value + "%, min " + -30.0f + "db)");
         }
 
         gainControl.setValue(volume);
