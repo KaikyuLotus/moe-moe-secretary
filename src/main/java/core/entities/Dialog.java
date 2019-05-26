@@ -1,4 +1,4 @@
-package azurlane.entities;
+package core.entities;
 
 public class Dialog {
     private String dialog;

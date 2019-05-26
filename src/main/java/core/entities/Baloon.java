@@ -1,6 +1,6 @@
 package core.entities;
 
-import azurlane.utils.Util;
+import core.utils.Util;
 import core.settings.Settings;
 
 import javax.swing.*;
@@ -27,7 +27,7 @@ public class Baloon extends JLabel {
 
         setSize(Settings.get(BALOON_WIDTH, 400), Settings.get(BALOON_HEIGHT, 100));
         setMinimumSize(new Dimension(Settings.get(BALOON_WIDTH, 400), Settings.get(BALOON_HEIGHT, 100)));
-        setMaximumSize(new Dimension(Settings.get(BALOON_WIDTH, 400), Settings.get(BALOON_HEIGHT, 100)));
+        setMaximumSize(new Dimension(Settings.get(BALOON_WIDTH, 400), Settings.get(BALOON_HEIGHT, 100) * 3));
 
         setLocation((windowWidth / 2 - Settings.get(BALOON_WIDTH, 400) / 2) + Settings.get(BALOON_X_OFFSET, 0),
                 windowHeight - Settings.get(BALOON_Y_OFFSET, 300));
@@ -40,6 +40,15 @@ public class Baloon extends JLabel {
         setHorizontalAlignment(SwingConstants.CENTER);
     }
 
+    public Rectangle getDesiredSize(int parentWidth, int parentHeight) {
+        return new Rectangle(
+                (parentWidth / 2 - Settings.get(BALOON_WIDTH, 400) / 2) + Settings.get(BALOON_X_OFFSET, 0),
+                parentHeight - Settings.get(BALOON_Y_OFFSET, 300),
+                Settings.get(BALOON_WIDTH, 400),
+                Settings.get(BALOON_HEIGHT, 100) * 3
+        );
+    }
+
     public void toggle(boolean visible) {
         isVisible = visible;
     }
@@ -47,13 +56,15 @@ public class Baloon extends JLabel {
     @Override
     public void paint(Graphics g) {
         if (isVisible) {
+
+            setSize(getWidth(), getPreferredSize().height);
+
             Graphics2D g2d = (Graphics2D) g;
 
-            boolean qualitySet = false;
+            boolean qualitySet = Settings.get(HIGH_QUALITY, true);
 
-            if (Settings.get(HIGH_QUALITY, true)) {
+            if (qualitySet) {
                 Util.setHighQuality(g2d);
-                qualitySet = true;
             }
 
             g2d.setPaint(Settings.get(BALOON_BACKGROUND, Color.BLACK));
@@ -65,6 +76,5 @@ public class Baloon extends JLabel {
 
             super.paint(g2d);
         }
-
     }
 }

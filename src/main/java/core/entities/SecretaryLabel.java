@@ -1,6 +1,6 @@
 package core.entities;
 
-import azurlane.utils.Util;
+import core.utils.Util;
 import core.settings.Settings;
 
 import javax.swing.*;
@@ -13,7 +13,7 @@ public class SecretaryLabel extends JLabel {
     private static final String TALK_JUMP_STEP        = "talk.jump.step";
     private static final String TALK_JUMP_STEP_SLEEP  = "talk.jump.stepSleep";
     private static final String TALK_JUMP_SWAP_SLEEP  = "talk.jump.swapSleep";
-    private static final String HIGH_QUALITY          = "ship.highQuality";
+    private static final String HIGH_QUALITY          = "waifu.highQuality";
     private static final String FLOATING_AMPLITUDE    = "floating.amplitude";
     private static final String FLOATING_STEP         = "floating.step";
     private static final String FLOATING_STEP_SLEEP   = "floating.stepSleep";
@@ -32,6 +32,14 @@ public class SecretaryLabel extends JLabel {
         super(icn);
     }
 
+    public Rectangle getDesiredBounds(int parentWidth, int parentHeight) {
+        return new Rectangle(
+                0,
+                getStartY(parentWidth, parentHeight),
+                this.getIcon().getIconWidth(),
+                this.getIcon().getIconHeight());
+    }
+
     public void speak(boolean s) {
         isSpeaking = s;
     }
@@ -40,19 +48,28 @@ public class SecretaryLabel extends JLabel {
         return isSpeaking;
     }
 
+    public int getStartY(int parentWidth, int parentHeight) {
+        int y = 0;
+        String settingPos = Settings.get("waifu.startY", "auto").toLowerCase();
+        if (settingPos.equals("auto")) {
+            y = parentHeight - this.getIcon().getIconHeight();
+        } else if (settingPos.matches("-?\\d+")){
+            y = Integer.parseInt(settingPos);
+        }
+        return y;
+    }
+
     public void startFloating() {
         new Thread(() -> {
             long times = 0;
             int increment = Settings.get(FLOATING_STEP, 1);
-
             while (running) {
 
                 waitJump();
 
                 if (times > Settings.get(FLOATING_AMPLITUDE, 20)) {
                     if (increment < 0) {
-
-                        setLocation(0, 0);
+                        setLocation(0, getStartY(this.getParent().getWidth(), this.getParent().getHeight()));
                     }
                     times = 0;
                     increment *= -1;
@@ -60,7 +77,6 @@ public class SecretaryLabel extends JLabel {
 
                 }
 
-                // yPosition += increment;
                 setLocation(getX(), getY() + increment);
                 Util.sleep(Settings.get(FLOATING_STEP_SLEEP, 40.0f));
                 times += 1;
@@ -119,6 +135,10 @@ public class SecretaryLabel extends JLabel {
         }
     }
 
+    // May be usefull
+    public void onVisible() {
+
+    }
 
     @Override
     public void paint(Graphics g) {

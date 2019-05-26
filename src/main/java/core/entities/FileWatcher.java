@@ -24,7 +24,7 @@ public class FileWatcher {
     }
 
     public void watch() {
-        new Thread(() -> {
+        Thread watcherThread = new Thread(() -> {
             try (WatchService watcher = FileSystems.getDefault().newWatchService()) {
                 if (dir.toFile().isFile()) {
                     dir.getParent().register(watcher, ENTRY_MODIFY);
@@ -47,14 +47,11 @@ public class FileWatcher {
                     }
 
                     for (WatchEvent<?> evt : key.pollEvents()) {
-
                         Path filename = (Path) evt.context();
-
                         if (evt.kind() == OVERFLOW || !filename.toString().equals(dir.toFile().getName())) {
                             Thread.yield();
                             continue;
                         }
-
                         runnable.run();
                     }
 
@@ -70,7 +67,11 @@ public class FileWatcher {
             }
 
 
-        }).start();
+        });
+
+        // Stop the thread when execution finishes
+        watcherThread.setDaemon(true);
+        watcherThread.start();
     }
 
 }

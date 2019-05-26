@@ -1,9 +1,10 @@
-package azurlane.utils;
+package core.utils;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class Util {
@@ -11,14 +12,14 @@ public class Util {
     private static final long SPIN_YIELD_PRECISION = TimeUnit.MILLISECONDS.toNanos(1);  //TODO: Determine for current machine
 
     public static void sleep(float millDurationFloat) {
-        sleepNano((long)(1000000 * millDurationFloat));
+        sleepNano((long) (1000000 * millDurationFloat));
     }
 
     public static void sleepNano(long nanoDuration) {
 
         try {
-            final long end      = System.nanoTime() + nanoDuration;
-            long       timeLeft = nanoDuration;
+            final long end = System.nanoTime() + nanoDuration;
+            long timeLeft = nanoDuration;
             do {
 
                 if (timeLeft > SLEEP_PRECISION) {
@@ -53,10 +54,12 @@ public class Util {
         return op.filter(image, null);
     }
 
+    public static Dimension getScreenSize() {
+        return Toolkit.getDefaultToolkit().getScreenSize();
+    }
+
     public static int getYStartPosition(int height) {
-        Dimension screenSize   = Toolkit.getDefaultToolkit().getScreenSize();
-        double    screenHeight = screenSize.getHeight();
-        return (int) screenHeight - height;
+        return (int) getScreenSize().getHeight() - height;
     }
 
     public static Graphics2D setHighQuality(Graphics2D g2d) {

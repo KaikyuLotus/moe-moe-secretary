@@ -12,6 +12,11 @@ public class AudioManager {
 
     public void play(String url, int volValue) {
         try {
+
+            if (url == null || url.equals("")) {
+                return;
+            }
+
             // Get AudioInputStream from given file.
             AudioInputStream in = AudioSystem.getAudioInputStream(new URL(url).openStream());
             AudioInputStream din;

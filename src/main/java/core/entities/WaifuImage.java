@@ -1,4 +1,4 @@
-package azurlane.entities;
+package core.entities;
 
 import org.apache.commons.io.IOUtils;
 
@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-public class Image {
+public class WaifuImage {
     private String url;
 
-    public Image(String url) {
+    public WaifuImage(String url) {
         this.url = url;
     }
 
@@ -18,6 +18,7 @@ public class Image {
     }
 
     public byte[] download() throws IOException {
+        System.out.println("Downloading: " + url);
         try(InputStream in = new URL(url).openStream()) {
             return IOUtils.toByteArray(in);
         }

@@ -1,45 +1,43 @@
 package core;
 
+import core.adapters.IWaifuAdapter;
 import core.entities.FileWatcher;
 import core.entities.Secretary;
 import core.settings.Settings;
+import core.utils.WaifuUtils;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Main {
 
-    private static List<Secretary> windows = new ArrayList<>();
+    private static Secretary secretary = null;
 
     private static void inizialize() {
-        try {
-
-            for (Secretary sec : windows) {
-                sec.close();
-                sec.dispose();
-            }
-            windows.clear();
-
-            Settings.reload();
-
-            for (String shipName : Settings.getArray("ship.names", ",")) {
-                windows.add(new Secretary(shipName));
-            }
-
-            String baseName = Settings.get("ship.name", "");
-            if (!"".equals(baseName)) {
-                windows.add(new Secretary(baseName));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(-1);
+        // Eventually clean
+        if (secretary != null) {
+            secretary.close();
         }
 
+        Settings.reload();
+
+        String adapter = Settings.get("adapter", "Ship");
+        String name = Settings.get("waifu.name", "");
+
+        System.out.println("Starting " + adapter + " with name " + name);
+        IWaifuAdapter waifu = WaifuUtils.getWaifuFromAdapterName(adapter, name);
+
+        if (waifu != null) {
+            try {
+                secretary = new Secretary(waifu);
+            } catch (Exception e) {
+                System.out.println("Cannot start the waifu: " + name + " with adapter " + adapter);
+                e.printStackTrace();
+            }
+        }
     }
 
     public static void main(String[] args) {
-        new FileWatcher(Paths.get(Settings.configPath), Main::inizialize).watch();
         inizialize();
+        new FileWatcher(Paths.get(Settings.configPath), Main::inizialize).watch();
     }
 }
