@@ -1,8 +1,16 @@
 package core.entities;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Dialog {
+
+    @SerializedName("dialog")
     private String dialog;
+
+    @SerializedName("event")
     private String event;
+
+    @SerializedName("audio")
     private String audio;
 
     public Dialog(String dialog, String event, String audio) {

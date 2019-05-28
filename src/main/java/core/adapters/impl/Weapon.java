@@ -2,8 +2,8 @@ package core.adapters.impl;
 
 import core.adapters.IWaifuAdapter;
 import core.entities.Dialog;
-import core.entities.WaifuImage;
 import core.entities.exceptions.StartFailedException;
+import core.entities.waifudata.WaifuData;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -13,9 +13,7 @@ import org.jsoup.select.Selector;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Weapon implements IWaifuAdapter {
@@ -29,24 +27,23 @@ public class Weapon implements IWaifuAdapter {
     private static final String ALL_TDS                 = "td";
     private static final String SOUNDS                  = "span.audio-button";
 
-    private String                    name;
-    private List<String>              skinNames;
-    private Map<String, List<Dialog>> dialogs;
-    private List<String>              imageSources;
+    private String    name;
+    private WaifuData data;
 
+    long startTimeMillis;
 
     public Weapon(String name) throws StartFailedException {
-        try {
-            System.out.println("Getting weapon home page");
-            Document mainDoc = Jsoup.connect(BASE_URL + "/wiki/" + name).get();
-            System.out.println("Getting weapon quotes");
-            Document quotesDoc = Jsoup.connect(BASE_URL + "/wiki/" + name + "/Quotes").get();
-            System.out.println("Parsing data...");
 
-            this.name = name;
-            this.skinNames = loadSkinNames(mainDoc);
-            this.dialogs = loadDialogs(quotesDoc);
-            this.imageSources = loadImageSources(mainDoc);
+        this.startTimeMillis = System.currentTimeMillis();
+        this.name = name;
+
+        try {
+            if (IWaifuAdapter.hasSavedFile(this)) {
+                data = IWaifuAdapter.getDataFromFile(this);
+            } else {
+                data = loadFromWiki();
+                IWaifuAdapter.saveDataToFile(this);
+            }
         } catch (HttpStatusException e) {
             String message = "Wiki status code: " + e.getStatusCode();
             if (e.getStatusCode() == 404) {
@@ -56,6 +53,19 @@ public class Weapon implements IWaifuAdapter {
         } catch (Exception e) {
             throw new StartFailedException(e.getMessage());
         }
+    }
+
+    /**
+     * Loads data from Wiki, we MUST use it only once in a while
+     */
+    private WaifuData loadFromWiki() throws IOException {
+        System.out.println("Getting weapon home page");
+        Document mainDoc = Jsoup.connect(BASE_URL + "/wiki/" + name).get();
+        System.out.println("Getting weapon quotes");
+        Document quotesDoc = Jsoup.connect(BASE_URL + "/wiki/" + name + "/Quotes").get();
+        System.out.println("Parsing data...");
+
+        return new WaifuData(loadSkinNames(mainDoc), loadDialogs(quotesDoc), loadImageSources(mainDoc));
     }
 
     // TODO better error handling
@@ -76,11 +86,11 @@ public class Weapon implements IWaifuAdapter {
                 .collect(Collectors.toList());
     }
 
-    private Map<String, List<Dialog>> loadDialogs(Document doc) {
+    private List<Dialog> loadDialogs(Document doc) {
 
         Elements rows = Selector.select(QUOTE_ROWS, doc);
 
-        Map<String, List<Dialog>> dialogs = new HashMap<>();
+        List<Dialog> dialogs = new ArrayList<>();
 
         String lastEvent = "";
 
@@ -104,13 +114,7 @@ public class Weapon implements IWaifuAdapter {
                 audioURl = sound.attr("data-src");
             }
 
-            Dialog dial = new Dialog(dialogString, lastEvent, audioURl);
-
-            if (!dialogs.keySet().contains(lastEvent)) {
-                dialogs.put(lastEvent, new ArrayList<>());
-            }
-
-            dialogs.get(lastEvent).add(dial);
+            dialogs.add(new Dialog(dialogString, lastEvent, audioURl));
         }
 
         return dialogs;
@@ -120,36 +124,43 @@ public class Weapon implements IWaifuAdapter {
         return Selector.select(IMAGES_URL_SELECTOR, doc)
                 .stream()
                 .map(e -> e.attr("href"))
+                .map(this::getFullImageLink)
                 .collect(Collectors.toList());
     }
 
     @Override
     public String getName() {
-        return this.name;
+        return name;
     }
 
     @Override
     public List<String> getSkinNames() {
-        return this.skinNames;
+        return data.getSkinNames();
     }
 
     @Override
     public int getSkinCount() {
-        return this.imageSources.size();
+        return data.getSkinNames().size();
     }
 
     @Override
-    public WaifuImage[] getImageSizeSet(int skinNumber) {
-        // Load only the page of the needed skin, not for every skin
-        if (skinNumber >= getSkinCount() || skinNumber < 0) {
-            return null;
-        }
-        return new WaifuImage[]{new WaifuImage(getFullImageLink(this.imageSources.get(skinNumber)))};
+    public String getSkinUrl(int skinNumber) {
+        return data.getSkinUrls().get(skinNumber);
     }
 
     @Override
-    public Map<String, List<Dialog>> getDialogs() {
-        return this.dialogs;
+    public List<Dialog> getDialogs() {
+        return data.getDialogs();
+    }
+
+    @Override
+    public List<Dialog> getDialogs(String event) {
+        return data.getDialogs().stream().filter(d -> d.getEvent().equals(event)).collect(Collectors.toList());
+    }
+
+    @Override
+    public WaifuData getWaifuData() {
+        return data;
     }
 
     @Override
@@ -165,5 +176,10 @@ public class Weapon implements IWaifuAdapter {
     @Override
     public String onLoginEventKey() {
         return "Greeting";
+    }
+
+    @Override
+    public long getUptime() {
+        return System.currentTimeMillis() - startTimeMillis;
     }
 }

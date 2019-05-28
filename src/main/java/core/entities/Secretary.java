@@ -13,6 +13,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.util.List;
 import java.util.Random;
 
@@ -85,7 +86,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             Util.sleep(5000); // Wait 5 seconds before starting idle loop
             while (running) {
                 secretaryLabel.waitIdle();
-                speak(waifuInterface.getDialogs().get(waifuInterface.onIdleEventKey()));
+                speak(waifuInterface.getDialogs(waifuInterface.onIdleEventKey()));
                 secretaryLabel.waitSpeak();
             }
         }).start();
@@ -94,7 +95,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     private void onLogin() {
         new Thread(() -> {
             Util.sleep(Settings.get(WELCOME_DELAY, 5000));
-            speak(waifuInterface.getDialogs().get(waifuInterface.onLoginEventKey()), false);
+            speak(waifuInterface.getDialogs(waifuInterface.onLoginEventKey()), false);
         }).start();
     }
 
@@ -166,6 +167,8 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     public void reloadSkin() throws IOException {
         secretaryLabel.setIcon(new ImageIcon(loadSkin(skinIndex)));
+        secretaryLabel.setBounds(secretaryLabel.getDesiredBounds(secretaryLabel.getIcon().getIconWidth(), Util.getScreenSize().height));
+        baloon.setBounds(baloon.getDesiredSize(secretaryLabel.getIcon().getIconWidth(), Util.getScreenSize().height));
     }
 
     public void speak(List<Dialog> dialogs) {
@@ -193,7 +196,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             new Thread(() -> {
                 if (Settings.get(VOICE_ENABLED, true) && dialog.getAudio() != null) {
 
-                    audioManager.play(dialog.getAudio(), Settings.get(VOICE_VOLUME, 50));
+                    audioManager.play(this.waifuInterface, dialog.getAudio(), Settings.get(VOICE_VOLUME, 50));
                 } else {
                     Util.sleep(Settings.get(BALOON_DURATION_NO_VOICE, 3000));
                 }
@@ -212,7 +215,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     private void onClick() {
         if (Settings.get(DIALOGS_ON_CLICK_ENABLED, true)) {
-            speak(waifuInterface.getDialogs().get(waifuInterface.onTouchEventKey()));
+            speak(waifuInterface.getDialogs(waifuInterface.onTouchEventKey()));
         }
     }
 
@@ -289,6 +292,10 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     @Override
     public void windowOpened(WindowEvent e) {
+        long waifuUptime = waifuInterface.getUptime();
+        long waifuStartTimeSeconds = (waifuUptime / 1000000);
+        long waifuStartTimeMillis = waifuUptime - waifuStartTimeSeconds;
+        System.out.println("Secretary up and running in " + waifuStartTimeSeconds + "." + waifuStartTimeMillis + " seconds");
     }
 
     @Override

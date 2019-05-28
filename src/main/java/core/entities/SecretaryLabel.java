@@ -24,10 +24,6 @@ public class SecretaryLabel extends JLabel {
     private boolean isJumping  = false;
     private boolean running    = true;
 
-    public Point getPosition() {
-        return getLocation();
-    }
-
     public SecretaryLabel(ImageIcon icn) {
         super(icn);
     }

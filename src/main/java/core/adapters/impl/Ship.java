@@ -2,8 +2,8 @@ package core.adapters.impl;
 
 import core.adapters.IWaifuAdapter;
 import core.entities.Dialog;
-import core.entities.WaifuImage;
 import core.entities.exceptions.StartFailedException;
+import core.entities.waifudata.WaifuData;
 import core.settings.Settings;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -12,6 +12,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.jsoup.select.Selector;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,25 +33,22 @@ public class Ship implements IWaifuAdapter {
     private static final String DIALOG_NATIVE_COL = "td:nth-child(3)";
     private static final String DIALOG_TRANSL_COL = "td:nth-child(4)";
 
-    private String                    name;
-    private List<String>              skinNames;
-    private Map<String, List<Dialog>> dialogs;
-    private List<WaifuImage[]>        imageSizeSets;
-
+    private String    name;
+    private WaifuData data;
+    private long      startTimeMillis;
 
     public Ship(String name) throws Exception {
 
-        try {
-            System.out.println("Getting ship home page");
-            Document mainDoc = Jsoup.connect(BASE_URL + "/" + name).get();
-            System.out.println("Getting ship quotes");
-            Document quotesDoc = Jsoup.connect(BASE_URL + "/" + name + "/Quotes").get();
-            System.out.println("Parsing data...");
+        this.startTimeMillis = System.currentTimeMillis();
+        this.name = name;
 
-            this.name = name;
-            this.skinNames = loadSkinNames(mainDoc);
-            this.dialogs = loadDialogs(quotesDoc);
-            this.imageSizeSets = loadImageSizeSet(mainDoc);
+        try {
+            if (IWaifuAdapter.hasSavedFile(this)) {
+                data = IWaifuAdapter.getDataFromFile(this);
+            } else {
+                data = loadFromWiki();
+                IWaifuAdapter.saveDataToFile(this);
+            }
         } catch (HttpStatusException e) {
             String message = "Wiki status code: " + e.getStatusCode();
             if (e.getStatusCode() == 404) {
@@ -62,6 +60,19 @@ public class Ship implements IWaifuAdapter {
         }
     }
 
+    /**
+     * Loads data from Wiki, we MUST use it only once in a while
+     */
+    private WaifuData loadFromWiki() throws IOException {
+        System.out.println("Getting ship home page");
+        Document mainDoc = Jsoup.connect(BASE_URL + "/" + name).get();
+        System.out.println("Getting ship quotes");
+        Document quotesDoc = Jsoup.connect(BASE_URL + "/" + name + "/Quotes").get();
+        System.out.println("Parsing data...");
+
+        return new WaifuData(loadSkinNames(mainDoc), loadDialogs(quotesDoc), loadSkinUrls(mainDoc));
+    }
+
     private List<String> loadSkinNames(Document doc) {
         return Selector.select(SKIN_NAMES, doc)
                 .stream()
@@ -69,19 +80,19 @@ public class Ship implements IWaifuAdapter {
                 .collect(Collectors.toList());
     }
 
-    private List<WaifuImage[]> loadImageSizeSet(Document doc) {
+    private List<String> loadSkinUrls(Document doc) {
         return Selector.select(IMAGES_SELECTOR, doc).stream()
                 .map(e -> e.attr("srcset"))
                 .map(set -> Arrays.stream(set.split(","))
                         .map(s -> BASE_URL + s.trim().split(" ")[0])
-                        .map(WaifuImage::new)
-                        .toArray(WaifuImage[]::new))
+                        .reduce((first, second) -> second)
+                        .orElse(null))
                 .collect(Collectors.toList());
     }
 
-    private Map<String, List<Dialog>> loadDialogs(Document doc) {
+    private List<Dialog> loadDialogs(Document doc) {
 
-        Map<String, List<Dialog>> phrasesMap = new HashMap<>();
+        List<Dialog> dialogList = new ArrayList<>();
 
         String lang = Settings.get(LANGUAGE, "Chinese");
         boolean useNative = Settings.get(NATIVE_LANG, false);
@@ -99,16 +110,15 @@ public class Ship implements IWaifuAdapter {
             String eventText = row.selectFirst(EVENT_COL).text().trim();
             String dialogText = row.selectFirst(useNative ? DIALOG_NATIVE_COL : DIALOG_TRANSL_COL).text();
 
-            Dialog dialog = new Dialog(dialogText, eventText, audioUrl);
-
-            // Initialize if not already present
-            if (!phrasesMap.containsKey(eventText)) {
-                phrasesMap.put(eventText, new ArrayList<>());
-            }
-
-            phrasesMap.get(eventText).add(dialog);
+            dialogList.add(new Dialog(dialogText, eventText, audioUrl));
         }
-        return phrasesMap;
+
+        return dialogList;
+    }
+
+    @Override
+    public WaifuData getWaifuData() {
+        return this.data;
     }
 
     @Override
@@ -118,25 +128,27 @@ public class Ship implements IWaifuAdapter {
 
     @Override
     public List<String> getSkinNames() {
-        return this.skinNames;
+        return this.data.getSkinNames();
     }
 
     @Override
     public int getSkinCount() {
-        return skinNames.size();
+        return this.data.getSkinNames().size();
     }
 
     @Override
-    public WaifuImage[] getImageSizeSet(int skinIndex) {
-        if (skinIndex >= getSkinCount() || skinIndex < 0) {
-            return null;
-        }
-        return this.imageSizeSets.get(skinIndex);
+    public String getSkinUrl(int skinIndex) {
+        return this.data.getSkinUrls().get(skinIndex);
     }
 
     @Override
-    public Map<String, List<Dialog>> getDialogs() {
-        return dialogs;
+    public List<Dialog> getDialogs() {
+        return data.getDialogs();
+    }
+
+    @Override
+    public List<Dialog> getDialogs(String event) {
+        return this.data.getDialogs().stream().filter(d -> d.getEvent().equals(event)).collect(Collectors.toList());
     }
 
     @Override
@@ -152,5 +164,10 @@ public class Ship implements IWaifuAdapter {
     @Override
     public String onLoginEventKey() {
         return "Login";
+    }
+
+    @Override
+    public long getUptime() {
+        return System.currentTimeMillis() - startTimeMillis;
     }
 }

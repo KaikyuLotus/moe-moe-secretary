@@ -1,15 +1,9 @@
 package core.utils;
 
 import core.adapters.IWaifuAdapter;
-import core.entities.WaifuImage;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class WaifuUtils {
 
@@ -20,6 +14,7 @@ public class WaifuUtils {
             // Someone could cheat in some way (??)
             // Prevention is better than cure lol
             if (IWaifuAdapter.class.isAssignableFrom(c)) {
+                Util.checkFolders(shipName); // Create folders
                 return (IWaifuAdapter) c.getConstructor(String.class).newInstance(shipName);
             }
 
@@ -33,6 +28,7 @@ public class WaifuUtils {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
             System.out.println("The " + adapterName + " failed to start, message: " + e.getCause().getMessage());
+            e.printStackTrace();
         }
 
         return null;
@@ -40,36 +36,9 @@ public class WaifuUtils {
 
     public static byte[] getShipImage(IWaifuAdapter waifuAdapter, int skinIndex) throws IOException {
         System.out.println("Getting skin index: " + skinIndex);
-
-        Path resourcePath = Paths.get("resources");
-        if (!resourcePath.toFile().exists() && !resourcePath.toFile().mkdir()) {
-            throw new IOException("Cannot make tmp resources dir");
-        }
-
-        Path imgPath = Paths.get("resources/" + waifuAdapter.getName() + "_" + skinIndex + ".png");
-
-        byte[] imgData;
-
-        if (Files.exists(imgPath)) {
-            System.out.println("Image already downloaded");
-            imgData = Files.readAllBytes(imgPath);
-        } else {
-            System.out.println("Image not in local memory, download and saving...");
-            File file = imgPath.toFile();
-            if (!file.createNewFile()) {
-                throw new IOException("Cannot save temp img...");
-            }
-            try (FileOutputStream fos = new FileOutputStream(imgPath.toFile().getAbsolutePath())) {
-                WaifuImage[] set = waifuAdapter.getImageSizeSet(skinIndex);
-                if (set == null) {
-                    return null;
-                }
-                imgData = set[set.length - 1].download();
-                fos.write(imgData);
-            }
-        }
-
-        return imgData;
+        String url = waifuAdapter.getSkinUrl(skinIndex);
+        String fileName = waifuAdapter.getName() + "_" + skinIndex + ".png";
+        return IWaifuAdapter.downloadFile(waifuAdapter, url, fileName);
     }
 
 }
