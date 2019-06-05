@@ -117,6 +117,8 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             buffImage = Util.flipImage(buffImage);
         }
 
+        int lastPixel = Util.getEmptyPixelsFromBottom(buffImage);
+        System.out.println(lastPixel);
         Image i = buffImage.getScaledInstance(-1, Settings.get(MAX_HEIGHT, 800), SCALE_AREA_AVERAGING);
 
         setSize(i.getWidth(null), (int) Util.getScreenSize().getHeight());
@@ -179,6 +181,11 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         if (secretaryLabel.isSpeaking() || !Settings.get(DIALOGS_ENABLED, true) || !running) {
             return;
         }
+
+        if (dialogs.isEmpty()) {
+            return;
+        }
+
         Random rand = new Random();
 
         Dialog dialog = dialogs.get(rand.nextInt(dialogs.size()));

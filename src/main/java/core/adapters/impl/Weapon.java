@@ -30,7 +30,7 @@ public class Weapon implements IWaifuAdapter {
     private String    name;
     private WaifuData data;
 
-    long startTimeMillis;
+    private long startTimeMillis;
 
     public Weapon(String name) throws StartFailedException {
 
@@ -65,7 +65,7 @@ public class Weapon implements IWaifuAdapter {
         Document quotesDoc = Jsoup.connect(BASE_URL + "/wiki/" + name + "/Quotes").get();
         System.out.println("Parsing data...");
 
-        return new WaifuData(loadSkinNames(mainDoc), loadDialogs(quotesDoc), loadImageSources(mainDoc));
+        return new WaifuData(loadDialogs(quotesDoc), loadImageSources(mainDoc));
     }
 
     // TODO better error handling
@@ -114,7 +114,7 @@ public class Weapon implements IWaifuAdapter {
                 audioURl = sound.attr("data-src");
             }
 
-            dialogs.add(new Dialog(dialogString, lastEvent, audioURl));
+            dialogs.add(new Dialog("english", dialogString, lastEvent, audioURl));
         }
 
         return dialogs;
@@ -134,18 +134,13 @@ public class Weapon implements IWaifuAdapter {
     }
 
     @Override
-    public List<String> getSkinNames() {
-        return data.getSkinNames();
-    }
-
-    @Override
     public int getSkinCount() {
-        return data.getSkinNames().size();
+        return data.getSkins().size();
     }
 
     @Override
-    public String getSkinUrl(int skinNumber) {
-        return data.getSkinUrls().get(skinNumber);
+    public String getSkin(int skinNumber) {
+        return data.getSkins().get(skinNumber);
     }
 
     @Override

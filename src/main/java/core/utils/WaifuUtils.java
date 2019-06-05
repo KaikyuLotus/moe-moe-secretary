@@ -36,8 +36,8 @@ public class WaifuUtils {
 
     public static byte[] getShipImage(IWaifuAdapter waifuAdapter, int skinIndex) throws IOException {
         System.out.println("Getting skin index: " + skinIndex);
-        String url = waifuAdapter.getSkinUrl(skinIndex);
-        String fileName = waifuAdapter.getName() + "_" + skinIndex + ".png";
+        String url = waifuAdapter.getSkin(skinIndex);
+        String fileName = Util.fileFromUrl(url);
         return IWaifuAdapter.downloadFile(waifuAdapter, url, fileName);
     }
 
