@@ -71,7 +71,7 @@ public class SecretaryLabel extends JLabel {
 		if (!isJumping) {
 			new Thread(() -> {
 				isJumping = true;
-				Util.sleep(Settings.get(JUMP_DURATION, 1.5f));
+				Util.sleep((long) Settings.get(JUMP_DURATION, 1.5));
 				isJumping = false;
 			}).start();
 		}
@@ -106,6 +106,7 @@ public class SecretaryLabel extends JLabel {
 
 	@Override
 	public void paint(Graphics g) {
+		g.clearRect(0, 0, this.getParent().getWidth(), this.getParent().getHeight());
 		super.paint(Settings.get(HIGH_QUALITY, true) ? Util.setHighQuality((Graphics2D) g) : g);
 	}
 }

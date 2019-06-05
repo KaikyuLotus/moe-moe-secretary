@@ -22,33 +22,13 @@ public class Util {
 
 	private static final Gson GSON = new Gson();
 
-	private static final long   SLEEP_PRECISION = TimeUnit.MILLISECONDS.toNanos(1);
 	private static final String AGENT           = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36";
 
-	public static void sleep(float millDurationFloat) {
-		sleepNano((long) (1000000 * millDurationFloat));
-	}
-
-	public static void sleepNano(long nanoDuration) {
-
+	public static void sleep(long millDurationFloat) {
 		try {
-			final long end      = System.nanoTime() + nanoDuration;
-			long       timeLeft = nanoDuration;
-			do {
-
-				if (timeLeft > SLEEP_PRECISION) {
-					Thread.sleep(1);
-				}
-
-				timeLeft = end - System.nanoTime();
-
-				if (Thread.interrupted()) {
-					throw new InterruptedException();
-				}
-
-			} while (timeLeft > 0);
-		} catch (Exception e) {
-			// Ignore
+			Thread.sleep(millDurationFloat);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -126,7 +106,7 @@ public class Util {
 	}
 
 	public static String fileFromUrl(String url) {
-		if (url.startsWith("http")) {
+		if (url != null && url.startsWith("http")) {
 			String[] urlParts = url.split("/");
 			return urlParts[urlParts.length - 1];
 		}
@@ -143,8 +123,6 @@ public class Util {
 				int alpha = color.getAlpha();
 				if (alpha == 255) {
 					continue linesLoop;
-				} else {
-					System.out.println("!");
 				}
 			}
 			return height - y;

@@ -51,6 +51,7 @@ public class Baloon extends JLabel {
 
     public void toggle(boolean visible) {
         isVisible = visible;
+        setVisible(visible);
     }
 
     @Override

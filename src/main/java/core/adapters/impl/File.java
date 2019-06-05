@@ -40,6 +40,11 @@ public class File implements IWaifuAdapter {
 	}
 
 	@Override
+	public String getShowableName() {
+		return this.name;
+	}
+
+	@Override
 	public String getSkin(int skinNumber) {
 		return data.getSkins().get(skinNumber);
 	}

@@ -130,6 +130,11 @@ public class Ship implements IWaifuAdapter {
 	}
 
 	@Override
+	public String getShowableName() {
+		return this.name;
+	}
+
+	@Override
 	public int getSkinCount() {
 		return this.data.getSkins().size();
 	}

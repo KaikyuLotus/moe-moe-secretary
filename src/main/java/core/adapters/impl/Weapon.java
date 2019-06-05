@@ -134,6 +134,11 @@ public class Weapon implements IWaifuAdapter {
     }
 
     @Override
+    public String getShowableName() {
+        return this.name;
+    }
+
+    @Override
     public int getSkinCount() {
         return data.getSkins().size();
     }

@@ -13,7 +13,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
+import java.net.URL;
 import java.util.List;
 import java.util.Random;
 
@@ -87,7 +87,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             while (running) {
                 secretaryLabel.waitIdle();
                 speak(waifuInterface.getDialogs(waifuInterface.onIdleEventKey()));
-                secretaryLabel.waitSpeak();
+                // secretaryLabel.waitSpeak();
             }
         }).start();
     }
@@ -95,7 +95,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     private void onLogin() {
         new Thread(() -> {
             Util.sleep(Settings.get(WELCOME_DELAY, 5000));
-            speak(waifuInterface.getDialogs(waifuInterface.onLoginEventKey()), false);
+            speak(waifuInterface.getDialogs(waifuInterface.onLoginEventKey()));
         }).start();
     }
 
@@ -104,11 +104,12 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
         if (index < 0) {
             index = waifuInterface.getSkinCount() - 1;
-            skinIndex = index;
-        } else if (index == waifuInterface.getSkinCount()) {
-            skinIndex = 0;
+        } else if (index >= waifuInterface.getSkinCount()) {
             index = 0;
         }
+
+        skinIndex = index;
+
 
         byte[] imgData = WaifuUtils.getShipImage(waifuInterface, index);
 
@@ -117,17 +118,16 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             buffImage = Util.flipImage(buffImage);
         }
 
-        int lastPixel = Util.getEmptyPixelsFromBottom(buffImage);
-        System.out.println(lastPixel);
+        // int lastPixel = Util.getEmptyPixelsFromBottom(buffImage);
         Image i = buffImage.getScaledInstance(-1, Settings.get(MAX_HEIGHT, 800), SCALE_AREA_AVERAGING);
 
         setSize(i.getWidth(null), (int) Util.getScreenSize().getHeight());
-        setLocation(0, Util.getYStartPosition(getHeight()));
+        setLocation(getX(), Util.getYStartPosition(getHeight()));
         return i;
     }
 
     private void swingSetup() throws IOException {
-        setTitle(waifuInterface.getName());
+        setTitle(waifuInterface.getShowableName());
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -152,6 +152,11 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         add(baloon);
         add(secretaryLabel);
 
+        URL ico = this.getClass().getResource("/icon.png");
+        if (ico != null) {
+            setIconImage(new ImageIcon(ico).getImage());
+        }
+
         setAlwaysOnTop(alwaysOnTop);
         setVisible(true);
         secretaryLabel.onVisible();
@@ -171,13 +176,10 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         secretaryLabel.setIcon(new ImageIcon(loadSkin(skinIndex)));
         secretaryLabel.setBounds(secretaryLabel.getDesiredBounds(secretaryLabel.getIcon().getIconWidth(), Util.getScreenSize().height));
         baloon.setBounds(baloon.getDesiredSize(secretaryLabel.getIcon().getIconWidth(), Util.getScreenSize().height));
+
     }
 
     public void speak(List<Dialog> dialogs) {
-        speak(dialogs, true);
-    }
-
-    public void speak(List<Dialog> dialogs, boolean withJump) {
         if (secretaryLabel.isSpeaking() || !Settings.get(DIALOGS_ENABLED, true) || !running) {
             return;
         }
@@ -186,9 +188,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             return;
         }
 
-        Random rand = new Random();
-
-        Dialog dialog = dialogs.get(rand.nextInt(dialogs.size()));
+        Dialog dialog = dialogs.get(new Random().nextInt(dialogs.size()));
 
         SwingUtilities.invokeLater(() -> {
             secretaryLabel.speak(true);
@@ -202,7 +202,6 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             baloon.toggle(!dialog.getDialog().equals(""));
             new Thread(() -> {
                 if (Settings.get(VOICE_ENABLED, true) && dialog.getAudio() != null) {
-
                     audioManager.play(this.waifuInterface, dialog.getAudio(), Settings.get(VOICE_VOLUME, 50));
                 } else {
                     Util.sleep(Settings.get(BALOON_DURATION_NO_VOICE, 3000));

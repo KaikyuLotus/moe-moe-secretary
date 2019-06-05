@@ -3,6 +3,7 @@ package core.adapters;
 import core.entities.Dialog;
 import core.entities.waifudata.WaifuData;
 import core.utils.Util;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +19,8 @@ public interface IWaifuAdapter {
 	int getSkinCount();
 
 	String getName();
+
+	String getShowableName();
 
 	String getSkin(int skinNumber);
 
@@ -43,7 +46,7 @@ public interface IWaifuAdapter {
 		File      file      = getDataFile(waifu);
 		WaifuData waifuData = waifu.getWaifuData();
 		System.out.println("Saving waifu " + waifu.getName() + " data...");
-		Files.write(file.toPath(), Util.serializeWaifuData(waifuData).getBytes(), StandardOpenOption.CREATE);
+		FileUtils.writeStringToFile(file, Util.serializeWaifuData(waifuData), "UTF-8");
 		System.out.println("Done!");
 	}
 
