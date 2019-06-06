@@ -109,6 +109,9 @@ public class Ship implements IWaifuAdapter {
 			Element audioElem        = row.select(AUDIO_COL).first();
 			String  audioUrl         = audioElem != null ? audioElem.attr("href") : "";
 			String  eventText        = row.selectFirst(EVENT_COL).text().trim();
+			if (eventText.contains("Idle")) {
+				eventText = "Idle";
+			}
 			String  dialogText       = row.selectFirst(DIALOG_TRANSL_COL).text();
 			String  dialogTextMative = row.selectFirst(DIALOG_NATIVE_COL).text();
 
@@ -164,7 +167,7 @@ public class Ship implements IWaifuAdapter {
 
 	@Override
 	public String onIdleEventKey() {
-		return "Secretary (Idle)";
+		return "Idle";
 	}
 
 	@Override

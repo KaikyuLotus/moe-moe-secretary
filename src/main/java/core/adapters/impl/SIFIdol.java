@@ -49,10 +49,14 @@ public class SIFIdol implements IWaifuAdapter {
 
         List<String> urls = getIdolSkinUrls(mainDoc);
 
-        Document quotesDoc = Jsoup.connect(String.format(QUOTES_WIKI_URL, this.idolName)).get();
-        List<Dialog> dialogs = getDialogsFromWiki(quotesDoc, onIdleEventKey());
-        dialogs.addAll(getDialogsFromWiki(quotesDoc, onTouchEventKey()));
-
+        List<Dialog> dialogs = new ArrayList<>();
+        try {
+            Document quotesDoc = Jsoup.connect(String.format(QUOTES_WIKI_URL, this.idolName)).get();
+            dialogs = getDialogsFromWiki(quotesDoc, onIdleEventKey());
+            dialogs.addAll(getDialogsFromWiki(quotesDoc, onTouchEventKey()));
+        } catch (Exception e) {
+            System.out.println("Cannot load waifu dialogs...");
+        }
         return new WaifuData(dialogs, urls);
     }
 

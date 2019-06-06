@@ -26,7 +26,6 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     private static final String MIRRORED                 = "waifu.mirrored";
     private static final String WELCOME_ENABLED          = "waifu.welcome.enabled";
     private static final String WELCOME_DELAY            = "waifu.welcome.delay";
-    private static final String FLOAT_ENABLED            = "floating.enabled";
     private static final String VOICE_ENABLED            = "voice.enabled";
     private static final String VOICE_VOLUME             = "voice.volume";
     private static final String DIALOGS_ENABLED          = "dialogs.enabled";
@@ -35,10 +34,6 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     private static final String BALOON_DURATION_NO_VOICE = "dialogs.baloon.noVoiceDuration";
     private static final String ALWAYS_ON_TOP            = "waifu.alwaysOnTop";
     private static final String BALOON_TEXT_FORMAT_HTML  = "baloon.formatString";
-    // private static final String OFFLINE               = "ship.offline";
-    // private static final String CACHE_SAVE_LOCAL      = "dialogs.enabled";
-    // private static final String CACHE_AUDIOS          = "dialogs.onClick";
-    // private static final String CACHE_IMAGES          = "dialogs.onIdle";
 
     private final AudioManager audioManager = new AudioManager();
 
@@ -67,9 +62,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
         swingSetup();
 
-        if (Settings.get(FLOAT_ENABLED, true)) {
-            secretaryLabel.startFloating();
-        }
+        secretaryLabel.startFloating();
 
         if (Settings.get(DIALOGS_ON_IDLE_ENABLED, true)) {
             idle();
