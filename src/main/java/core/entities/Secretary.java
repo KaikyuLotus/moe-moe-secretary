@@ -197,7 +197,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
                 if (Settings.get(VOICE_ENABLED, true) && dialog.getAudio() != null) {
                     audioManager.play(this.waifuInterface, dialog.getAudio(), Settings.get(VOICE_VOLUME, 50));
                 } else {
-                    Util.sleep(Settings.get(BALOON_DURATION_NO_VOICE, 3000));
+                    Util.sleep(Settings.get(BALOON_DURATION_NO_VOICE, 3) * 1000);
                 }
 
                 baloon.toggle(false);
@@ -315,10 +315,12 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     @Override
     public void windowActivated(WindowEvent e) {
+        setOpacity(Settings.get("waifu.active.opacity", 100.0f) / 100.0f);
     }
 
     @Override
     public void windowDeactivated(WindowEvent e) {
+        setOpacity(Settings.get("waifu.inactive.opacity", 100.0f) / 100.0f);
     }
 
     // Endregion

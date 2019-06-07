@@ -2,6 +2,8 @@ package core.settings;
 
 import core.Main;
 import core.entities.FileWatcher;
+import org.apache.commons.io.FileUtils;
+import sun.misc.IOUtils;
 
 import java.awt.*;
 import java.io.*;
@@ -17,7 +19,8 @@ import static java.nio.file.StandardWatchEventKinds.*;
 
 public class Settings {
 
-    public static final String configPath = "config/config.properties";
+    public static final String configFolder = "config";
+    public static final String configPath   = "config/config.properties";
 
     private static final Map<String, String> data = new HashMap<>();
 
@@ -52,25 +55,36 @@ public class Settings {
 
     private static void loadBase() {
 
-            data.clear();
+        data.clear();
 
-            InputStream s;
+        InputStream s;
 
-            System.out.println("Loading default config first");
-            s = Main.class.getClassLoader().getResourceAsStream(configPath);
-            if (s != null) {
-                load(s);
+        System.out.println("Loading default config first");
+        s = Main.class.getClassLoader().getResourceAsStream(configPath);
+        if (s != null) {
+            load(s);
+        }
+
+        Path config = Paths.get(configPath);
+        if (config.toFile().exists()) {
+            System.out.println("Found custom config file, loading it...");
+            try {
+                load(new ByteArrayInputStream(Files.readAllBytes(config)));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-            Path config = Paths.get(configPath);
-            if (config.toFile().exists()) {
-                System.out.println("Found custom config file, loading it...");
-                try {
-                    load(new ByteArrayInputStream(Files.readAllBytes(config)));
-                } catch (IOException e) {
-                    e.printStackTrace();
+        } else {
+            try {
+                File rf = Paths.get(configFolder).toFile();
+                if (!rf.exists() && !rf.mkdir()) {
+                    return;
                 }
+                s = Main.class.getClassLoader().getResourceAsStream(configPath);
+                FileUtils.copyInputStreamToFile(s, config.toFile());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        }
     }
 
     public static void reload() {

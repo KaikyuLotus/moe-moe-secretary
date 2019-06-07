@@ -124,6 +124,7 @@ public class Weapon implements IWaifuAdapter {
         return Selector.select(IMAGES_URL_SELECTOR, doc)
                 .stream()
                 .map(e -> e.attr("href"))
+                .filter(a -> !a.contains("_S"))
                 .map(this::getFullImageLink)
                 .collect(Collectors.toList());
     }

@@ -117,7 +117,7 @@ public class SecretaryLabel extends JLabel {
 
     public void waitIdle() {
         int times = 0;
-        int dialWait = Settings.get(IDLE_DIALOG_WAIT, 120000) / 10;
+        int dialWait = Settings.get(IDLE_DIALOG_WAIT, 60) * 1000;
         while (times < dialWait) {
             for (int i = 0; i < dialWait; i++) {
                 Util.sleep(10);
@@ -140,10 +140,5 @@ public class SecretaryLabel extends JLabel {
     // May be usefull
     public void onVisible() {
 
-    }
-
-    @Override
-    public void paint(Graphics g) {
-        super.paint(Settings.get(HIGH_QUALITY, true) ? Util.setHighQuality((Graphics2D) g) : g);
     }
 }
