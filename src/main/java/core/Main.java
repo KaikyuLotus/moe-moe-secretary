@@ -13,7 +13,6 @@ public class Main {
     private static Secretary secretary = null;
 
     private static void inizialize() {
-        // Eventually clean
         if (secretary != null) {
             secretary.close();
         }
