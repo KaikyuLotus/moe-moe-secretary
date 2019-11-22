@@ -16,6 +16,9 @@ public class WaifuData {
 	@SerializedName("skins")
 	private List<String> skins;
 
+	@SerializedName("lastPosition")
+	private int position;
+
 	public WaifuData(List<Dialog> dialogs, List<String> skinUrls) {
 		this.dialogs = dialogs;
 		this.skins = skinUrls;
@@ -27,5 +30,13 @@ public class WaifuData {
 
 	public List<String> getSkins() {
 		return skins;
+	}
+
+	public int getPosition() {
+		return position;
+	}
+
+	public void setPosition(int position) {
+		this.position = position;
 	}
 }

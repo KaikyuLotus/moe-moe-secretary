@@ -47,7 +47,6 @@ public interface IWaifuAdapter {
 		WaifuData waifuData = waifu.getWaifuData();
 		System.out.println("Saving waifu " + waifu.getName() + " data...");
 		FileUtils.writeStringToFile(file, Util.serializeWaifuData(waifuData), "UTF-8");
-		System.out.println("Done!");
 	}
 
 	static WaifuData getDataFromFile(IWaifuAdapter waifu) throws IOException {
@@ -97,6 +96,10 @@ public interface IWaifuAdapter {
 
 		return resourceData;
 
+	}
+
+	public static void saveData(IWaifuAdapter waifu) throws IOException {
+		saveDataToFile(waifu);
 	}
 
 }

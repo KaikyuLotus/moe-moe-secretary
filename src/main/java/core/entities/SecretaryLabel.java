@@ -5,6 +5,7 @@ import core.settings.Settings;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SecretaryLabel extends JLabel {
@@ -21,19 +22,23 @@ public class SecretaryLabel extends JLabel {
     private static final String JUMP_PIXEL_PER_STEP  = "jump.pixelPerStep";
     private static final String JUMP_STEP_SLEEP      = "jump.stepSleep";
     private static final String JUMP_PIXEL_RANGE     = "jump.pixelRange";
+    private static final String FLOAT_SWITCH_SLEEP   = "floating.switchSleep";
 
 
     private boolean isSpeaking = false;
     private boolean isJumping  = false;
 
-    public SecretaryLabel(ImageIcon icn) {
+    private final Secretary parentFrame;
+
+    public SecretaryLabel(ImageIcon icn, Secretary parentFrame) {
         super(icn);
+        this.parentFrame = parentFrame;
     }
 
     public Rectangle getDesiredBounds(int parentWidth, int parentHeight) {
         return new Rectangle(
                 0,
-                getStartY(parentWidth, parentHeight),
+                parentHeight - this.getIcon().getIconHeight(),
                 this.getIcon().getIconWidth(),
                 this.getIcon().getIconHeight());
     }
@@ -46,17 +51,6 @@ public class SecretaryLabel extends JLabel {
         return isSpeaking;
     }
 
-    public int getStartY(int parentWidth, int parentHeight) {
-        int y = 0;
-        String settingPos = Settings.get("waifu.startY", "auto").toLowerCase();
-        if (settingPos.equals("auto")) {
-            y = parentHeight - this.getIcon().getIconHeight();
-        } else if (settingPos.matches("-?\\d+")) {
-            y = Integer.parseInt(settingPos);
-        }
-        return y;
-    }
-
     public void startFloating() {
 
         if (!Settings.get(FLOAT_ENABLED, true)) {
@@ -67,19 +61,43 @@ public class SecretaryLabel extends JLabel {
         AtomicBoolean raise = new AtomicBoolean(true);
 
         int stepSleep = Settings.get(FLOAT_STEP_SLEEP, 16);
-        int max = Settings.get(FLOAT_PIXEl_RANGE, 30);
+        int max = Settings.get(FLOAT_PIXEl_RANGE, 300);
         int increment = Settings.get(FLOAT_PIXEL_PER_STEP, 1);
         int swapSleep = Settings.get(FLOAT_SWAP_SLEEP, 100);
-        int defaultY = getY();
+        int startY = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - parentFrame.getY();
+        int minY = startY - max;
+        int maxY = startY + max * 2;
+        int switchSleep = Settings.get(FLOAT_SWITCH_SLEEP, 10);
+        System.out.println(String.format("Min %s Max %s Current %s", minY, maxY, startY));
 
+        final int screenHeight = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
         // 60 fps{
-        new Timer(stepSleep, (event) -> {
-            if (!isJumping) {
-                if (getY() >= defaultY + max || getY() <= defaultY - max) {
-                    raise.set(!raise.get());
+        new Thread(() -> {
+            while (true) {
+                Util.sleep(stepSleep);
+
+                if (isJumping || parentFrame.isDragging()) {
+                    continue;
                 }
-                setLocation(getX(), getY() + (raise.get() ? increment : -increment));
+                int position = screenHeight - parentFrame.getY();
+                // System.out.println(String.format("%s : %s : %s", startY, position, maxY));
+
+                if (raise.get()) {
+                    // Se sta salendo controlla se ha raggiunto il massimo
+                    if (position >= maxY) {
+                        // Ha raggiunto il massimo quindi inizia a scendere
+                        raise.set(false);
+                    }
+                } else {
+                    if (position <= startY) {
+                        raise.set(true);
+                        Util.sleep(switchSleep);
+                    }
+                }
+
+                parentFrame.setLocation(parentFrame.getX(), parentFrame.getY() + (raise.get() ? -increment : increment));
             }
+
         }).start();
     }
 
@@ -89,14 +107,16 @@ public class SecretaryLabel extends JLabel {
         int step = Settings.get(JUMP_PIXEL_PER_STEP, 5);
         int max = Settings.get(JUMP_PIXEL_RANGE, 40);
 
+        int position = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - parentFrame.getY();
+
         for (int j = 0; j < jumps; j++) {
             for (int i = 0; i < max / step; i++) {
-                setLocation(getX(), getY() - step);
+                parentFrame.setLocation(parentFrame.getX(), parentFrame.getY() - step);
                 Util.sleep(stepSleep);
             }
 
             for (int i = 0; i < max / step; i++) {
-                setLocation(getX(), getY() + step);
+                parentFrame.setLocation(parentFrame.getX(), parentFrame.getY() + step);
                 Util.sleep(stepSleep);
             }
         }
@@ -109,7 +129,6 @@ public class SecretaryLabel extends JLabel {
             new Thread(() -> {
                 isJumping = true;
                 jumpAnimation();
-                // Util.sleep((long) Settings.get(JUMP_DURATION, 1500));
                 isJumping = false;
             }).start();
         }
@@ -137,8 +156,17 @@ public class SecretaryLabel extends JLabel {
         }
     }
 
-    // May be usefull
+    // May be useful
     public void onVisible() {
 
     }
+
+    public void paint(Graphics g) {
+        g.clearRect(0, 0, this.getWidth(), this.getHeight());
+        Toolkit.getDefaultToolkit().sync();
+        super.paint(g);
+    }
+
+    // g.clearRect(0, 0, this.getWidth(), this.getHeight());
+    // Toolkit.getDefaultToolkit().sync();
 }

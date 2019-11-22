@@ -33,6 +33,7 @@ public class AudioManager {
 							false);
 					// Get AudioInputStream that will be decoded by underlying VorbisSPI
 					AudioInputStream din = AudioSystem.getAudioInputStream(decodedFormat, in);
+					System.out.println("Playing audio...");
 					rawplay(decodedFormat, din, volValue);
 				}
 			} catch (Exception e) {

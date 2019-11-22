@@ -1,9 +1,7 @@
 package core.settings;
 
 import core.Main;
-import core.entities.FileWatcher;
 import org.apache.commons.io.FileUtils;
-import sun.misc.IOUtils;
 
 import java.awt.*;
 import java.io.*;
@@ -11,11 +9,6 @@ import java.nio.file.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import static java.nio.file.StandardWatchEventKinds.*;
 
 public class Settings {
 
