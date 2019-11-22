@@ -1,93 +1,92 @@
 package core.audio;
 
+import core.adapters.IWaifuAdapter;
+import core.utils.Util;
 
 import javax.sound.sampled.*;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URL;
 
 
 public class AudioManager {
 
-    private Float volume = null;
+	private Float volume = null;
 
-    public void play(String url, int volValue) {
-        try {
-            // Get AudioInputStream from given file.
-            AudioInputStream in = AudioSystem.getAudioInputStream(new URL(url).openStream());
-            AudioInputStream din;
+	public void play(IWaifuAdapter adapter, String url, int volValue) {
 
-            if (in != null) {
-                AudioFormat baseFormat = in.getFormat();
-                AudioFormat decodedFormat = new AudioFormat(
-                        AudioFormat.Encoding.PCM_SIGNED,
-                        baseFormat.getSampleRate(),
-                        16,
-                        baseFormat.getChannels(),
-                        baseFormat.getChannels() * 2,
-                        baseFormat.getSampleRate(),
-                        false);
-                // Get AudioInputStream that will be decoded by underlying VorbisSPI
-                din = AudioSystem.getAudioInputStream(decodedFormat, in);
-                // Play now !
-                rawplay(decodedFormat, din, volValue);
-                in.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+		if (url != null && !url.equals("")) {
 
-        volume = null;
-    }
+			String fileName = Util.fileFromUrl(url);
 
-    private void setVolume(SourceDataLine line, int value) {
+			try {
+				byte[] audio = IWaifuAdapter.downloadFile(adapter, url, fileName);
+				// Get AudioInputStream from given bytes!
+				try (AudioInputStream in = AudioSystem.getAudioInputStream(new ByteArrayInputStream(audio))) {
+					AudioFormat baseFormat = in.getFormat();
+					AudioFormat decodedFormat = new AudioFormat(
+							AudioFormat.Encoding.PCM_SIGNED,
+							baseFormat.getSampleRate(),
+							16,
+							baseFormat.getChannels(),
+							baseFormat.getChannels() * 2,
+							baseFormat.getSampleRate(),
+							false);
+					// Get AudioInputStream that will be decoded by underlying VorbisSPI
+					AudioInputStream din = AudioSystem.getAudioInputStream(decodedFormat, in);
+					System.out.println("Playing audio...");
+					rawplay(decodedFormat, din, volValue);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 
-        FloatControl gainControl =
-                (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
+		volume = null;
+	}
 
-        // 0 : -80 = 100 : 6
+	private void setVolume(SourceDataLine line, int value) {
 
-        if (volume == null) {
+		FloatControl gainControl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
 
-            if (value > 100 || value < 0) {
-                System.out.println("Invalid volume value, using 30% as default");
-                value = 30;
-            }
-            // Range / 100 * % + minimum
-            volume = (gainControl.getMaximum() - -30.0f) / 100.0f * value + -30.0f;
-            System.out.println("Volume set to " + volume + "db (" + value + "%, min " + -30.0f + "db)");
-        }
+		if (volume == null) {
+			if (value > 100 || value < 0) {
+				System.out.println("Invalid volume value, using 30% as default");
+				value = 30;
+			}
+			// Range / 100 * % + minimum
+			volume = (gainControl.getMaximum() - -30.0f) / 100.0f * value + -30.0f;
+		}
 
-        gainControl.setValue(volume);
-    }
+		gainControl.setValue(volume);
+	}
 
-    private void rawplay(AudioFormat targetFormat,
-                         AudioInputStream din, int volValue) throws IOException, LineUnavailableException {
-        byte[] data = new byte[4096];
-        SourceDataLine line = getLine(targetFormat);
-        if (line != null) {
-            // Start
-            line.start();
+	private void rawplay(AudioFormat targetFormat,
+						 AudioInputStream din, int volValue) throws IOException, LineUnavailableException {
+		byte[]         data = new byte[4096];
+		SourceDataLine line = getLine(targetFormat);
+		if (line != null) {
+			// Start
+			line.start();
 
-            setVolume(line, volValue);
+			setVolume(line, volValue);
 
-            int nBytesRead = 0;
-            while (nBytesRead != -1) {
-                nBytesRead = din.read(data, 0, data.length);
-                if (nBytesRead != -1) line.write(data, 0, nBytesRead);
-            }
-            // Stop
-            line.drain();
-            line.stop();
-            line.close();
-            din.close();
-        }
-    }
+			int nBytesRead = 0;
+			while (nBytesRead != -1) {
+				nBytesRead = din.read(data, 0, data.length);
+				if (nBytesRead != -1) line.write(data, 0, nBytesRead);
+			}
+			// Stop
+			line.drain();
+			line.stop();
+			line.close();
+			din.close();
+		}
+	}
 
-    private static SourceDataLine getLine(AudioFormat audioFormat) throws LineUnavailableException {
-        SourceDataLine res = null;
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
-        res = (SourceDataLine) AudioSystem.getLine(info);
-        res.open(audioFormat);
-        return res;
-    }
+	private static SourceDataLine getLine(AudioFormat audioFormat) throws LineUnavailableException {
+		DataLine.Info  info = new DataLine.Info(SourceDataLine.class, audioFormat);
+		SourceDataLine res  = (SourceDataLine) AudioSystem.getLine(info);
+		res.open(audioFormat);
+		return res;
+	}
 }

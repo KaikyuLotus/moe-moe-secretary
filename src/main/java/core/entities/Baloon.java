@@ -1,6 +1,6 @@
 package core.entities;
 
-import azurlane.utils.Util;
+import core.utils.Util;
 import core.settings.Settings;
 
 import javax.swing.*;
@@ -9,64 +9,73 @@ import java.awt.geom.RoundRectangle2D;
 
 public class Baloon extends JLabel {
 
-    private static final boolean highQuality = Settings.get("baloon.highQuality", true);
-    private static final boolean highQualityText = Settings.get("baloon.highQualityText", true);
-
-    private static final int baloonYOffset  = Settings.get("baloon.yOffset", 300);
-    private static final int baloonXOffset  = Settings.get("baloon.xOffset", 0);
-    private static final int baloonWidth    = Settings.get("baloon.width", 400);
-    private static final int baloonHeight   = Settings.get("baloon.height", 100);
-    private static final int baloonFontSize = Settings.get("baloon.fontSize", 15);
-
-    private static final String baloonFont = Settings.get("baloon.font", "Arial");
-
-    private static final Color baloonBackground = Settings.get("baloon.background", Color.BLACK);
-    private static final Color baloonForeground = Settings.get("baloon.foreground", Color.WHITE);
+    private static final String HIGH_QUALITY      = "baloon.highQuality";
+    private static final String HIGH_QUALITY_TEXT = "baloon.highQualityText";
+    private static final String BALOON_Y_OFFSET   = "baloon.yOffset";
+    private static final String BALOON_X_OFFSET   = "baloon.xOffset";
+    private static final String BALOON_WIDTH      = "baloon.width";
+    private static final String BALOON_HEIGHT     = "baloon.height";
+    private static final String BALOON_FONT_SIZE  = "baloon.fontSize";
+    private static final String BALOON_FONT       = "baloon.font";
+    private static final String BALOON_BACKGROUND = "baloon.background";
+    private static final String BALOON_FOREGROUND = "baloon.foreground";
 
     private boolean isVisible = false;
 
+    // TODO fix this mess
     public Baloon(int windowWidth, int windowHeight) {
 
-        setSize(baloonWidth, baloonHeight);
-        setMinimumSize(new Dimension(baloonWidth, baloonHeight));
-        setMaximumSize(new Dimension(baloonWidth, baloonHeight));
+        setSize(Settings.get(BALOON_WIDTH, 400), Settings.get(BALOON_HEIGHT, 100));
+        setMinimumSize(new Dimension(Settings.get(BALOON_WIDTH, 400), Settings.get(BALOON_HEIGHT, 100)));
+        setMaximumSize(new Dimension(Settings.get(BALOON_WIDTH, 400), Settings.get(BALOON_HEIGHT, 100) * 3));
 
-        setLocation((windowWidth / 2 - baloonWidth / 2) + baloonXOffset, windowHeight - baloonYOffset);
-        setForeground(baloonForeground);
+        setLocation((windowWidth / 2 - Settings.get(BALOON_WIDTH, 400) / 2) + Settings.get(BALOON_X_OFFSET, 0),
+                windowHeight - Settings.get(BALOON_Y_OFFSET, 300));
+        setForeground(Settings.get(BALOON_FOREGROUND, Color.WHITE));
         setBackground(new Color(0, 0, 0, 0));
         setOpaque(false);
 
-        setFont(new Font(baloonFont, Font.PLAIN, baloonFontSize));
+        setFont(new Font(Settings.get(BALOON_FONT, "Arial"), Font.PLAIN, Settings.get(BALOON_FONT_SIZE, 15)));
         setVerticalAlignment(SwingConstants.TOP);
         setHorizontalAlignment(SwingConstants.CENTER);
     }
 
+    public Rectangle getDesiredSize(int parentWidth, int parentHeight) {
+        return new Rectangle(
+                (parentWidth / 2 - Settings.get(BALOON_WIDTH, 400) / 2) + Settings.get(BALOON_X_OFFSET, 0),
+                parentHeight - Settings.get(BALOON_Y_OFFSET, 300),
+                Settings.get(BALOON_WIDTH, 400),
+                Settings.get(BALOON_HEIGHT, 100) * 3
+        );
+    }
+
     public void toggle(boolean visible) {
         isVisible = visible;
-        System.out.println("Baloon " + (visible ? "enabled" : "disabled"));
+        setVisible(visible);
     }
 
     @Override
     public void paint(Graphics g) {
         if (isVisible) {
+
+            setSize(getWidth(), getPreferredSize().height);
+
             Graphics2D g2d = (Graphics2D) g;
 
-            boolean qualitySet = false;
+            boolean qualitySet = Settings.get(HIGH_QUALITY, true);
 
-            if (highQuality) {
+            if (qualitySet) {
                 Util.setHighQuality(g2d);
-                qualitySet = true;
             }
 
-            g2d.setPaint(baloonBackground);
+            g2d.setPaint(Settings.get(BALOON_BACKGROUND, Color.BLACK));
             g2d.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 10.0, 10.0));
 
-            if (highQualityText && !qualitySet) {
+            if (Settings.get(HIGH_QUALITY_TEXT, true) && !qualitySet) {
                 Util.setHighQuality(g2d);
             }
 
             super.paint(g2d);
         }
-
     }
 }

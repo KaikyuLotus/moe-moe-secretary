@@ -1,39 +1,46 @@
 package core.entities;
 
-import azurlane.utils.Util;
+import core.utils.Util;
 import core.settings.Settings;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SecretaryLabel extends JLabel {
 
-    // Talk
-    private static final int   talkJumpsCount     = Settings.get("talk.jump.count", 2);
-    private static final int   talkJumpStepsCount = Settings.get("talk.jump.stepsCount", 30);
-    private static final int   talkJumpStep       = Settings.get("talk.jump.step", 1);
-    private static final float talkJumpStepSleep  = Settings.get("talk.jump.stepSleep", 5.0f);
-    private static final float talkJumpSwapSleep  = Settings.get("talk.jump.swapSleep", 80.0f);
+    private static final String HIGH_QUALITY         = "waifu.highQuality";
+    private static final String FLOAT_ENABLED        = "floating.enabled";
+    private static final String FLOAT_PIXEL_PER_STEP = "floating.pixelPerStep";
+    private static final String FLOAT_PIXEl_RANGE    = "floating.pixelRange";
+    private static final String FLOAT_STEP_SLEEP     = "floating.stepSleep";
+    private static final String FLOAT_SWAP_SLEEP     = "floating.swapSleep";
+    private static final String IDLE_DIALOG_WAIT     = "dialogs.idle.frequency";
+    private static final String JUMP_ON_CLICK        = "jump.onClick";
+    private static final String JUMPS_COUNT          = "jump.count";
+    private static final String JUMP_PIXEL_PER_STEP  = "jump.pixelPerStep";
+    private static final String JUMP_STEP_SLEEP      = "jump.stepSleep";
+    private static final String JUMP_PIXEL_RANGE     = "jump.pixelRange";
+    private static final String FLOAT_SWITCH_SLEEP   = "floating.switchSleep";
 
-    private static final boolean highQuality = Settings.get("ship.highQuality", true);
-
-    private static final int   floatingAmplitude = Settings.get("floating.amplitude", 20);
-    private static final int   floatingStep      = Settings.get("floating.step", 1);
-    private static final float floatingStepSleep = Settings.get("floating.stepSleep", 40.0f);
-    private static final float floatingSwapSleep = Settings.get("floating.swapSleep", 700.0f);
-
-    private static final int idleDialogWait = Settings.get("dialogs.idle.frequency", 120000);
 
     private boolean isSpeaking = false;
     private boolean isJumping  = false;
-    private boolean running    = true;
 
-    public Point getPosition() {
-        return getLocation();
+    private final Secretary parentFrame;
+
+    public SecretaryLabel(ImageIcon icn, Secretary parentFrame) {
+        super(icn);
+        this.parentFrame = parentFrame;
     }
 
-    public SecretaryLabel(ImageIcon icn) {
-        super(icn);
+    public Rectangle getDesiredBounds(int parentWidth, int parentHeight) {
+        return new Rectangle(
+                0,
+                parentHeight - this.getIcon().getIconHeight(),
+                this.getIcon().getIconWidth(),
+                this.getIcon().getIconHeight());
     }
 
     public void speak(boolean s) {
@@ -45,60 +52,92 @@ public class SecretaryLabel extends JLabel {
     }
 
     public void startFloating() {
-        new Thread(() -> {
-            long times     = 0;
-            int  increment = floatingStep;
 
-            while (running) {
-
-                waitJump();
-
-                if (times > floatingAmplitude) {
-                    if (increment < 0) {
-
-                        setLocation(0,0);
-                    }
-                    times = 0;
-                    increment *= -1;
-                    Util.sleep(floatingSwapSleep);
-
-                }
-
-                // yPosition += increment;
-                setLocation(getX(), getY() + increment);
-                Util.sleep(floatingStepSleep);
-                times += 1;
-            }
-        }).start();
-    }
-
-    public void speakJump() {
-
-        if (isJumping) {
+        if (!Settings.get(FLOAT_ENABLED, true)) {
+            System.out.println("Floating is disabled");
             return;
         }
 
-        isJumping = true;
-        new Thread(() -> {
-            int order = -1;
+        AtomicBoolean raise = new AtomicBoolean(true);
 
-            for (int i = 0; i < talkJumpsCount * 2; i++) {
-                for (int i2 = 0; i2 < talkJumpStepsCount; i2++) {
-                    setLocation(getX(), getY() + (talkJumpStep * order));
-                    Util.sleep(talkJumpStepSleep);
+        int stepSleep = Settings.get(FLOAT_STEP_SLEEP, 16);
+        int max = Settings.get(FLOAT_PIXEl_RANGE, 300);
+        int increment = Settings.get(FLOAT_PIXEL_PER_STEP, 1);
+        int swapSleep = Settings.get(FLOAT_SWAP_SLEEP, 100);
+        int startY = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - parentFrame.getY();
+        int minY = startY - max;
+        int maxY = startY + max * 2;
+        int switchSleep = Settings.get(FLOAT_SWITCH_SLEEP, 10);
+        System.out.println(String.format("Min %s Max %s Current %s", minY, maxY, startY));
+
+        final int screenHeight = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+        // 60 fps{
+        new Thread(() -> {
+            while (true) {
+                Util.sleep(stepSleep);
+
+                if (isJumping || parentFrame.isDragging()) {
+                    continue;
                 }
-                order *= -1;
-                Util.sleep(talkJumpSwapSleep);
+                int position = screenHeight - parentFrame.getY();
+                // System.out.println(String.format("%s : %s : %s", startY, position, maxY));
+
+                if (raise.get()) {
+                    // Se sta salendo controlla se ha raggiunto il massimo
+                    if (position >= maxY) {
+                        // Ha raggiunto il massimo quindi inizia a scendere
+                        raise.set(false);
+                    }
+                } else {
+                    if (position <= startY) {
+                        raise.set(true);
+                        Util.sleep(switchSleep);
+                    }
+                }
+
+                parentFrame.setLocation(parentFrame.getX(), parentFrame.getY() + (raise.get() ? -increment : increment));
             }
 
-            isJumping = false;
         }).start();
     }
 
+    public void jumpAnimation() {
+        int jumps = Settings.get(JUMPS_COUNT, 2);
+        int stepSleep = Settings.get(JUMP_STEP_SLEEP, 15);
+        int step = Settings.get(JUMP_PIXEL_PER_STEP, 5);
+        int max = Settings.get(JUMP_PIXEL_RANGE, 40);
+
+        int position = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - parentFrame.getY();
+
+        for (int j = 0; j < jumps; j++) {
+            for (int i = 0; i < max / step; i++) {
+                parentFrame.setLocation(parentFrame.getX(), parentFrame.getY() - step);
+                Util.sleep(stepSleep);
+            }
+
+            for (int i = 0; i < max / step; i++) {
+                parentFrame.setLocation(parentFrame.getX(), parentFrame.getY() + step);
+                Util.sleep(stepSleep);
+            }
+        }
+
+
+    }
+
+    public void speakJump() {
+        if (!isJumping && Settings.get(JUMP_ON_CLICK, true)) {
+            new Thread(() -> {
+                isJumping = true;
+                jumpAnimation();
+                isJumping = false;
+            }).start();
+        }
+    }
+
     public void waitIdle() {
-        int times    = 0;
-        int dialWait = idleDialogWait / 10;
-        while (running && times < dialWait) {
+        int times = 0;
+        int dialWait = Settings.get(IDLE_DIALOG_WAIT, 60) * 1000;
+        while (times < dialWait) {
             for (int i = 0; i < dialWait; i++) {
                 Util.sleep(10);
                 if (isJumping || isSpeaking) {
@@ -117,15 +156,17 @@ public class SecretaryLabel extends JLabel {
         }
     }
 
-    public void waitJump() {
-        while (isJumping) {
-            Util.sleep(10);
-        }
+    // May be useful
+    public void onVisible() {
+
     }
 
-
-    @Override
     public void paint(Graphics g) {
-        super.paint(highQuality ? Util.setHighQuality((Graphics2D) g) : g);
+        g.clearRect(0, 0, this.getWidth(), this.getHeight());
+        Toolkit.getDefaultToolkit().sync();
+        super.paint(g);
     }
+
+    // g.clearRect(0, 0, this.getWidth(), this.getHeight());
+    // Toolkit.getDefaultToolkit().sync();
 }

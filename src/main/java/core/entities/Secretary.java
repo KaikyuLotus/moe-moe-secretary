@@ -1,96 +1,147 @@
 package core.entities;
 
-import azurlane.endpoints.Ship;
-import azurlane.entities.Dialog;
-import azurlane.utils.Util;
+import core.adapters.IWaifuAdapter;
+import core.utils.Util;
 import core.audio.AudioManager;
 import core.settings.Settings;
+import core.utils.WaifuUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.Area;
+import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
-public class Secretary extends JFrame implements MouseListener, MouseMotionListener, MouseWheelListener {
+import static java.awt.Image.SCALE_AREA_AVERAGING;
 
-    // Various
-    private static final boolean mirrored       = Settings.get("ship.mirrored", false);
-    private static final boolean offline        = Settings.get("ship.offline", false);
-    private static final boolean welcomeEnabled = Settings.get("ship.welcome.enabled", true);
-    private static final int     welcomeDelay   = Settings.get("ship.welcome.delay", 5000);
-    private static final int     maxHeight      = Settings.get("ship.height", 800);
-    private static final int     shipSkinIndex  = Settings.get("ship.skinIndex", 0);
+public class Secretary extends JFrame implements MouseListener, MouseMotionListener,
+        MouseWheelListener, KeyListener, WindowListener {
 
-    // Floating
-    private static final boolean floatingEnabled = Settings.get("floating.enabled", true);
-
-    // Voice
-    private static final boolean voiceEnabled = Settings.get("voice.enabled", true);
-    private static final int     voiceVolume  = Settings.get("voice.volume", 50);
-
-    // Dialogs
-    private static final boolean dialogsEnabled        = Settings.get("dialogs.enabled", true);
-    private static final boolean dialogsOnClickEnabled = Settings.get("dialogs.onClick", true);
-    private static final boolean dialogsOnIdleEnabled  = Settings.get("dialogs.onIdle", true);
-
-    private static final int baloonDurationNoVoice = Settings.get("dialogs.baloon.noVoiceDuration", 3000);
-
-    // Cache
-    private static final boolean cacheSaveLocal = Settings.get("dialogs.enabled", true);
-    private static final boolean cacheAudios    = Settings.get("dialogs.onClick", true);
-    private static final boolean cacheImages    = Settings.get("dialogs.onIdle", true);
+    private static final String MAX_HEIGHT = "waifu.height";
+    private static final String MIRRORED = "waifu.mirrored";
+    private static final String WELCOME_ENABLED = "waifu.welcome.enabled";
+    private static final String WELCOME_DELAY = "waifu.welcome.delay";
+    private static final String VOICE_ENABLED = "voice.enabled";
+    private static final String VOICE_VOLUME = "voice.volume";
+    private static final String DIALOGS_ENABLED = "dialogs.enabled";
+    private static final String DIALOGS_ON_CLICK_ENABLED = "dialogs.onClick";
+    private static final String DIALOGS_ON_IDLE_ENABLED = "dialogs.onIdle";
+    private static final String BALOON_DURATION_NO_VOICE = "dialogs.baloon.noVoiceDuration";
+    private static final String ALWAYS_ON_TOP = "waifu.alwaysOnTop";
+    private static final String BALOON_TEXT_FORMAT_HTML = "baloon.formatString";
 
     private final AudioManager audioManager = new AudioManager();
 
-    private final Ship                      ship;
-    private final Map<String, List<Dialog>> phrases;
+    private final IWaifuAdapter waifuInterface;
 
-    private double startPoint = 0;
-    private int    xClickPosition;
+    private int xClickPosition;
+    private int dragDiff = 0;
 
     private boolean running;
+    private boolean alwaysOnTop = Settings.get(ALWAYS_ON_TOP, false);
 
+    private int skinIndex = 0;
 
-    private Baloon         baloon;
-    private Image          icn;
+    private Baloon baloon;
     private SecretaryLabel secretaryLabel;
+
+    private BufferedImage buffImage;
+
+    private boolean isManual = false;
+    private boolean isDragging = false;
 
     /**
      * Application start point
      *
-     * @param shipName The name of the ship to start with
+     * @param waifu Your initialized waifu
      * @throws Exception Something went wrong while starting the ship
      */
-    public Secretary(String shipName) throws Exception {
+    public Secretary(IWaifuAdapter waifu) throws Exception {
 
-        ship = Ship.get(shipName);
-        phrases = ship.getPhrases();
+        waifuInterface = waifu;
 
         swingSetup();
 
-        if (floatingEnabled) {
-            secretaryLabel.startFloating();
-        }
+        secretaryLabel.startFloating();
 
-        if (dialogsOnIdleEnabled) {
+        if (Settings.get(DIALOGS_ON_IDLE_ENABLED, true)) {
             idle();
         }
 
-        if (welcomeEnabled) {
+        if (Settings.get(WELCOME_ENABLED, true)) {
             onLogin(); // Say Hi!
         }
 
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        g.clearRect(0, 0, this.getWidth(), this.getHeight());
+        super.paint(g);
+        if (!isManual) {
+            new Thread(() -> {
+                BufferedImage image = getScreenShot(this);
+                Area area = getOutline(image, 255);
+                setShape(area);
+            }).start();
+        }
+    }
+
+    public BufferedImage getScreenShot(Component component) {
+        BufferedImage image = new BufferedImage(
+                component.getWidth(),
+                component.getHeight(),
+                BufferedImage.TYPE_INT_ARGB
+        );
+        setShape(null);
+        isManual = true;
+        component.printAll(image.getGraphics());
+        isManual = false;
+        return image;
+    }
+
+    public Area getOutline(BufferedImage i, int targetTransp) {
+
+        // construct the GeneralPath
+        GeneralPath gp = new GeneralPath();
+        gp.moveTo(0, 0);
+
+        boolean drawing = false;
+        for (int y = 0; y < i.getHeight(); y++) {
+            for (int x = 0; x < i.getWidth(); x++) {
+
+                int rgb = i.getRGB(x, y);
+                boolean isTransp = (rgb >>> 24) <= targetTransp;
+
+                if (isTransp) {
+                    if (drawing) {
+                        gp.closePath();
+                    }
+                    drawing = false;
+                } else {
+                    drawing = true;
+                    gp.moveTo(x, y);
+                    gp.lineTo(x + 1, y);
+                    gp.lineTo(x + 1, y + 1);
+                    gp.lineTo(x, y + 1);
+                    gp.moveTo(x, y);
+
+                }
+            }
+            gp.closePath();
+        }
+        gp.closePath();
+        // construct the Area from the GP & return it
+        return new Area(gp);
     }
 
     private void idle() {
@@ -98,7 +149,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             Util.sleep(5000); // Wait 5 seconds before starting idle loop
             while (running) {
                 secretaryLabel.waitIdle();
-                speak(ship.getPhrases().get("Secretary (Idle)"));
+                speak(waifuInterface.getDialogs(waifuInterface.onIdleEventKey()));
                 secretaryLabel.waitSpeak();
             }
         }).start();
@@ -106,47 +157,52 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     private void onLogin() {
         new Thread(() -> {
-            Util.sleep(welcomeDelay);
-            speak(ship.getPhrases().get("Login"), false);
+            Util.sleep(Settings.get(WELCOME_DELAY, 5000));
+            speak(waifuInterface.getDialogs(waifuInterface.onLoginEventKey()));
         }).start();
     }
 
-    private byte[] getShipImage(Ship ship) throws IOException {
-        Path imgPath = Paths.get("resources/" + ship.getName() + "_" + shipSkinIndex + ".png");
 
-        byte[] imgData;
+    private Image loadSkin(int index) throws IOException {
 
-        if (Files.exists(imgPath)) {
-            System.out.println("Ship already downloaded");
-            imgData = Files.readAllBytes(imgPath);
-        } else {
-            System.out.println("Ship image not in memory, download and saving...");
-            File file = imgPath.toFile();
-            if (!file.createNewFile()) {
-                throw new IOException("Cannot save temp img...");
-            }
-            try (FileOutputStream fos = new FileOutputStream(imgPath.toFile().getAbsolutePath())) {
-                List<azurlane.entities.Image> set = ship.getImageSizeSet(shipSkinIndex);
-                imgData = set.get(set.size() - 1).download();
-                fos.write(imgData);
-            }
+        if (index < 0) {
+            index = waifuInterface.getSkinCount() - 1;
+        } else if (index >= waifuInterface.getSkinCount()) {
+            index = 0;
         }
 
-        return imgData;
-    }
+        skinIndex = index;
 
-    private void swingSetup() throws IOException {
+        byte[] imgData = WaifuUtils.getShipImage(waifuInterface, index);
 
-        byte[] imgData = getShipImage(ship);
-
-        BufferedImage buffImage = ImageIO.read(new ByteArrayInputStream(imgData));
-        if (mirrored) {
+        buffImage = ImageIO.read(new ByteArrayInputStream(imgData));
+        if (Settings.get(MIRRORED, false)) {
             buffImage = Util.flipImage(buffImage);
         }
 
-        icn = buffImage.getScaledInstance(-1, maxHeight, Image.SCALE_AREA_AVERAGING);
+        // int lastPixel = Util.getEmptyPixelsFromBottom(buffImage);
+        Image i = buffImage.getScaledInstance(-1, Settings.get(MAX_HEIGHT, 800), SCALE_AREA_AVERAGING);
 
-        setTitle(ship.getName());
+        setSize(i.getWidth(null), i.getHeight(null));
+        setLocation(getX(), Util.getYStartPosition(i.getHeight(null)));
+
+        return i;
+    }
+
+    public int getStartY() {
+        int y = Util.getScreenSize().height - getHeight();
+        String settingPos = Settings.get("waifu.startY", "auto").toLowerCase();
+        if (!settingPos.equals("auto")) {
+            if (settingPos.matches("-?\\d+")) {
+                y += Integer.parseInt(settingPos);
+            }
+        }
+
+        return y;
+    }
+
+    private void swingSetup() throws IOException {
+        setTitle(waifuInterface.getShowableName());
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -154,50 +210,78 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         addMouseListener(this);
         addMouseMotionListener(this);
         addMouseWheelListener(this);
+        addKeyListener(this);
+        addWindowListener(this);
 
-        setLayout(new FlowLayout());
+        setLayout(null);
         setUndecorated(true);
         setBackground(new Color(0, 0, 0, 0));
 
-        secretaryLabel = new SecretaryLabel(new ImageIcon(icn));
-
-        setContentPane(secretaryLabel);
-        setSize(icn.getWidth(null), icn.getHeight(null) + 100);
-        setLocation(0, Util.getYStartPosition(getHeight()));
+        ImageIcon icn = new ImageIcon(loadSkin(Settings.get("waifu.skinIndex", 0)));
+        secretaryLabel = new SecretaryLabel(icn, this);
+        secretaryLabel.setBounds(secretaryLabel.getDesiredBounds(icn.getIconWidth(), icn.getIconHeight()));
 
         baloon = new Baloon(getWidth(), getHeight());
+        baloon.setBounds(baloon.getDesiredSize(icn.getIconWidth(), icn.getIconHeight()));
+
         add(baloon);
+        add(secretaryLabel);
 
+        URL ico = this.getClass().getResource("/icon.png");
+        if (ico != null) {
+            setIconImage(new ImageIcon(ico).getImage());
+        }
+
+        setAlwaysOnTop(alwaysOnTop);
+        setLocation(waifuInterface.getWaifuData().getPosition(), getStartY());
+        setType(Type.POPUP);
         setVisible(true);
-        System.out.println("Swing setup done");
 
+        secretaryLabel.onVisible();
+
+        System.out.println("Swing setup done");
         running = true;
     }
 
-
-    public void speak(List<Dialog> dialogs) {
-        speak(dialogs, true);
+    public void toggleAlwaysOnTop() {
+        alwaysOnTop = !alwaysOnTop;
+        setAlwaysOnTop(alwaysOnTop);
+        System.out.println("Always on top: " + alwaysOnTop);
     }
 
-    public void speak(List<Dialog> dialogs, boolean withJump) {
-        if (secretaryLabel.isSpeaking() || !dialogsEnabled) {
+    public void reloadSkin() throws IOException {
+        secretaryLabel.setIcon(new ImageIcon(loadSkin(skinIndex)));
+        secretaryLabel.setBounds(secretaryLabel.getDesiredBounds(secretaryLabel.getIcon().getIconWidth(), secretaryLabel.getIcon().getIconHeight()));
+        baloon.setBounds(baloon.getDesiredSize(secretaryLabel.getIcon().getIconWidth(), secretaryLabel.getIcon().getIconHeight()));
+        setLocation(getX(), getStartY());
+    }
+
+    public void speak(List<Dialog> dialogs) {
+        if (secretaryLabel.isSpeaking() || !Settings.get(DIALOGS_ENABLED, true) || !running) {
             return;
         }
-        Random rand = new Random();
 
-        Dialog dialog = dialogs.get(rand.nextInt(dialogs.size()));
+        if (dialogs.isEmpty()) {
+            return;
+        }
+
+        Dialog dialog = dialogs.get(new Random().nextInt(dialogs.size()));
 
         SwingUtilities.invokeLater(() -> {
             secretaryLabel.speak(true);
 
-            baloon.setText("<html><div style='text-align: center';><p style='padding-left: 16px; padding-right: 16px;'><br>" + dialog.getDialog() + "</p></div></html>");
-            //baloon.setText("Oh");
-            baloon.toggle(true);
+            baloon.setText(
+                    Settings.get(BALOON_TEXT_FORMAT_HTML, "[[text]]")
+                            .replace("[[text]]", dialog.getDialog() + "<br>&zwnj;")
+            );
+
+            // Activate baloon only if there is text to show
+            baloon.toggle(!dialog.getDialog().equals(""));
             new Thread(() -> {
-                if (voiceEnabled) {
-                    audioManager.play(dialog.getAudio(), voiceVolume);
+                if (Settings.get(VOICE_ENABLED, true) && dialog.getAudio() != null) {
+                    audioManager.play(this.waifuInterface, dialog.getAudio(), Settings.get(VOICE_VOLUME, 50));
                 } else {
-                    Util.sleep(baloonDurationNoVoice);
+                    Util.sleep(Settings.get(BALOON_DURATION_NO_VOICE, 3) * 1000);
                 }
 
                 baloon.toggle(false);
@@ -206,37 +290,72 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         });
     }
 
+    public boolean isDragging() {
+        return isDragging;
+    }
+
+    public void close() {
+        this.running = false;
+        System.out.println("Closed");
+        this.dispose();
+    }
 
     private void onClick() {
-        if (dialogsOnClickEnabled) {
-            speak(phrases.get("Secretary (Touch)"));
+
+        if (Settings.get(DIALOGS_ON_CLICK_ENABLED, true)) {
+            speak(waifuInterface.getDialogs(waifuInterface.onTouchEventKey()));
         }
     }
 
     // Region: Swing Mouse Events
     @Override
     public void mousePressed(MouseEvent e) {
-        startPoint = e.getXOnScreen();
         xClickPosition = e.getXOnScreen();
+        dragDiff = xClickPosition - getX();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        startPoint = e.getXOnScreen();
         if (xClickPosition == e.getXOnScreen()) {
             secretaryLabel.speakJump();
             onClick();
         }
+        isDragging = false;
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        setLocation((int) getLocation().getX() + e.getXOnScreen() - (int) startPoint, getY());
-        startPoint = e.getXOnScreen();
+        isDragging = true;
+        setLocation(e.getXOnScreen() - dragDiff, getY());
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        try {
+            switch (e.getKeyChar()) {
+                case 'k':
+                    skinIndex++;
+                    reloadSkin();
+                    break;
+                case 'j':
+                    skinIndex--;
+                    reloadSkin();
+                    break;
+                case 't':
+                    toggleAlwaysOnTop();
+                    break;
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        if (e.getButton() == 2) {
+            dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+        }
+
     }
 
     @Override
@@ -253,6 +372,57 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+    }
+
+    @Override
+    public void windowOpened(WindowEvent e) {
+        long waifuUptime = waifuInterface.getUptime();
+        long waifuStartTimeSeconds = (waifuUptime / 1000000);
+        long waifuStartTimeMillis = waifuUptime - waifuStartTimeSeconds;
+        System.out.println("Secretary up and running in " + waifuStartTimeSeconds + "." + waifuStartTimeMillis + " seconds");
+    }
+
+    @Override
+    public void windowClosing(WindowEvent e) {
+        try {
+            waifuInterface.getWaifuData().setPosition(getX());
+            IWaifuAdapter.saveDataToFile(waifuInterface);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        close();
+    }
+
+    @Override
+    public void windowClosed(WindowEvent e) {
+
+    }
+
+    @Override
+    public void windowIconified(WindowEvent e) {
+    }
+
+    @Override
+    public void windowDeiconified(WindowEvent e) {
+    }
+
+    @Override
+    public void windowActivated(WindowEvent e) {
+        //setOpacity(Settings.get("waifu.active.opacity", 100.0f) / 100.0f);
+    }
+
+    @Override
+    public void windowDeactivated(WindowEvent e) {
+        // secretaryLabel.getIcon().
+        // setOpacity(Settings.get("waifu.inactive.opacity", 100.0f) / 100.0f);
     }
 
     // Endregion

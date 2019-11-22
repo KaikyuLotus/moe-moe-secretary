@@ -1,28 +1,23 @@
 package core.settings;
 
 import core.Main;
+import org.apache.commons.io.FileUtils;
 
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.*;
+import java.nio.file.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
-import java.util.stream.Collectors;
 
 public class Settings {
 
-    private static final String configPath = "config/config.properties";
+    public static final String configFolder = "config";
+    public static final String configPath   = "config/config.properties";
 
     private static final Map<String, String> data = new HashMap<>();
 
-    private static void load(InputStream is) throws Exception {
+    private static void load(InputStream is) {
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
 
@@ -46,10 +41,15 @@ public class Settings {
                 data.put(parts[0].trim(), parts[1].trim());
 
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    private static void init() throws Exception {
+    private static void loadBase() {
+
+        data.clear();
+
         InputStream s;
 
         System.out.println("Loading default config first");
@@ -61,8 +61,27 @@ public class Settings {
         Path config = Paths.get(configPath);
         if (config.toFile().exists()) {
             System.out.println("Found custom config file, loading it...");
-            load(new ByteArrayInputStream(Files.readAllBytes(config)));
+            try {
+                load(new ByteArrayInputStream(Files.readAllBytes(config)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                File rf = Paths.get(configFolder).toFile();
+                if (!rf.exists() && !rf.mkdir()) {
+                    return;
+                }
+                s = Main.class.getClassLoader().getResourceAsStream(configPath);
+                FileUtils.copyInputStreamToFile(s, config.toFile());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    public static void reload() {
+        loadBase();
     }
 
     public static Color get(String key, Color defaultValue) {
@@ -146,14 +165,5 @@ public class Settings {
             return new double[0];
         }
         return Arrays.stream(data.get(key).split(divider)).mapToDouble(Double::parseDouble).toArray();
-    }
-
-    static {
-        try {
-            init();
-        } catch (Exception e) {
-            System.out.println("Cannot load configuration...");
-            e.printStackTrace();
-        }
     }
 }
