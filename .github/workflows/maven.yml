@@ -19,6 +19,6 @@ jobs:
       uses: actions/upload-artifact@v1.0.0
       with:
         # Artifact name
-        name: mms.jar
+        name: "*-jar-with-dependencies.jar"
         # Directory containing files to upload
-        path: target/*-jar-with-dependencies.jar
+        path: target
