@@ -21,4 +21,4 @@ jobs:
         # Artifact name
         name: "mms.jar"
         # Directory containing files to upload
-        path: target
+        path: target/mms.jar

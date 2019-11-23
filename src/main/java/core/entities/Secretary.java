@@ -14,10 +14,8 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -90,7 +88,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         if (!isManual) {
             new Thread(() -> {
                 BufferedImage image = getScreenShot(this);
-                Area area = getOutline(image, 255);
+                Area area = getOutline(image, 0);
                 setShape(area);
             }).start();
         }
@@ -106,6 +104,14 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         isManual = true;
         component.printAll(image.getGraphics());
         isManual = false;
+
+        // Debug screenshot
+        // try {
+        //     ImageIO.write(image, "PNG", Paths.get("resources", "screen.png").toFile());
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
+
         return image;
     }
 
