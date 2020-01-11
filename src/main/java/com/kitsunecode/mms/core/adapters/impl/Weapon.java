@@ -20,14 +20,14 @@ public class Weapon implements IWaifuAdapter {
 
     private static final String BASE_URL = "https://en.gfwiki.com";
 
-    private static final String IMAGES_URL_SELECTOR     = "ul.gallery.mw-gallery-traditional > li > * a";
+    private static final String IMAGES_URL_SELECTOR = "ul.gallery.mw-gallery-traditional > li > * a";
     private static final String FULL_IMAGE_URL_SELECTOR = ".fullMedia > a";
-    private static final String SKIN_NAMES              = "ul.gallery.mw-gallery-traditional > li > * p";
-    private static final String QUOTE_ROWS              = ".tabbertab > * tr";
-    private static final String ALL_TDS                 = "td";
-    private static final String SOUNDS                  = "span.audio-button";
+    private static final String SKIN_NAMES = "ul.gallery.mw-gallery-traditional > li > * p";
+    private static final String QUOTE_ROWS = ".tabbertab > * tr";
+    private static final String ALL_TDS = "td";
+    private static final String SOUNDS = "span.audio-button";
 
-    private String    name;
+    private String name;
     private WaifuData data;
 
     private long startTimeMillis;

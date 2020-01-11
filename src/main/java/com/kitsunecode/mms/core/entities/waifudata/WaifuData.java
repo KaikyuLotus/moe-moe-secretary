@@ -10,33 +10,33 @@ import java.util.List;
  */
 public class WaifuData {
 
-	@SerializedName("dialogs")
-	private List<Dialog> dialogs;
+    @SerializedName("dialogs")
+    private List<Dialog> dialogs;
 
-	@SerializedName("skins")
-	private List<String> skins;
+    @SerializedName("skins")
+    private List<String> skins;
 
-	@SerializedName("lastPosition")
-	private int position;
+    @SerializedName("lastPosition")
+    private int position;
 
-	public WaifuData(List<Dialog> dialogs, List<String> skinUrls) {
-		this.dialogs = dialogs;
-		this.skins = skinUrls;
-	}
+    public WaifuData(List<Dialog> dialogs, List<String> skinUrls) {
+        this.dialogs = dialogs;
+        this.skins = skinUrls;
+    }
 
-	public List<Dialog> getDialogs() {
-		return dialogs;
-	}
+    public List<Dialog> getDialogs() {
+        return dialogs;
+    }
 
-	public List<String> getSkins() {
-		return skins;
-	}
+    public List<String> getSkins() {
+        return skins;
+    }
 
-	public int getPosition() {
-		return position;
-	}
+    public int getPosition() {
+        return position;
+    }
 
-	public void setPosition(int position) {
-		this.position = position;
-	}
+    public void setPosition(int position) {
+        this.position = position;
+    }
 }

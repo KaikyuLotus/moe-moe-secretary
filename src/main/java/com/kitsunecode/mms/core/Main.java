@@ -19,8 +19,8 @@ public class Main {
 
         Settings.reload();
 
-        String adapter = Settings.get("adapter", "Ship");
-        String name = Settings.get("waifu.name", "");
+        String adapter = Settings.getAdapter();
+        String name = Settings.getWaifuName();
 
         System.out.println("Starting " + adapter + " with name " + name);
         IWaifuAdapter waifu = WaifuUtils.getWaifuFromAdapterName(adapter, name);

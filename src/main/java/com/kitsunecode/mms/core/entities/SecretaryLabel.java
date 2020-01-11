@@ -1,7 +1,7 @@
 package com.kitsunecode.mms.core.entities;
 
-import com.kitsunecode.mms.core.utils.Util;
 import com.kitsunecode.mms.core.settings.Settings;
+import com.kitsunecode.mms.core.utils.Util;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,23 +9,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SecretaryLabel extends JLabel {
 
-    private static final String HIGH_QUALITY         = "waifu.highQuality";
-    private static final String FLOAT_ENABLED        = "floating.enabled";
-    private static final String FLOAT_PIXEL_PER_STEP = "floating.pixelPerStep";
-    private static final String FLOAT_PIXEl_RANGE    = "floating.pixelRange";
-    private static final String FLOAT_STEP_SLEEP     = "floating.stepSleep";
-    private static final String FLOAT_SWAP_SLEEP     = "floating.swapSleep";
-    private static final String IDLE_DIALOG_WAIT     = "dialogs.idle.frequency";
-    private static final String JUMP_ON_CLICK        = "jump.onClick";
-    private static final String JUMPS_COUNT          = "jump.count";
-    private static final String JUMP_PIXEL_PER_STEP  = "jump.pixelPerStep";
-    private static final String JUMP_STEP_SLEEP      = "jump.stepSleep";
-    private static final String JUMP_PIXEL_RANGE     = "jump.pixelRange";
-    private static final String FLOAT_SWITCH_SLEEP   = "floating.switchSleep";
-
-
     private boolean isSpeaking = false;
-    private boolean isJumping  = false;
+    private boolean isJumping = false;
 
     private final Secretary parentFrame;
 
@@ -52,21 +37,21 @@ public class SecretaryLabel extends JLabel {
 
     public void startFloating() {
 
-        if (!Settings.get(FLOAT_ENABLED, true)) {
+        if (!Settings.isFloatingEnabled()) {
             System.out.println("Floating is disabled");
             return;
         }
 
         AtomicBoolean raise = new AtomicBoolean(true);
 
-        int stepSleep = Settings.get(FLOAT_STEP_SLEEP, 16);
-        int max = Settings.get(FLOAT_PIXEl_RANGE, 300);
-        int increment = Settings.get(FLOAT_PIXEL_PER_STEP, 1);
-        int swapSleep = Settings.get(FLOAT_SWAP_SLEEP, 100);
+        int stepSleep = Settings.getFloatingStepSleep();
+        int max = Settings.getFloatingPixelRange();
+        int increment = Settings.getFloatingPixelPerStep();
+        // int swapSleep = Settings.getFloatingSwapSleep();
         int startY = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - parentFrame.getY();
         int minY = startY - max;
         int maxY = startY + max * 2;
-        int switchSleep = Settings.get(FLOAT_SWITCH_SLEEP, 10);
+        int switchSleep = Settings.getFloatingSwitchSleep();
         System.out.println(String.format("Min %s Max %s Current %s", minY, maxY, startY));
 
         final int screenHeight = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
@@ -101,12 +86,12 @@ public class SecretaryLabel extends JLabel {
     }
 
     public void jumpAnimation() {
-        int jumps = Settings.get(JUMPS_COUNT, 2);
-        int stepSleep = Settings.get(JUMP_STEP_SLEEP, 15);
-        int step = Settings.get(JUMP_PIXEL_PER_STEP, 5);
-        int max = Settings.get(JUMP_PIXEL_RANGE, 40);
+        int jumps = Settings.getJumpCount();
+        int stepSleep = Settings.getJumpSleep();
+        int step = Settings.getJumpPixelPerStep();
+        int max = Settings.getJumpPixelRange();
 
-        int position = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - parentFrame.getY();
+        // int position = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - parentFrame.getY();
 
         for (int j = 0; j < jumps; j++) {
             for (int i = 0; i < max / step; i++) {
@@ -124,7 +109,7 @@ public class SecretaryLabel extends JLabel {
     }
 
     public void speakJump() {
-        if (!isJumping && Settings.get(JUMP_ON_CLICK, true)) {
+        if (!isJumping && Settings.isJumpOnClick()) {
             new Thread(() -> {
                 isJumping = true;
                 jumpAnimation();
@@ -135,7 +120,7 @@ public class SecretaryLabel extends JLabel {
 
     public void waitIdle() {
         int times = 0;
-        int dialWait = Settings.get(IDLE_DIALOG_WAIT, 60) * 1000;
+        int dialWait = Settings.getDialogsIdleFrequency() * 1000;
         while (times < dialWait) {
             for (int i = 0; i < dialWait; i++) {
                 Util.sleep(10);

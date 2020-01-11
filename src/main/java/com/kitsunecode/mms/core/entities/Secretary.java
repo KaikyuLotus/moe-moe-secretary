@@ -1,9 +1,9 @@
 package com.kitsunecode.mms.core.entities;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
-import com.kitsunecode.mms.core.utils.Util;
 import com.kitsunecode.mms.core.audio.AudioManager;
 import com.kitsunecode.mms.core.settings.Settings;
+import com.kitsunecode.mms.core.utils.Util;
 import com.kitsunecode.mms.core.utils.WaifuUtils;
 
 import javax.imageio.ImageIO;
@@ -24,19 +24,6 @@ import static java.awt.Image.SCALE_AREA_AVERAGING;
 public class Secretary extends JFrame implements MouseListener, MouseMotionListener,
         MouseWheelListener, KeyListener, WindowListener {
 
-    private static final String MAX_HEIGHT = "waifu.height";
-    private static final String MIRRORED = "waifu.mirrored";
-    private static final String WELCOME_ENABLED = "waifu.welcome.enabled";
-    private static final String WELCOME_DELAY = "waifu.welcome.delay";
-    private static final String VOICE_ENABLED = "voice.enabled";
-    private static final String VOICE_VOLUME = "voice.volume";
-    private static final String DIALOGS_ENABLED = "dialogs.enabled";
-    private static final String DIALOGS_ON_CLICK_ENABLED = "dialogs.onClick";
-    private static final String DIALOGS_ON_IDLE_ENABLED = "dialogs.onIdle";
-    private static final String BALOON_DURATION_NO_VOICE = "dialogs.baloon.noVoiceDuration";
-    private static final String ALWAYS_ON_TOP = "waifu.alwaysOnTop";
-    private static final String BALOON_TEXT_FORMAT_HTML = "baloon.formatString";
-
     private final AudioManager audioManager = new AudioManager();
 
     private final IWaifuAdapter waifuInterface;
@@ -45,7 +32,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     private int dragDiff = 0;
 
     private boolean running;
-    private boolean alwaysOnTop = Settings.get(ALWAYS_ON_TOP, false);
+    private boolean alwaysOnTop = Settings.isWaifuAlwaysOnTop();
 
     private int skinIndex = 0;
 
@@ -71,11 +58,11 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
         secretaryLabel.startFloating();
 
-        if (Settings.get(DIALOGS_ON_IDLE_ENABLED, true)) {
+        if (Settings.isDialogsEnabled()) {
             idle();
         }
 
-        if (Settings.get(WELCOME_ENABLED, true)) {
+        if (Settings.isWaifuWelcomeEnabled()) {
             onLogin(); // Say Hi!
         }
 
@@ -163,7 +150,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     private void onLogin() {
         new Thread(() -> {
-            Util.sleep(Settings.get(WELCOME_DELAY, 5000));
+            Util.sleep(Settings.getWaifuWelcomeDelay());
             speak(waifuInterface.getDialogs(waifuInterface.onLoginEventKey()));
         }).start();
     }
@@ -182,12 +169,12 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         byte[] imgData = WaifuUtils.getShipImage(waifuInterface, index);
 
         buffImage = ImageIO.read(new ByteArrayInputStream(imgData));
-        if (Settings.get(MIRRORED, false)) {
+        if (Settings.isWaifuMirrored()) {
             buffImage = Util.flipImage(buffImage);
         }
 
         // int lastPixel = Util.getEmptyPixelsFromBottom(buffImage);
-        Image i = buffImage.getScaledInstance(-1, Settings.get(MAX_HEIGHT, 800), SCALE_AREA_AVERAGING);
+        Image i = buffImage.getScaledInstance(-1, Settings.getWaifuHeight(), SCALE_AREA_AVERAGING);
 
         setSize(i.getWidth(null), i.getHeight(null));
         setLocation(getX(), Util.getYStartPosition(i.getHeight(null)));
@@ -197,7 +184,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     public int getStartY() {
         int y = Util.getScreenSize().height - getHeight();
-        String settingPos = Settings.get("waifu.startY", "auto").toLowerCase();
+        String settingPos = Settings.getWaifuStartY().toLowerCase();
         if (!settingPos.equals("auto")) {
             if (settingPos.matches("-?\\d+")) {
                 y += Integer.parseInt(settingPos);
@@ -223,7 +210,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         setUndecorated(true);
         setBackground(new Color(0, 0, 0, 0));
 
-        ImageIcon icn = new ImageIcon(loadSkin(Settings.get("waifu.skinIndex", 0)));
+        ImageIcon icn = new ImageIcon(loadSkin(Settings.getWaifuSkinIndex()));
         secretaryLabel = new SecretaryLabel(icn, this);
         secretaryLabel.setBounds(secretaryLabel.getDesiredBounds(icn.getIconWidth(), icn.getIconHeight()));
 
@@ -263,7 +250,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     }
 
     public void speak(List<Dialog> dialogs) {
-        if (secretaryLabel.isSpeaking() || !Settings.get(DIALOGS_ENABLED, true) || !running) {
+        if (secretaryLabel.isSpeaking() || !Settings.isDialogsEnabled() || !running) {
             return;
         }
 
@@ -277,17 +264,17 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             secretaryLabel.speak(true);
 
             baloon.setText(
-                    Settings.get(BALOON_TEXT_FORMAT_HTML, "[[text]]")
-                            .replace("[[text]]", dialog.getDialog() + "<br>&zwnj;")
+                    Settings.getBaloonFormatString().replace("[[text]]",
+                            dialog.getDialog() + "<br>&zwnj;")
             );
 
             // Activate baloon only if there is text to show
             baloon.toggle(!dialog.getDialog().equals(""));
             new Thread(() -> {
-                if (Settings.get(VOICE_ENABLED, true) && dialog.getAudio() != null) {
-                    audioManager.play(this.waifuInterface, dialog.getAudio(), Settings.get(VOICE_VOLUME, 50));
+                if (Settings.isVoiceEnabled() && dialog.getAudio() != null) {
+                    audioManager.play(this.waifuInterface, dialog.getAudio(), Settings.getVoiceVolume());
                 } else {
-                    Util.sleep(Settings.get(BALOON_DURATION_NO_VOICE, 3) * 1000);
+                    Util.sleep(Settings.getDialogsBaloonNoVoiceDuration() * 1000);
                 }
 
                 baloon.toggle(false);
@@ -308,7 +295,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     private void onClick() {
 
-        if (Settings.get(DIALOGS_ON_CLICK_ENABLED, true)) {
+        if (Settings.isDialogsOnClick()) {
             speak(waifuInterface.getDialogs(waifuInterface.onTouchEventKey()));
         }
     }

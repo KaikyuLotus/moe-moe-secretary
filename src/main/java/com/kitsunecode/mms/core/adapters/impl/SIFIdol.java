@@ -22,8 +22,8 @@ public class SIFIdol implements IWaifuAdapter {
     private static final String CARD_URL = BASE_URL + "/cards/%s/";
 
     private static final String NAME_SELECTOR = "tr:nth-child(2) > td > strong";
-    private static final String SKIN_LINKS    = "td > a";
-    private static final String QUOTES_SEL    = "#mw-content-text > *";
+    private static final String SKIN_LINKS = "td > a";
+    private static final String QUOTES_SEL = "#mw-content-text > *";
 
     private WaifuData data;
 
