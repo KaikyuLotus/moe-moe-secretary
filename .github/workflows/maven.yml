@@ -19,6 +19,6 @@ jobs:
       uses: actions/upload-artifact@v1.0.0
       with:
         # Artifact name
-        name: "mms.jar"
+        name: "Artifact Jar"
         # Directory containing files to upload
-        path: target/mms.jar
+        path: target/mms**-.jar
