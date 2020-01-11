@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Weapon implements IWaifuAdapter {
+public class GirlsFrontline implements IWaifuAdapter {
 
     private static final String BASE_URL = "https://en.gfwiki.com";
 
@@ -32,7 +32,7 @@ public class Weapon implements IWaifuAdapter {
 
     private long startTimeMillis;
 
-    public Weapon(String name) throws StartFailedException {
+    public GirlsFrontline(String name) throws StartFailedException {
 
         this.startTimeMillis = System.currentTimeMillis();
         this.name = name;

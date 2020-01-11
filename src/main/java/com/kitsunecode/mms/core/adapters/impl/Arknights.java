@@ -9,29 +9,20 @@ import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.jsoup.select.Selector;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Ship implements IWaifuAdapter {
+public class Arknights implements IWaifuAdapter {
 
-    private static final String BASE_URL = "https://azurlane.koumakan.jp";
+    private static final String BASE_URL = "http://en.rhinelab.org";
 
-
-    private static final String IMAGES_SELECTOR = ".adaptiveratioimg > a > img";
-    private static final String TABLE_ROWS_JAP = "div[title='Japanese Server'] > table:nth-child(3) > * tr";
-    private static final String TABLE_ROWS_CN = "div[title='Chinese Server'] > table:nth-child(3) > * tr";
     private static final String SKIN_NAMES = ".azl_box_body > .tabber > div[title]";
-
-    private static final String AUDIO_COL = "td:nth-child(2) > a";
-    private static final String EVENT_COL = "td:nth-child(1)";
-    private static final String DIALOG_NATIVE_COL = "td:nth-child(3)";
-    private static final String DIALOG_TRANSL_COL = "td:nth-child(4)";
+    private static final String SD_IMG_SELECTOR = ".gallerybox a";
+    private static final String HD_IMG_SELECTOR = ".fullImageLink a";
 
     private static final String lang = Settings.getWaifuLanguage();
 
@@ -39,7 +30,7 @@ public class Ship implements IWaifuAdapter {
     private WaifuData data;
     private long startTimeMillis;
 
-    public Ship(String name) throws Exception {
+    public Arknights(String name) throws Exception {
 
         this.startTimeMillis = System.currentTimeMillis();
         this.name = name;
@@ -58,6 +49,7 @@ public class Ship implements IWaifuAdapter {
             }
             throw new StartFailedException(message);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new StartFailedException(e.getMessage());
         }
     }
@@ -68,11 +60,8 @@ public class Ship implements IWaifuAdapter {
     private WaifuData loadFromWiki() throws IOException {
         System.out.println("Getting ship home page");
         Document mainDoc = Jsoup.connect(BASE_URL + "/" + name).get();
-        System.out.println("Getting ship quotes");
-        Document quotesDoc = Jsoup.connect(BASE_URL + "/" + name + "/Quotes").get();
         System.out.println("Parsing data...");
-
-        return new WaifuData(loadDialogs(quotesDoc), loadSkinUrls(mainDoc));
+        return new WaifuData(new ArrayList<>(), loadSkinUrls(mainDoc));
     }
 
     private List<String> loadSkinNames(Document doc) {
@@ -82,44 +71,15 @@ public class Ship implements IWaifuAdapter {
                 .collect(Collectors.toList());
     }
 
-    private List<String> loadSkinUrls(Document doc) {
-        return Selector.select(IMAGES_SELECTOR, doc).stream()
-                .map(e -> e.attr("srcset"))
-                .map(set -> Arrays.stream(set.split(","))
-                        .map(s -> BASE_URL + s.trim().split(" ")[0])
-                        .reduce((first, second) -> second)
-                        .orElse(null))
-                .collect(Collectors.toList());
-    }
-
-    private List<Dialog> loadDialogs(Document doc) {
-        List<Dialog> dialogList = new ArrayList<>();
-        dialogList.addAll(loadDialogs(doc, TABLE_ROWS_CN, "Chinese"));
-        dialogList.addAll(loadDialogs(doc, TABLE_ROWS_JAP, "Japanese"));
-        return dialogList;
-    }
-
-    private List<Dialog> loadDialogs(Document doc, String selector, String lang) {
-        List<Dialog> dialogList = new ArrayList<>();
-
-        Elements rows = Selector.select(selector, doc);
-        rows.remove(0);
-
-        for (Element row : rows) {
-            Element audioElem = row.select(AUDIO_COL).first();
-            String audioUrl = audioElem != null ? audioElem.attr("href") : "";
-            String eventText = row.selectFirst(EVENT_COL).text().trim();
-            if (eventText.contains("Idle")) {
-                eventText = "Idle";
-            }
-            String dialogText = row.selectFirst(DIALOG_TRANSL_COL).text();
-            String dialogTextMative = row.selectFirst(DIALOG_NATIVE_COL).text();
-
-            dialogList.add(new Dialog(lang, dialogText, eventText, audioUrl));
-            dialogList.add(new Dialog(lang + " Native", dialogTextMative, eventText, audioUrl));
+    private List<String> loadSkinUrls(Document doc) throws IOException {
+        List<String> urls = new ArrayList<>();
+        for (Element element : Selector.select(SD_IMG_SELECTOR, doc)) {
+            String hdUrl = element.attr("href");
+            Document hdImgDoc = Jsoup.connect(BASE_URL + hdUrl).get();
+            String hdUrlString = BASE_URL + Selector.select(HD_IMG_SELECTOR, hdImgDoc).first().attr("href");
+            urls.add(hdUrlString);
         }
-
-        return dialogList;
+        return urls;
     }
 
     @Override

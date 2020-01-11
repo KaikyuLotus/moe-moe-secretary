@@ -134,4 +134,9 @@ public class Util {
     public static String serializeWaifuData(WaifuData data) {
         return GSON.toJson(data);
     }
+
+    public static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("win");
+    }
+
 }

@@ -225,7 +225,8 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
         setAlwaysOnTop(alwaysOnTop);
         setLocation(waifuInterface.getWaifuData().getPosition(), getStartY());
-        setType(Type.POPUP);
+        setType(Util.isWindows() ? Type.UTILITY : Type.POPUP);
+
         setVisible(true);
 
         secretaryLabel.onVisible();
@@ -307,6 +308,10 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseReleased(MouseEvent e) {
+        if (e.getButton() == 2) {
+            dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+            return;
+        }
         if (xClickPosition == e.getXOnScreen()) {
             secretaryLabel.speakJump();
             onClick();

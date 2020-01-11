@@ -104,8 +104,6 @@ public class SecretaryLabel extends JLabel {
                 Util.sleep(stepSleep);
             }
         }
-
-
     }
 
     public void speakJump() {
