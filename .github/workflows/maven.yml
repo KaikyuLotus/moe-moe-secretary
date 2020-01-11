@@ -19,6 +19,6 @@ jobs:
       uses: actions/upload-artifact@v1.0.0
       with:
         # Artifact name
-        name: "mms**-.jar"
+        name: "moe-moe-secretary.jar"
         # Directory containing files to upload
-        path: target/
+        path: target/moe-moe-secretary.jar

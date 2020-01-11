@@ -81,7 +81,7 @@
                             <attach>false</attach>
                             <classifier>jar</classifier>
                             <appendAssemblyId>false</appendAssemblyId>
-                            <finalName>mss-${project.version}</finalName>
+                            <finalName>moe-moe-secretary</finalName>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
