@@ -1,10 +1,10 @@
-package core;
+package com.kitsunecode.mms.core;
 
-import core.adapters.IWaifuAdapter;
-import core.entities.FileWatcher;
-import core.entities.Secretary;
-import core.settings.Settings;
-import core.utils.WaifuUtils;
+import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
+import com.kitsunecode.mms.core.entities.FileWatcher;
+import com.kitsunecode.mms.core.entities.Secretary;
+import com.kitsunecode.mms.core.settings.Settings;
+import com.kitsunecode.mms.core.utils.WaifuUtils;
 
 import java.nio.file.Paths;
 

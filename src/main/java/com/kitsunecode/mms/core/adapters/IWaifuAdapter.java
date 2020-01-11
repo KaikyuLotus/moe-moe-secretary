@@ -1,8 +1,8 @@
-package core.adapters;
+package com.kitsunecode.mms.core.adapters;
 
-import core.entities.Dialog;
-import core.entities.waifudata.WaifuData;
-import core.utils.Util;
+import com.kitsunecode.mms.core.entities.Dialog;
+import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
+import com.kitsunecode.mms.core.utils.Util;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 

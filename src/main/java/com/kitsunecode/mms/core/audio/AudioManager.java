@@ -1,7 +1,7 @@
-package core.audio;
+package com.kitsunecode.mms.core.audio;
 
-import core.adapters.IWaifuAdapter;
-import core.utils.Util;
+import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
+import com.kitsunecode.mms.core.utils.Util;
 
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;

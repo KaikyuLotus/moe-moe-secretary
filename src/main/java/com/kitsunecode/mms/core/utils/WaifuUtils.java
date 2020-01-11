@@ -1,6 +1,6 @@
-package core.utils;
+package com.kitsunecode.mms.core.utils;
 
-import core.adapters.IWaifuAdapter;
+import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -9,7 +9,7 @@ public class WaifuUtils {
 
     public static IWaifuAdapter getWaifuFromAdapterName(String adapterName, String shipName) {
         try {
-            Class<?> c = Class.forName("core.adapters.impl." + adapterName);
+            Class<?> c = Class.forName("com.kitsunecode.mms.core.adapters.impl." + adapterName);
 
             // Someone could cheat in some way (??)
             // Prevention is better than cure lol

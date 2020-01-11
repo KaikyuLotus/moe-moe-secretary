@@ -1,7 +1,7 @@
-package core.entities.waifudata;
+package com.kitsunecode.mms.core.entities.waifudata;
 
 import com.google.gson.annotations.SerializedName;
-import core.entities.Dialog;
+import com.kitsunecode.mms.core.entities.Dialog;
 
 import java.util.List;
 

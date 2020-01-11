@@ -1,10 +1,10 @@
-package core.entities;
+package com.kitsunecode.mms.core.entities;
 
-import core.adapters.IWaifuAdapter;
-import core.utils.Util;
-import core.audio.AudioManager;
-import core.settings.Settings;
-import core.utils.WaifuUtils;
+import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
+import com.kitsunecode.mms.core.utils.Util;
+import com.kitsunecode.mms.core.audio.AudioManager;
+import com.kitsunecode.mms.core.settings.Settings;
+import com.kitsunecode.mms.core.utils.WaifuUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

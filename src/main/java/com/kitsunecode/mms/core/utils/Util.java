@@ -1,22 +1,19 @@
-package core.utils;
+package com.kitsunecode.mms.core.utils;
 
 import com.google.gson.Gson;
-import core.entities.waifudata.WaifuData;
+import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
 import org.apache.commons.io.IOUtils;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.concurrent.TimeUnit;
 
 public class Util {
 

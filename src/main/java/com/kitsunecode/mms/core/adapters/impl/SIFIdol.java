@@ -1,9 +1,8 @@
-package core.adapters.impl;
+package com.kitsunecode.mms.core.adapters.impl;
 
-import core.adapters.IWaifuAdapter;
-import core.entities.Dialog;
-import core.entities.waifudata.WaifuData;
-import core.settings.Settings;
+import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
+import com.kitsunecode.mms.core.entities.Dialog;
+import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

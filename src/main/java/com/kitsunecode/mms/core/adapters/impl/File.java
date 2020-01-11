@@ -1,9 +1,9 @@
-package core.adapters.impl;
+package com.kitsunecode.mms.core.adapters.impl;
 
-import core.adapters.IWaifuAdapter;
-import core.entities.Dialog;
-import core.entities.exceptions.StartFailedException;
-import core.entities.waifudata.WaifuData;
+import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
+import com.kitsunecode.mms.core.entities.Dialog;
+import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
+import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
 
 import java.io.IOException;
 import java.util.List;

@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>kitsune.code</groupId>
-    <artifactId>azur-lane-desktop</artifactId>
+    <groupId>com.kitsunecode</groupId>
+    <artifactId>moe-moe-secretary</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -63,7 +63,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        core.Main
+                                        com.kitsunecode.mms.core.Main
                                     </mainClass>
                                 </manifest>
                             </archive>

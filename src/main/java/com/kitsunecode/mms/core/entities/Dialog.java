@@ -1,4 +1,4 @@
-package core.entities;
+package com.kitsunecode.mms.core.entities;
 
 import com.google.gson.annotations.SerializedName;
 
