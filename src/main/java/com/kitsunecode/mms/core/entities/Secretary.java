@@ -19,8 +19,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Random;
 
-import static java.awt.Image.SCALE_AREA_AVERAGING;
-
 public class Secretary extends JFrame implements MouseListener, MouseMotionListener,
         MouseWheelListener, KeyListener, WindowListener {
 
@@ -174,7 +172,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         }
 
         // int lastPixel = Util.getEmptyPixelsFromBottom(buffImage);
-        Image i = buffImage.getScaledInstance(-1, Settings.getWaifuHeight(), SCALE_AREA_AVERAGING);
+        Image i = buffImage.getScaledInstance(-1, Settings.getWaifuHeight(), Image.SCALE_AREA_AVERAGING);
 
         setSize(i.getWidth(null), i.getHeight(null));
         setLocation(getX(), Util.getYStartPosition(i.getHeight(null)));

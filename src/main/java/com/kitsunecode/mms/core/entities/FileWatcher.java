@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.concurrent.TimeUnit;
 
-import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
-import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
-
 public class FileWatcher {
 
     private final Runnable runnable;
@@ -27,9 +24,9 @@ public class FileWatcher {
         Thread watcherThread = new Thread(() -> {
             try (WatchService watcher = FileSystems.getDefault().newWatchService()) {
                 if (dir.toFile().isFile()) {
-                    dir.getParent().register(watcher, ENTRY_MODIFY);
+                    dir.getParent().register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
                 } else {
-                    dir.register(watcher, ENTRY_MODIFY);
+                    dir.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
                 }
 
                 while (running) {
@@ -48,7 +45,7 @@ public class FileWatcher {
 
                     for (WatchEvent<?> evt : key.pollEvents()) {
                         Path filename = (Path) evt.context();
-                        if (evt.kind() == OVERFLOW || !filename.toString().equals(dir.toFile().getName())) {
+                        if (evt.kind() == StandardWatchEventKinds.OVERFLOW || !filename.toString().equals(dir.toFile().getName())) {
                             Thread.yield();
                             continue;
                         }
