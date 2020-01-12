@@ -25,7 +25,7 @@ public class File implements IWaifuAdapter {
                 data = IWaifuAdapter.getDataFromFile(this);
             }
         } catch (IOException e) {
-            throw new StartFailedException(e.getMessage());
+            throw new StartFailedException(e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 

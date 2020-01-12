@@ -42,15 +42,20 @@ public class Arknights implements IWaifuAdapter {
                 data = loadFromWiki();
                 IWaifuAdapter.saveDataToFile(this);
             }
+
+            if (data.getSkins().isEmpty()) {
+                throw new StartFailedException("No images found for this waifu");
+            }
+
         } catch (HttpStatusException e) {
             String message = "Wiki status code: " + e.getStatusCode();
             if (e.getStatusCode() == 404) {
-                message += ", probably this weapon does not exist";
+                message += ", probably this unit does not exist";
             }
             throw new StartFailedException(message);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new StartFailedException(e.getMessage());
+            throw new StartFailedException(e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 
@@ -79,6 +84,7 @@ public class Arknights implements IWaifuAdapter {
             String hdUrlString = BASE_URL + Selector.select(HD_IMG_SELECTOR, hdImgDoc).first().attr("href");
             urls.add(hdUrlString);
         }
+
         return urls;
     }
 

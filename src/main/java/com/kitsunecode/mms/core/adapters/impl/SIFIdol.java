@@ -2,6 +2,7 @@ package com.kitsunecode.mms.core.adapters.impl;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.entities.Dialog;
+import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -40,6 +41,11 @@ public class SIFIdol implements IWaifuAdapter {
             data = loadFromWiki();
             IWaifuAdapter.saveDataToFile(this);
         }
+
+        if (data.getSkins().isEmpty()) {
+            throw new StartFailedException("No images found for this waifu");
+        }
+
     }
 
     private WaifuData loadFromWiki() throws IOException {

@@ -1,6 +1,8 @@
 package com.kitsunecode.mms.core.utils;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
+import com.kitsunecode.mms.core.entities.BootFailedFrame;
+import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -18,20 +20,18 @@ public class WaifuUtils {
                 return (IWaifuAdapter) c.getConstructor(String.class).newInstance(shipName);
             }
 
-            System.out.println("The chosen adapter is not a WaifuAdapter!");
+            throw new StartFailedException("The chosen adapter is not a WaifuAdapter!");
         } catch (ClassNotFoundException e) {
-            System.out.println("Adapter " + adapterName + " does not exist");
+            throw new StartFailedException("Adapter '" + adapterName + "' does not exist");
         } catch (NoSuchMethodException e) {
-            System.out.println("Adapter has no constructor that takes the name as parameter");
+            throw new StartFailedException("Adapter has no constructor that takes the name as parameter");
         } catch (IllegalAccessException | InstantiationException e) {
-            System.out.println("Critical error while instancing the waifu");
-            e.printStackTrace();
+            throw new StartFailedException("Critical error while instancing the waifu");
         } catch (InvocationTargetException e) {
-            System.out.println("The " + adapterName + " failed to start, message: " + e.getCause().getMessage());
-            e.printStackTrace();
+            throw new StartFailedException(e.getCause().getMessage());
+        } catch (Exception e) {
+            throw new StartFailedException("Critical error while creating the adapter: " + e.getMessage());
         }
-
-        return null;
     }
 
     public static byte[] getShipImage(IWaifuAdapter waifuAdapter, int skinIndex) throws IOException {

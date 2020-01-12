@@ -51,6 +51,11 @@ public class AzurLane implements IWaifuAdapter {
                 data = loadFromWiki();
                 IWaifuAdapter.saveDataToFile(this);
             }
+
+            if (data.getSkins().isEmpty()) {
+                throw new StartFailedException("No images found for this waifu");
+            }
+
         } catch (HttpStatusException e) {
             String message = "Wiki status code: " + e.getStatusCode();
             if (e.getStatusCode() == 404) {
@@ -58,7 +63,7 @@ public class AzurLane implements IWaifuAdapter {
             }
             throw new StartFailedException(message);
         } catch (Exception e) {
-            throw new StartFailedException(e.getMessage());
+            throw new StartFailedException(e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 

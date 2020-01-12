@@ -1,6 +1,7 @@
 package com.kitsunecode.mms.core;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
+import com.kitsunecode.mms.core.entities.BootFailedFrame;
 import com.kitsunecode.mms.core.entities.FileWatcher;
 import com.kitsunecode.mms.core.entities.Secretary;
 import com.kitsunecode.mms.core.settings.Settings;
@@ -23,15 +24,13 @@ public class Main {
         String name = Settings.getWaifuName();
 
         System.out.println("Starting " + adapter + " with name " + name);
-        IWaifuAdapter waifu = WaifuUtils.getWaifuFromAdapterName(adapter, name);
 
-        if (waifu != null) {
-            try {
-                secretary = new Secretary(waifu);
-            } catch (Exception e) {
-                System.out.println("Cannot start the waifu: " + name + " with adapter " + adapter);
-                e.printStackTrace();
-            }
+        try {
+            IWaifuAdapter waifu = WaifuUtils.getWaifuFromAdapterName(adapter, name);
+            secretary = new Secretary(waifu);
+        } catch (Exception e) {
+            e.printStackTrace();
+            BootFailedFrame frame = new BootFailedFrame(e.getMessage());
         }
     }
 
