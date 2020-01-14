@@ -60,7 +60,7 @@ public class SecretaryLabel extends JLabel {
             while (true) {
                 Util.sleep(stepSleep);
 
-                if (isJumping || parentFrame.isDragging()) {
+                if (isJumping || parentFrame.isDragging() || !parentFrame.isFloatingToggle()) {
                     continue;
                 }
                 int position = screenHeight - parentFrame.getY();
@@ -118,7 +118,7 @@ public class SecretaryLabel extends JLabel {
 
     public void waitIdle() {
         int times = 0;
-        int dialWait = Settings.getDialogsIdleFrequency() * 1000;
+        int dialWait = Settings.getDialogsIdleFrequency() / 10;
         while (times < dialWait) {
             for (int i = 0; i < dialWait; i++) {
                 Util.sleep(10);

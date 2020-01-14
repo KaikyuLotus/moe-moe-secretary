@@ -229,10 +229,6 @@ public class Settings {
         return get("waifu.skinIndex", 0);
     }
 
-    public static String isWaifuHighQuality() {
-        return get("waifu.highQuality", "");
-    }
-
     public static boolean isFloatingEnabled() {
         return get("floating.enabled", true);
     }
@@ -247,10 +243,6 @@ public class Settings {
 
     public static int getFloatingStepSleep() {
         return get("floating.stepSleep", 16);
-    }
-
-    public static int getFloatingSwapSleep() {
-        return get("floating.swapSleep", 100);
     }
 
     public static int getDialogsIdleFrequency() {
@@ -282,11 +274,31 @@ public class Settings {
     }
 
     public static String getWaifuLanguage() {
-        return get("waifu.language", "Chinese");
+        return get("azurlane.language", "Chinese");
     }
 
-    public static boolean useWaifuNativeLanguage() {
-        return get("waifu.language.useNative", false);
+    public static String getFileFormat() {
+        String format = get("adapter.file.format", "JSON").toUpperCase();
+        if (!format.equals("JSON") && !format.equals("YAML")) {
+            throw new IllegalArgumentException("adapter.file.format must be JSON or YAML");
+        }
+        return format;
+    }
+
+    public static float getWaifuActiveOpacity() {
+        return get("waifu.active.opacity", 100.0f);
+    }
+
+    public static float getWaifuInactiveOpacity() {
+        return get("waifu.inactive.opacity", 100.0f);
+    }
+
+    public static boolean isAzurChibi() {
+        return get("azurlane.chibi", false);
+    }
+
+    public static boolean isWaifuYDragEnabled() {
+        return get("waifu.enableYdrag", false);
     }
 
 }

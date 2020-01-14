@@ -1,8 +1,13 @@
 package com.kitsunecode.mms.core.entities;
 
+import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
+import com.kitsunecode.mms.core.utils.Util;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -31,8 +36,10 @@ public class BootFailedFrame extends JFrame {
     private String fontName = "Arial";
 
 
-    public BootFailedFrame(String error) {
+    public BootFailedFrame(Exception ex) {
         super("Moe Moe Error");
+
+        String error = ex.getMessage();
 
         setLayout(null);
         setResizable(false);
@@ -54,7 +61,7 @@ public class BootFailedFrame extends JFrame {
 
         String errorsMsg = ERRORS[new Random().nextInt(ERRORS.length)];
 
-        String errorFull = "<html><div style='text-align: center;'>&Prime;" + error + "&Prime;<br><br>" + errorsMsg + "</div></html>";
+        String errorFull = "<html><div style='text-align: center;'><p style='padding-left: 16px; padding-right: 16px;'>&Prime;" + error + "&Prime;<br><br>" + errorsMsg + "</p></div></html>";
         JLabel textMsg = new JLabel(errorFull, SwingConstants.CENTER);
         textMsg.setFont(new Font(fontName, Font.PLAIN, fontSize));
         textMsg.setBackground(msgBgColor);
@@ -65,6 +72,39 @@ public class BootFailedFrame extends JFrame {
 
         add(textMsg, BorderLayout.CENTER);
         add(pane, BorderLayout.CENTER);
+
+        if (ex instanceof StartFailedException) {
+            StartFailedException sfx = (StartFailedException) ex;
+            if (sfx.hasHelpUrl()) {
+                String helpUrl = sfx.getHttpHelpUrl();
+                textMsg.addMouseListener(new MouseListener() {
+                    @Override
+                    public void mouseClicked(MouseEvent mouseEvent) {
+                        Util.openUrl(helpUrl);
+                    }
+
+                    @Override
+                    public void mousePressed(MouseEvent mouseEvent) {
+
+                    }
+
+                    @Override
+                    public void mouseReleased(MouseEvent mouseEvent) {
+
+                    }
+
+                    @Override
+                    public void mouseEntered(MouseEvent mouseEvent) {
+
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent mouseEvent) {
+
+                    }
+                });
+            }
+        }
 
         setLocationRelativeTo(null);
 

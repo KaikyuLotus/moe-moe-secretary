@@ -4,6 +4,7 @@ import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.entities.Dialog;
 import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
+import com.kitsunecode.mms.core.settings.Settings;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,9 +24,13 @@ public class File implements IWaifuAdapter {
         try {
             if (IWaifuAdapter.hasSavedFile(this)) {
                 data = IWaifuAdapter.getDataFromFile(this);
+            } else {
+                throw new StartFailedException("File adapter needs a configuration folder, please click here to open the guide!",
+                        "https://telegra.ph/Moe-Moe-Secretary-File-Adapter-Configuration-01-12");
             }
         } catch (IOException e) {
-            throw new StartFailedException(e.getClass().getSimpleName() + ": " + e.getMessage());
+            throw new StartFailedException(e.getClass().getSimpleName() + ": " + e.getMessage(),
+                    "https://telegra.ph/Moe-Moe-Secretary-File-Adapter-Configuration-01-12");
         }
     }
 

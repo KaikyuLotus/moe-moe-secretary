@@ -2,7 +2,10 @@ package com.kitsunecode.mms.core.utils;
 
 import com.google.gson.Gson;
 import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
+import com.kitsunecode.mms.core.settings.Settings;
 import org.apache.commons.io.IOUtils;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.introspector.BeanAccess;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -12,6 +15,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 
@@ -19,7 +24,13 @@ public class Util {
 
     private static final Gson GSON = new Gson();
 
+    private static final Yaml YAML = new Yaml();
+
     private static final String AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36";
+
+    static {
+        YAML.setBeanAccess(BeanAccess.FIELD);
+    }
 
     public static void sleep(long millDurationFloat) {
         try {
@@ -62,7 +73,7 @@ public class Util {
      */
     public static byte[] downloadFile(String url, File resourceFile) {
         try {
-            if (!url.startsWith("http")) {
+            if (!Util.isUrl(url)) {
                 // Not an URL!
                 return null;
             }
@@ -127,16 +138,42 @@ public class Util {
         return height;
     }
 
-    public static WaifuData deserializeWaifuJson(String jsonData) {
-        return GSON.fromJson(jsonData, WaifuData.class);
+    public static WaifuData deserializeWaifu(String data) {
+        String fileFormat = Settings.getFileFormat();
+        if (fileFormat.equals("YAML")) {
+            return YAML.loadAs(data, WaifuData.class);
+        } else if (fileFormat.equals("JSON")){
+            return GSON.fromJson(data, WaifuData.class);
+        } else {
+            throw new IllegalArgumentException("Invalid adapter file type");
+        }
     }
 
     public static String serializeWaifuData(WaifuData data) {
-        return GSON.toJson(data);
+        String fileFormat = Settings.getFileFormat();
+        if (fileFormat.equals("YAML")) {
+            return YAML.dump(data);
+        } else if (fileFormat.equals("JSON")){
+            return GSON.toJson(data);
+        } else {
+            throw new IllegalArgumentException("Invalid adapter file type");
+        }
     }
 
     public static boolean isWindows() {
         return System.getProperty("os.name").toLowerCase().contains("win");
+    }
+
+    public static void openUrl(String url) {
+        if (Desktop.isDesktopSupported()) {
+            try {
+                Desktop.getDesktop().browse(new URI(url));
+            } catch (IOException | URISyntaxException e) { /* TODO: error handling */ }
+        } else { /* TODO: error handling */ }
+    }
+
+    public static boolean isUrl(String url) {
+        return url.startsWith("http");
     }
 
 }

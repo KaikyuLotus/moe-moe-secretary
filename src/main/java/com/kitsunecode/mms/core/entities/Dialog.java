@@ -16,6 +16,10 @@ public class Dialog {
     @SerializedName("audio")
     private String audio;
 
+    private Dialog() {
+        // Private impl
+    }
+
     public Dialog(String language, String dialog, String event, String audio) {
         this.dialog = dialog;
         this.event = event;

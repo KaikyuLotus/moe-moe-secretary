@@ -26,8 +26,14 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     private final IWaifuAdapter waifuInterface;
 
+    private boolean floatingToggle = true;
+
     private int xClickPosition;
-    private int dragDiff = 0;
+    private int yClickPosition;
+    private int dragDiffX = 0;
+    private int dragDiffY = 0;
+
+    private int yDifference = 0;
 
     private boolean running;
     private boolean alwaysOnTop = Settings.isWaifuAlwaysOnTop();
@@ -56,7 +62,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
         secretaryLabel.startFloating();
 
-        if (Settings.isDialogsEnabled()) {
+        if (Settings.isDialogsOnIdle()) {
             idle();
         }
 
@@ -171,8 +177,12 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             buffImage = Util.flipImage(buffImage);
         }
 
+        Image i = buffImage;
+
         // int lastPixel = Util.getEmptyPixelsFromBottom(buffImage);
-        Image i = buffImage.getScaledInstance(-1, Settings.getWaifuHeight(), Image.SCALE_AREA_AVERAGING);
+        if (Settings.getWaifuHeight() != 0) {
+            i = buffImage.getScaledInstance(-1, Settings.getWaifuHeight(), Image.SCALE_AREA_AVERAGING);
+        }
 
         setSize(i.getWidth(null), i.getHeight(null));
         setLocation(getX(), Util.getYStartPosition(i.getHeight(null)));
@@ -241,6 +251,11 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         System.out.println("Always on top: " + alwaysOnTop);
     }
 
+    public void toggleFloating() {
+        floatingToggle = !floatingToggle;
+        System.out.println("Floating: " + floatingToggle);
+    }
+
     public void reloadSkin() throws IOException {
         secretaryLabel.setIcon(new ImageIcon(loadSkin(skinIndex)));
         secretaryLabel.setBounds(secretaryLabel.getDesiredBounds(secretaryLabel.getIcon().getIconWidth(), secretaryLabel.getIcon().getIconHeight()));
@@ -270,10 +285,10 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             // Activate baloon only if there is text to show
             baloon.toggle(!dialog.getDialog().equals(""));
             new Thread(() -> {
-                if (Settings.isVoiceEnabled() && dialog.getAudio() != null) {
+                if (Settings.isVoiceEnabled() && dialog.getAudio() != null && !dialog.getAudio().equals("")) {
                     audioManager.play(this.waifuInterface, dialog.getAudio(), Settings.getVoiceVolume());
                 } else {
-                    Util.sleep(Settings.getDialogsBaloonNoVoiceDuration() * 1000);
+                    Util.sleep(Settings.getDialogsBaloonNoVoiceDuration());
                 }
 
                 baloon.toggle(false);
@@ -303,7 +318,9 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     @Override
     public void mousePressed(MouseEvent e) {
         xClickPosition = e.getXOnScreen();
-        dragDiff = xClickPosition - getX();
+        yClickPosition = e.getYOnScreen();
+        dragDiffX = xClickPosition - getX();
+        dragDiffY = yClickPosition - getY();
     }
 
     @Override
@@ -312,7 +329,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
             return;
         }
-        if (xClickPosition == e.getXOnScreen()) {
+        if (xClickPosition == e.getXOnScreen() && yClickPosition == e.getYOnScreen()) {
             secretaryLabel.speakJump();
             onClick();
         }
@@ -322,7 +339,8 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     @Override
     public void mouseDragged(MouseEvent e) {
         isDragging = true;
-        setLocation(e.getXOnScreen() - dragDiff, getY());
+        setLocation(e.getXOnScreen() - dragDiffX, Settings.isWaifuYDragEnabled() ? e.getYOnScreen() - dragDiffY : getY());
+        yDifference = e.getYOnScreen() + dragDiffY;
     }
 
     @Override
@@ -340,6 +358,8 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
                 case 't':
                     toggleAlwaysOnTop();
                     break;
+                case 'f':
+                    toggleFloating();
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -412,14 +432,26 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     @Override
     public void windowActivated(WindowEvent e) {
-        //setOpacity(Settings.get("waifu.active.opacity", 100.0f) / 100.0f);
+        if (Util.isWindows()) {
+            setOpacity(Settings.getWaifuActiveOpacity() / 100.0f);
+        }
     }
 
     @Override
     public void windowDeactivated(WindowEvent e) {
-        // secretaryLabel.getIcon().
-        // setOpacity(Settings.get("waifu.inactive.opacity", 100.0f) / 100.0f);
+        if (Util.isWindows()) {
+            setOpacity(Settings.getWaifuInactiveOpacity() / 100.0f);
+        }
     }
 
     // Endregion
+
+
+    public int getYDifference() {
+        return yDifference;
+    }
+
+    public boolean isFloatingToggle() {
+        return floatingToggle;
+    }
 }

@@ -2,6 +2,7 @@ package com.kitsunecode.mms.core.adapters;
 
 import com.kitsunecode.mms.core.entities.Dialog;
 import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
+import com.kitsunecode.mms.core.settings.Settings;
 import com.kitsunecode.mms.core.utils.Util;
 import org.apache.commons.io.FileUtils;
 
@@ -38,7 +39,7 @@ public interface IWaifuAdapter {
     long getUptime();
 
     static File getDataFile(IWaifuAdapter waifu) {
-        return Paths.get("resources", waifu.getName(), "data.json").toFile();
+        return Paths.get("resources", waifu.getName(), "data." + Settings.getFileFormat().toLowerCase()).toFile();
     }
 
     static void saveDataToFile(IWaifuAdapter waifu) throws IOException {
@@ -53,7 +54,7 @@ public interface IWaifuAdapter {
         System.out.println("Reading waifu " + waifu.getName() + " data...");
         String jsonData = String.join("\n", Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
         System.out.println("Readed " + (jsonData.length() * 2) + " bytes of waifu data!");
-        return Util.deserializeWaifuJson(jsonData);
+        return Util.deserializeWaifu(jsonData);
     }
 
     static boolean hasSavedFile(IWaifuAdapter waifu) {
@@ -74,7 +75,7 @@ public interface IWaifuAdapter {
      * @throws IOException If something goes wrong while reading/wrinting
      */
     static byte[] downloadFile(IWaifuAdapter waifu, String url, String fileName) throws IOException {
-        String specificFolder = url.endsWith(".ogg") ? "audios" : "skins";
+        String specificFolder = (Util.isUrl(url)) ? (url.endsWith(".ogg") ? "audios" : "skins") : "";
         File resourceFile = Paths.get("resources", waifu.getName(), specificFolder, fileName).toFile();
 
         byte[] resourceData = null;
@@ -85,6 +86,10 @@ public interface IWaifuAdapter {
         }
 
         // Try to download
+        if (resourceData == null && !Util.isUrl(url)) {
+            throw new RuntimeException("Can't find file " + fileName + " from path " + url);
+        }
+
         if (resourceData == null) {
             resourceData = Util.downloadFile(url, resourceFile);
         }

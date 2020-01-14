@@ -27,6 +27,7 @@
         <vorbisspi.version>1.0.3.3</vorbisspi.version>
         <jsoup.version>1.11.3</jsoup.version>
         <commons-io.version>2.6</commons-io.version>
+        <snakeyaml.version>1.25</snakeyaml.version>
     </properties>
 
     <dependencies>
@@ -54,6 +55,11 @@
             <artifactId>gson</artifactId>
             <version>${gson.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>${snakeyaml.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -79,7 +85,6 @@
                                 </manifest>
                             </archive>
                             <attach>false</attach>
-                            <classifier>jar</classifier>
                             <appendAssemblyId>false</appendAssemblyId>
                             <finalName>moe-moe-secretary</finalName>
                             <descriptorRefs>

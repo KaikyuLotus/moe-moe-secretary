@@ -23,7 +23,7 @@ public class AzurLane implements IWaifuAdapter {
     private static final String BASE_URL = "https://azurlane.koumakan.jp";
 
 
-    private static final String IMAGES_SELECTOR = ".adaptiveratioimg > a > img";
+    private static final String IMAGES_SELECTOR = "div.tabbertab a.image > img";
     private static final String TABLE_ROWS_JAP = "div[title='Japanese Server'] > table:nth-child(3) > * tr";
     private static final String TABLE_ROWS_CN = "div[title='Chinese Server'] > table:nth-child(3) > * tr";
     private static final String SKIN_NAMES = ".azl_box_body > .tabber > div[title]";
@@ -59,7 +59,7 @@ public class AzurLane implements IWaifuAdapter {
         } catch (HttpStatusException e) {
             String message = "Wiki status code: " + e.getStatusCode();
             if (e.getStatusCode() == 404) {
-                message += ", probably this weapon does not exist";
+                message += ", probably this ship does not exist";
             }
             throw new StartFailedException(message);
         } catch (Exception e) {
@@ -71,13 +71,14 @@ public class AzurLane implements IWaifuAdapter {
      * Loads data from Wiki, we MUST use it only once in a while
      */
     private WaifuData loadFromWiki() throws IOException {
-        System.out.println("Getting ship home page");
-        Document mainDoc = Jsoup.connect(BASE_URL + "/" + name).get();
+//        System.out.println("Getting ship home page");
+//        Document mainDoc = Jsoup.connect(BASE_URL + "/" + name).get();
         System.out.println("Getting ship quotes");
         Document quotesDoc = Jsoup.connect(BASE_URL + "/" + name + "/Quotes").get();
+        System.out.println("Getting ship images");
+        Document skinsDoc = Jsoup.connect(BASE_URL + "/" + name + "/Gallery").get();
         System.out.println("Parsing data...");
-
-        return new WaifuData(loadDialogs(quotesDoc), loadSkinUrls(mainDoc));
+        return new WaifuData(loadDialogs(quotesDoc), loadSkinUrls(skinsDoc));
     }
 
     private List<String> loadSkinNames(Document doc) {
@@ -89,7 +90,7 @@ public class AzurLane implements IWaifuAdapter {
 
     private List<String> loadSkinUrls(Document doc) {
         return Selector.select(IMAGES_SELECTOR, doc).stream()
-                .map(e -> e.attr("srcset"))
+                .map(e -> e.hasAttr("srcset") ? e.attr("srcset") : e.attr("src"))
                 .map(set -> Arrays.stream(set.split(","))
                         .map(s -> BASE_URL + s.trim().split(" ")[0])
                         .reduce((first, second) -> second)
@@ -118,10 +119,10 @@ public class AzurLane implements IWaifuAdapter {
                 eventText = "Idle";
             }
             String dialogText = row.selectFirst(DIALOG_TRANSL_COL).text();
-            String dialogTextMative = row.selectFirst(DIALOG_NATIVE_COL).text();
+            String dialogTextNative = row.selectFirst(DIALOG_NATIVE_COL).text();
 
             dialogList.add(new Dialog(lang, dialogText, eventText, audioUrl));
-            dialogList.add(new Dialog(lang + " Native", dialogTextMative, eventText, audioUrl));
+            dialogList.add(new Dialog(lang + " Native", dialogTextNative, eventText, audioUrl));
         }
 
         return dialogList;
@@ -149,7 +150,9 @@ public class AzurLane implements IWaifuAdapter {
 
     @Override
     public String getSkin(int skinIndex) {
-        return this.data.getSkins().get(skinIndex);
+        return this.data.getSkins().stream()
+                .filter(e -> Settings.isAzurChibi() == e.toLowerCase().contains("chibi"))
+                .collect(Collectors.toList()).get(skinIndex);
     }
 
     @Override

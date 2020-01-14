@@ -30,7 +30,7 @@ public class Main {
             secretary = new Secretary(waifu);
         } catch (Exception e) {
             e.printStackTrace();
-            BootFailedFrame frame = new BootFailedFrame(e.getMessage());
+            BootFailedFrame frame = new BootFailedFrame(e);
         }
     }
 

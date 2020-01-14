@@ -1,7 +1,6 @@
 package com.kitsunecode.mms.core.utils;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
-import com.kitsunecode.mms.core.entities.BootFailedFrame;
 import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 
 import java.io.IOException;
@@ -28,6 +27,9 @@ public class WaifuUtils {
         } catch (IllegalAccessException | InstantiationException e) {
             throw new StartFailedException("Critical error while instancing the waifu");
         } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof StartFailedException) {
+                throw (StartFailedException) e.getCause(); // Throw already handled exception
+            }
             throw new StartFailedException(e.getCause().getMessage());
         } catch (Exception e) {
             throw new StartFailedException("Critical error while creating the adapter: " + e.getMessage());

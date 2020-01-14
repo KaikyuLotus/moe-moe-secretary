@@ -2,7 +2,6 @@ package com.kitsunecode.mms.core.entities.waifudata;
 
 import com.google.gson.annotations.SerializedName;
 import com.kitsunecode.mms.core.entities.Dialog;
-import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 
 import java.util.List;
 
@@ -19,6 +18,10 @@ public class WaifuData {
 
     @SerializedName("lastPosition")
     private int position;
+
+    private WaifuData() {
+        // Private impl
+    }
 
     public WaifuData(List<Dialog> dialogs, List<String> skinUrls) {
         this.dialogs = dialogs;
