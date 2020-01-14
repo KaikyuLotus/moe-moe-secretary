@@ -272,6 +272,12 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     public void close() {
         this.running = false;
+        try {
+            waifuInterface.getWaifuData().setPosition(getX());
+            waifuInterface.saveDataToFile();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
         System.out.println("Closed");
         this.dispose();
     }
@@ -381,12 +387,6 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     @Override
     public void windowClosing(WindowEvent e) {
-        try {
-            waifuInterface.getWaifuData().setPosition(getX());
-            waifuInterface.saveDataToFile();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
         close();
     }
 
