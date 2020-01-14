@@ -11,7 +11,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -79,7 +78,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         if (!isManual) {
             new Thread(() -> {
                 BufferedImage image = getScreenShot(this);
-                Area area = getOutline(image, 0);
+                Area area = WaifuUtils.getOutline(image, 0);
                 setShape(area);
             }).start();
         }
@@ -104,41 +103,6 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         // }
 
         return image;
-    }
-
-    public Area getOutline(BufferedImage i, int targetTransp) {
-
-        // construct the GeneralPath
-        GeneralPath gp = new GeneralPath();
-        gp.moveTo(0, 0);
-
-        boolean drawing = false;
-        for (int y = 0; y < i.getHeight(); y++) {
-            for (int x = 0; x < i.getWidth(); x++) {
-
-                int rgb = i.getRGB(x, y);
-                boolean isTransp = (rgb >>> 24) <= targetTransp;
-
-                if (isTransp) {
-                    if (drawing) {
-                        gp.closePath();
-                    }
-                    drawing = false;
-                } else {
-                    drawing = true;
-                    gp.moveTo(x, y);
-                    gp.lineTo(x + 1, y);
-                    gp.lineTo(x + 1, y + 1);
-                    gp.lineTo(x, y + 1);
-                    gp.moveTo(x, y);
-
-                }
-            }
-            gp.closePath();
-        }
-        gp.closePath();
-        // construct the Area from the GP & return it
-        return new Area(gp);
     }
 
     private void idle() {
@@ -178,8 +142,6 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         }
 
         Image i = buffImage;
-
-        // int lastPixel = Util.getEmptyPixelsFromBottom(buffImage);
         if (Settings.getWaifuHeight() != 0) {
             i = buffImage.getScaledInstance(-1, Settings.getWaifuHeight(), Image.SCALE_AREA_AVERAGING);
         }
@@ -188,6 +150,12 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         setLocation(getX(), Util.getYStartPosition(i.getHeight(null)));
 
         return i;
+    }
+
+    public void flipSkin() {
+        System.out.println("Flipping skin");
+        buffImage = Util.flipImage(Util.toBufferedImage((ImageIcon) secretaryLabel.getIcon()));
+        secretaryLabel.setIcon(new ImageIcon(buffImage));
     }
 
     public int getStartY() {
@@ -257,6 +225,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     }
 
     public void reloadSkin() throws IOException {
+        if (waifuInterface.getSkinCount() == 1) return;
         secretaryLabel.setIcon(new ImageIcon(loadSkin(skinIndex)));
         secretaryLabel.setBounds(secretaryLabel.getDesiredBounds(secretaryLabel.getIcon().getIconWidth(), secretaryLabel.getIcon().getIconHeight()));
         baloon.setBounds(baloon.getDesiredSize(secretaryLabel.getIcon().getIconWidth(), secretaryLabel.getIcon().getIconHeight()));
@@ -360,6 +329,10 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
                     break;
                 case 'f':
                     toggleFloating();
+                    break;
+                case 's':
+                    flipSkin();
+                    break;
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -410,7 +383,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     public void windowClosing(WindowEvent e) {
         try {
             waifuInterface.getWaifuData().setPosition(getX());
-            IWaifuAdapter.saveDataToFile(waifuInterface);
+            waifuInterface.saveDataToFile();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -418,17 +391,13 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     }
 
     @Override
-    public void windowClosed(WindowEvent e) {
-
-    }
+    public void windowClosed(WindowEvent e) { }
 
     @Override
-    public void windowIconified(WindowEvent e) {
-    }
+    public void windowIconified(WindowEvent e) { }
 
     @Override
-    public void windowDeiconified(WindowEvent e) {
-    }
+    public void windowDeiconified(WindowEvent e) { }
 
     @Override
     public void windowActivated(WindowEvent e) {

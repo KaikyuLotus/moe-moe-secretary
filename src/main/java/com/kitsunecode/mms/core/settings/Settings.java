@@ -17,8 +17,11 @@ import java.util.function.Function;
 
 public class Settings {
 
+    private static final String currentVersion = "1.1";
+
     public static final String configFolder = "config";
     public static final String configPath = "config/config.properties";
+    public static final String configBckPath = "config/config_bck.properties";
 
     private static Properties properties = null;
 
@@ -42,17 +45,25 @@ public class Settings {
                 load(s);
             }
 
-            Path config = Paths.get(configPath);
-            if (config.toFile().exists()) {
-                System.out.println("Found custom config file, loading it...");
-                load(new ByteArrayInputStream(Files.readAllBytes(config)));
-                return properties;
-            }
-
             File rf = Paths.get(configFolder).toFile();
             if (!rf.exists() && !rf.mkdir()) {
                 return properties;
             }
+
+            Path config = Paths.get(configPath);
+            if (config.toFile().exists()) {
+                System.out.println("Found custom config file, loading it...");
+                byte[] bytes = Files.readAllBytes(config);
+                if (new String(bytes).contains("Version: " + currentVersion)) {
+                    load(new ByteArrayInputStream(bytes));
+                    return properties;
+                } else {
+                    Files.write(Paths.get(configBckPath), bytes); // Backup old file
+                    config.toFile().delete();
+                }
+            }
+
+
 
             s = Main.class.getClassLoader().getResourceAsStream(configPath);
             if (s != null) {

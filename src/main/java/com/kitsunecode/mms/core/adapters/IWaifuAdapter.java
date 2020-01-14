@@ -1,10 +1,12 @@
 package com.kitsunecode.mms.core.adapters;
 
 import com.kitsunecode.mms.core.entities.Dialog;
+import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
 import com.kitsunecode.mms.core.settings.Settings;
 import com.kitsunecode.mms.core.utils.Util;
 import org.apache.commons.io.FileUtils;
+import org.jsoup.HttpStatusException;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,51 +16,71 @@ import java.nio.file.Paths;
 import java.util.List;
 
 
-public interface IWaifuAdapter {
+public abstract class IWaifuAdapter {
 
-    int getSkinCount();
+    private long startTimeMillis;
 
-    String getName();
+    protected String name;
+    protected WaifuData data;
 
-    String getShowableName();
+    public abstract String onTouchEventKey();
 
-    String getSkin(int skinNumber);
+    public abstract String onIdleEventKey();
 
-    String onTouchEventKey();
+    public abstract String onLoginEventKey();
 
-    String onIdleEventKey();
+    protected abstract WaifuData loadFromCustomSource() throws Exception;
 
-    String onLoginEventKey();
+    public IWaifuAdapter(String name) {
+        this.startTimeMillis = System.currentTimeMillis();
+        this.name = name;
 
-    List<Dialog> getDialogs();
+        try {
+            if (hasSavedFile()) {
+                data = getDataFromFile();
+            } else {
+                data = loadFromCustomSource();
+                saveDataToFile();
+            }
 
-    List<Dialog> getDialogs(String event);
+            if (data.getSkins().isEmpty()) {
+                throw new StartFailedException("No images found for this waifu");
+            }
 
-    WaifuData getWaifuData();
-
-    long getUptime();
-
-    static File getDataFile(IWaifuAdapter waifu) {
-        return Paths.get("resources", waifu.getName(), "data." + Settings.getFileFormat().toLowerCase()).toFile();
+        } catch (HttpStatusException e) {
+            String message = "Wiki status code: " + e.getStatusCode();
+            if (e.getStatusCode() == 404) {
+                message += ", probably this waifu does not exist";
+            }
+            throw new StartFailedException(message);
+        } catch (StartFailedException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new StartFailedException(e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
     }
 
-    static void saveDataToFile(IWaifuAdapter waifu) throws IOException {
-        File file = getDataFile(waifu);
-        WaifuData waifuData = waifu.getWaifuData();
-        System.out.println("Saving waifu " + waifu.getName() + " data...");
+    public File getDataFile() {
+        return Paths.get("resources", getName(), "data." + Settings.getFileFormat().toLowerCase()).toFile();
+    }
+
+    public void saveDataToFile() throws IOException {
+        File file = getDataFile();
+        WaifuData waifuData = getWaifuData();
+        System.out.println("Saving waifu " + getName() + " data...");
         FileUtils.writeStringToFile(file, Util.serializeWaifuData(waifuData), "UTF-8");
     }
 
-    static WaifuData getDataFromFile(IWaifuAdapter waifu) throws IOException {
-        File file = getDataFile(waifu);
-        System.out.println("Reading waifu " + waifu.getName() + " data...");
+    public WaifuData getDataFromFile() throws IOException {
+        File file = getDataFile();
+        System.out.println("Reading waifu " + getName() + " data...");
         String jsonData = String.join("\n", Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
         System.out.println("Readed " + (jsonData.length() * 2) + " bytes of waifu data!");
         return Util.deserializeWaifu(jsonData);
     }
 
-    static boolean hasSavedFile(IWaifuAdapter waifu) {
-        return getDataFile(waifu).exists();
+    public boolean hasSavedFile() {
+        return getDataFile().exists();
     }
 
     /**
@@ -68,15 +90,14 @@ public interface IWaifuAdapter {
      * If the file is already present the this method just reads and returns it
      * If something goes wrong throws an exception, really angery waifu incoming in that case <3
      *
-     * @param waifu    The waifu who owns the file
      * @param url      The file's url
      * @param fileName File's name
      * @return File's byte array
      * @throws IOException If something goes wrong while reading/wrinting
      */
-    static byte[] downloadFile(IWaifuAdapter waifu, String url, String fileName) throws IOException {
+    public byte[] downloadFile(String url, String fileName) throws IOException {
         String specificFolder = (Util.isUrl(url)) ? (url.endsWith(".ogg") ? "audios" : "skins") : "";
-        File resourceFile = Paths.get("resources", waifu.getName(), specificFolder, fileName).toFile();
+        File resourceFile = Paths.get("resources", getName(), specificFolder, fileName).toFile();
 
         byte[] resourceData = null;
 
@@ -102,8 +123,36 @@ public interface IWaifuAdapter {
 
     }
 
-    static void saveData(IWaifuAdapter waifu) throws IOException {
-        saveDataToFile(waifu);
+    public WaifuData getWaifuData() {
+        return this.data;
+    }
+
+    public String getSkin(int skinNumber) {
+        return this.data.getSkins().get(skinNumber);
+    }
+
+    public int getSkinCount() {
+        return this.data.getSkins().size();
+    }
+
+    public long getUptime() {
+        return System.currentTimeMillis() - startTimeMillis;
+    }
+
+    public List<Dialog> getDialogs() {
+        return data.getDialogs();
+    }
+
+    public List<Dialog> getDialogs(String event) {
+        return this.data.getDialogs();
+    }
+
+    public String getShowableName() {
+        return this.name;
+    }
+
+    public String getName() {
+        return name;
     }
 
 }

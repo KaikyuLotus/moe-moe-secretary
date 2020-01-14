@@ -19,7 +19,7 @@ public class AudioManager {
             String fileName = Util.fileFromUrl(url);
 
             try {
-                byte[] audio = IWaifuAdapter.downloadFile(adapter, url, fileName);
+                byte[] audio = adapter.downloadFile(url, fileName);
                 // Get AudioInputStream from given bytes!
                 try (AudioInputStream in = AudioSystem.getAudioInputStream(new ByteArrayInputStream(audio))) {
                     AudioFormat baseFormat = in.getFormat();

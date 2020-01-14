@@ -2,10 +2,8 @@ package com.kitsunecode.mms.core.adapters.impl;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.entities.Dialog;
-import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
 import com.kitsunecode.mms.core.settings.Settings;
-import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -18,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AzurLane implements IWaifuAdapter {
+public class AzurLane extends IWaifuAdapter {
 
     private static final String BASE_URL = "https://azurlane.koumakan.jp";
 
@@ -26,7 +24,6 @@ public class AzurLane implements IWaifuAdapter {
     private static final String IMAGES_SELECTOR = "div.tabbertab a.image > img";
     private static final String TABLE_ROWS_JAP = "div[title='Japanese Server'] > table:nth-child(3) > * tr";
     private static final String TABLE_ROWS_CN = "div[title='Chinese Server'] > table:nth-child(3) > * tr";
-    private static final String SKIN_NAMES = ".azl_box_body > .tabber > div[title]";
 
     private static final String AUDIO_COL = "td:nth-child(2) > a";
     private static final String EVENT_COL = "td:nth-child(1)";
@@ -35,57 +32,21 @@ public class AzurLane implements IWaifuAdapter {
 
     private static final String lang = Settings.getWaifuLanguage();
 
-    private String name;
-    private WaifuData data;
-    private long startTimeMillis;
-
-    public AzurLane(String name) throws Exception {
-
-        this.startTimeMillis = System.currentTimeMillis();
-        this.name = name;
-
-        try {
-            if (IWaifuAdapter.hasSavedFile(this)) {
-                data = IWaifuAdapter.getDataFromFile(this);
-            } else {
-                data = loadFromWiki();
-                IWaifuAdapter.saveDataToFile(this);
-            }
-
-            if (data.getSkins().isEmpty()) {
-                throw new StartFailedException("No images found for this waifu");
-            }
-
-        } catch (HttpStatusException e) {
-            String message = "Wiki status code: " + e.getStatusCode();
-            if (e.getStatusCode() == 404) {
-                message += ", probably this ship does not exist";
-            }
-            throw new StartFailedException(message);
-        } catch (Exception e) {
-            throw new StartFailedException(e.getClass().getSimpleName() + ": " + e.getMessage());
-        }
+    public AzurLane(String name) {
+        super(name);
     }
 
     /**
      * Loads data from Wiki, we MUST use it only once in a while
      */
-    private WaifuData loadFromWiki() throws IOException {
-//        System.out.println("Getting ship home page");
-//        Document mainDoc = Jsoup.connect(BASE_URL + "/" + name).get();
+    @Override
+    protected WaifuData loadFromCustomSource() throws IOException {
         System.out.println("Getting ship quotes");
         Document quotesDoc = Jsoup.connect(BASE_URL + "/" + name + "/Quotes").get();
         System.out.println("Getting ship images");
         Document skinsDoc = Jsoup.connect(BASE_URL + "/" + name + "/Gallery").get();
         System.out.println("Parsing data...");
         return new WaifuData(loadDialogs(quotesDoc), loadSkinUrls(skinsDoc));
-    }
-
-    private List<String> loadSkinNames(Document doc) {
-        return Selector.select(SKIN_NAMES, doc)
-                .stream()
-                .map(e -> e.attr("title"))
-                .collect(Collectors.toList());
     }
 
     private List<String> loadSkinUrls(Document doc) {
@@ -99,6 +60,7 @@ public class AzurLane implements IWaifuAdapter {
     }
 
     private List<Dialog> loadDialogs(Document doc) {
+        System.out.println("Loading dialogs");
         List<Dialog> dialogList = new ArrayList<>();
         dialogList.addAll(loadDialogs(doc, TABLE_ROWS_CN, "Chinese"));
         dialogList.addAll(loadDialogs(doc, TABLE_ROWS_JAP, "Japanese"));
@@ -107,6 +69,8 @@ public class AzurLane implements IWaifuAdapter {
 
     private List<Dialog> loadDialogs(Document doc, String selector, String lang) {
         List<Dialog> dialogList = new ArrayList<>();
+
+        System.out.println("Loading dialogs of language " + lang);
 
         Elements rows = Selector.select(selector, doc);
         rows.remove(0);
@@ -121,31 +85,16 @@ public class AzurLane implements IWaifuAdapter {
             String dialogText = row.selectFirst(DIALOG_TRANSL_COL).text();
             String dialogTextNative = row.selectFirst(DIALOG_NATIVE_COL).text();
 
-            dialogList.add(new Dialog(lang, dialogText, eventText, audioUrl));
-            dialogList.add(new Dialog(lang + " Native", dialogTextNative, eventText, audioUrl));
+            if (!dialogText.equals("")) {
+                dialogList.add(new Dialog(lang, dialogText, eventText, audioUrl));
+            }
+            if (!dialogTextNative.equals("")) {
+                dialogList.add(new Dialog(lang + " Native", dialogTextNative, eventText, audioUrl));
+            }
         }
 
+        System.out.println("Found " + dialogList.size() + " dialogs");
         return dialogList;
-    }
-
-    @Override
-    public WaifuData getWaifuData() {
-        return this.data;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getShowableName() {
-        return this.name;
-    }
-
-    @Override
-    public int getSkinCount() {
-        return this.data.getSkins().size();
     }
 
     @Override
@@ -156,8 +105,10 @@ public class AzurLane implements IWaifuAdapter {
     }
 
     @Override
-    public List<Dialog> getDialogs() {
-        return data.getDialogs();
+    public int getSkinCount() {
+        return (int) this.data.getSkins().stream()
+                .filter(e -> Settings.isAzurChibi() == e.toLowerCase().contains("chibi"))
+                .count();
     }
 
     @Override
@@ -183,8 +134,4 @@ public class AzurLane implements IWaifuAdapter {
         return "Login";
     }
 
-    @Override
-    public long getUptime() {
-        return System.currentTimeMillis() - startTimeMillis;
-    }
 }

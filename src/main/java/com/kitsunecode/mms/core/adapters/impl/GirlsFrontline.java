@@ -2,9 +2,7 @@ package com.kitsunecode.mms.core.adapters.impl;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.entities.Dialog;
-import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
-import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -16,54 +14,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GirlsFrontline implements IWaifuAdapter {
+public class GirlsFrontline extends IWaifuAdapter {
 
     private static final String BASE_URL = "https://en.gfwiki.com";
 
     private static final String IMAGES_URL_SELECTOR = "ul.gallery.mw-gallery-traditional > li > * a";
     private static final String FULL_IMAGE_URL_SELECTOR = ".fullMedia > a";
-    private static final String SKIN_NAMES = "ul.gallery.mw-gallery-traditional > li > * p";
     private static final String QUOTE_ROWS = ".tabbertab > * tr";
     private static final String ALL_TDS = "td";
     private static final String SOUNDS = "span.audio-button";
 
-    private String name;
-    private WaifuData data;
-
-    private long startTimeMillis;
-
-    public GirlsFrontline(String name) throws StartFailedException {
-
-        this.startTimeMillis = System.currentTimeMillis();
-        this.name = name;
-
-        try {
-            if (IWaifuAdapter.hasSavedFile(this)) {
-                data = IWaifuAdapter.getDataFromFile(this);
-            } else {
-                data = loadFromWiki();
-                IWaifuAdapter.saveDataToFile(this);
-            }
-
-            if (data.getSkins().isEmpty()) {
-                throw new StartFailedException("No images found for this waifu");
-            }
-
-        } catch (HttpStatusException e) {
-            String message = "Wiki status code: " + e.getStatusCode();
-            if (e.getStatusCode() == 404) {
-                message += ", probably this weapon does not exist";
-            }
-            throw new StartFailedException(message);
-        } catch (Exception e) {
-            throw new StartFailedException(e.getClass().getSimpleName() + ": " + e.getMessage());
-        }
+    public GirlsFrontline(String name) {
+        super(name);
     }
 
     /**
      * Loads data from Wiki, we MUST use it only once in a while
      */
-    private WaifuData loadFromWiki() throws IOException {
+    protected WaifuData loadFromCustomSource() throws IOException {
         System.out.println("Getting weapon home page");
         Document mainDoc = Jsoup.connect(BASE_URL + "/wiki/" + name).get();
         System.out.println("Getting weapon quotes");
@@ -73,7 +41,6 @@ public class GirlsFrontline implements IWaifuAdapter {
         return new WaifuData(loadDialogs(quotesDoc), loadImageSources(mainDoc));
     }
 
-    // TODO better error handling
     private String getFullImageLink(String path) {
         try {
             Document imgDoc = Jsoup.connect(BASE_URL + path).get();
@@ -82,13 +49,6 @@ public class GirlsFrontline implements IWaifuAdapter {
             e.printStackTrace();
         }
         return null;
-    }
-
-    private List<String> loadSkinNames(Document doc) {
-        return Selector.select(SKIN_NAMES, doc)
-                .stream()
-                .map(Element::text)
-                .collect(Collectors.toList());
     }
 
     private List<Dialog> loadDialogs(Document doc) {
@@ -130,43 +90,14 @@ public class GirlsFrontline implements IWaifuAdapter {
                 .stream()
                 .map(e -> e.attr("href"))
                 .filter(a -> !a.contains("_S"))
+                .filter(a -> a.contains(name))
                 .map(this::getFullImageLink)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getShowableName() {
-        return this.name;
-    }
-
-    @Override
-    public int getSkinCount() {
-        return data.getSkins().size();
-    }
-
-    @Override
-    public String getSkin(int skinNumber) {
-        return data.getSkins().get(skinNumber);
-    }
-
-    @Override
-    public List<Dialog> getDialogs() {
-        return data.getDialogs();
-    }
-
-    @Override
     public List<Dialog> getDialogs(String event) {
         return data.getDialogs().stream().filter(d -> d.getEvent().equals(event)).collect(Collectors.toList());
-    }
-
-    @Override
-    public WaifuData getWaifuData() {
-        return data;
     }
 
     @Override
@@ -184,8 +115,4 @@ public class GirlsFrontline implements IWaifuAdapter {
         return "Greeting";
     }
 
-    @Override
-    public long getUptime() {
-        return System.currentTimeMillis() - startTimeMillis;
-    }
 }

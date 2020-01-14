@@ -3,6 +3,9 @@ package com.kitsunecode.mms.core.utils;
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 
+import java.awt.geom.Area;
+import java.awt.geom.GeneralPath;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
@@ -40,7 +43,42 @@ public class WaifuUtils {
         System.out.println("Getting skin index: " + skinIndex);
         String url = waifuAdapter.getSkin(skinIndex);
         String fileName = Util.fileFromUrl(url);
-        return IWaifuAdapter.downloadFile(waifuAdapter, url, fileName);
+        return waifuAdapter.downloadFile(url, fileName);
+    }
+
+    public static Area getOutline(BufferedImage i, int targetTransp) {
+
+        // construct the GeneralPath
+        GeneralPath gp = new GeneralPath();
+        gp.moveTo(0, 0);
+
+        boolean drawing = false;
+        for (int y = 0; y < i.getHeight(); y++) {
+            for (int x = 0; x < i.getWidth(); x++) {
+
+                int rgb = i.getRGB(x, y);
+                boolean isTransp = (rgb >>> 24) <= targetTransp;
+
+                if (isTransp) {
+                    if (drawing) {
+                        gp.closePath();
+                    }
+                    drawing = false;
+                } else {
+                    drawing = true;
+                    gp.moveTo(x, y);
+                    gp.lineTo(x + 1, y);
+                    gp.lineTo(x + 1, y + 1);
+                    gp.lineTo(x, y + 1);
+                    gp.moveTo(x, y);
+
+                }
+            }
+            gp.closePath();
+        }
+        gp.closePath();
+        // construct the Area from the GP & return it
+        return new Area(gp);
     }
 
 }

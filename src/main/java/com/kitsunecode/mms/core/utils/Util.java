@@ -7,6 +7,7 @@ import org.apache.commons.io.IOUtils;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
@@ -46,10 +47,6 @@ public class Util {
         tx.translate(-image.getWidth(null), 0);
         AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
         return op.filter(image, null);
-    }
-
-    public static double sin(long time, double slowFactor) {
-        return Math.sin(time * slowFactor);
     }
 
     public static Dimension getScreenSize() {
@@ -121,23 +118,6 @@ public class Util {
         return url;
     }
 
-    public static int getEmptyPixelsFromBottom(BufferedImage image) {
-        int width = image.getWidth();
-        int height = image.getHeight();
-        linesLoop:
-        for (int y = height / 2; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                Color color = new Color(image.getRGB(x, y), true);
-                int alpha = color.getAlpha();
-                if (alpha == 255) {
-                    continue linesLoop;
-                }
-            }
-            return height - y;
-        }
-        return height;
-    }
-
     public static WaifuData deserializeWaifu(String data) {
         String fileFormat = Settings.getFileFormat();
         if (fileFormat.equals("YAML")) {
@@ -174,6 +154,16 @@ public class Util {
 
     public static boolean isUrl(String url) {
         return url.startsWith("http");
+    }
+
+    public static BufferedImage toBufferedImage(ImageIcon icon) {
+        BufferedImage bufferedImage = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+
+        Graphics graphics = bufferedImage.createGraphics();
+        icon.paintIcon(null, graphics, 0, 0);
+        graphics.dispose();
+
+        return bufferedImage;
     }
 
 }

@@ -2,7 +2,6 @@ package com.kitsunecode.mms.core.adapters.impl;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.entities.Dialog;
-import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SIFIdol implements IWaifuAdapter {
+public class SIFIdol extends IWaifuAdapter {
 
     private static final String QUOTES_WIKI_URL = "https://decaf.kouhi.me/lovelive/index.php?title=%s";
 
@@ -26,30 +25,15 @@ public class SIFIdol implements IWaifuAdapter {
     private static final String SKIN_LINKS = "td > a";
     private static final String QUOTES_SEL = "#mw-content-text > *";
 
-    private WaifuData data;
-
-    private String code;
-    private String name;
     private String idolName;
 
-    public SIFIdol(String code) throws IOException {
-        this.code = code;
-        this.name = code;
-        if (IWaifuAdapter.hasSavedFile(this)) {
-            data = IWaifuAdapter.getDataFromFile(this);
-        } else {
-            data = loadFromWiki();
-            IWaifuAdapter.saveDataToFile(this);
-        }
-
-        if (data.getSkins().isEmpty()) {
-            throw new StartFailedException("No images found for this waifu");
-        }
-
+    public SIFIdol(String code) {
+        super(code);
     }
 
-    private WaifuData loadFromWiki() throws IOException {
-        Document mainDoc = Jsoup.connect(String.format(CARD_URL, this.code)).get();
+    @Override
+    protected WaifuData loadFromCustomSource() throws IOException {
+        Document mainDoc = Jsoup.connect(String.format(CARD_URL, this.name)).get();
         this.idolName = getIdolName(mainDoc);
 
         List<String> urls = getIdolSkinUrls(mainDoc);
@@ -75,7 +59,7 @@ public class SIFIdol implements IWaifuAdapter {
 
         if (info != null && !info.equals("")) {
             // Filter here
-            if (info.contains("#") && !info.contains(this.code)) {
+            if (info.contains("#") && !info.contains(this.name)) {
                 return null;
             }
         }
@@ -126,27 +110,6 @@ public class SIFIdol implements IWaifuAdapter {
         return nameElem.isEmpty() ? null : nameElem.text();
     }
 
-
-    @Override
-    public int getSkinCount() {
-        return this.data.getSkins().size();
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public String getShowableName() {
-        return this.idolName;
-    }
-
-    @Override
-    public String getSkin(int skinNumber) {
-        return this.data.getSkins().get(skinNumber);
-    }
-
     @Override
     public String onTouchEventKey() {
         return "Tapping the Character";
@@ -163,24 +126,10 @@ public class SIFIdol implements IWaifuAdapter {
     }
 
     @Override
-    public List<Dialog> getDialogs() {
-        return this.data.getDialogs();
-    }
-
-    @Override
     public List<Dialog> getDialogs(String event) {
         return this.data.getDialogs().stream()
                 .filter(d -> d.getEvent().equalsIgnoreCase(event))
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public WaifuData getWaifuData() {
-        return this.data;
-    }
-
-    @Override
-    public long getUptime() {
-        return 0;
-    }
 }
