@@ -24,6 +24,10 @@ public class GirlsFrontline extends IWaifuAdapter {
     private static final String ALL_TDS = "td";
     private static final String SOUNDS = "span.audio-button";
 
+    private static final String WIKI_ON_CLICK_EVENT_KEY = "Secretary";
+    private static final String WIKI_ON_LOGIN_EVENT_KEY = "Greeting";
+    private static final String WIKI_ON_IDLE_EVENT_KEY  = "Secretary";
+
     public GirlsFrontline(String name) {
         super(name);
     }
@@ -79,7 +83,18 @@ public class GirlsFrontline extends IWaifuAdapter {
                 audioURl = sound.attr("data-src");
             }
 
-            dialogs.add(new Dialog("english", dialogString, lastEvent, audioURl));
+            String mmsEventKey;
+            if (lastEvent.equals(WIKI_ON_CLICK_EVENT_KEY)) {
+                mmsEventKey = onTouchEventKey();
+            } else if (lastEvent.equals(WIKI_ON_LOGIN_EVENT_KEY)) {
+                mmsEventKey = onLoginEventKey();
+            } else if (lastEvent.equals(WIKI_ON_IDLE_EVENT_KEY)) { // on idle key may change
+                mmsEventKey = onIdleEventKey();
+            } else {
+                continue; // We don't need this dialog
+            }
+
+            dialogs.add(new Dialog("english", dialogString, mmsEventKey, audioURl));
         }
 
         return dialogs;
@@ -98,21 +113,6 @@ public class GirlsFrontline extends IWaifuAdapter {
     @Override
     public List<Dialog> getDialogs(String event) {
         return data.getDialogs().stream().filter(d -> d.getEvent().equals(event)).collect(Collectors.toList());
-    }
-
-    @Override
-    public String onTouchEventKey() {
-        return "Secretary";
-    }
-
-    @Override
-    public String onIdleEventKey() {
-        return "Secretary";
-    }
-
-    @Override
-    public String onLoginEventKey() {
-        return "Greeting";
     }
 
 }

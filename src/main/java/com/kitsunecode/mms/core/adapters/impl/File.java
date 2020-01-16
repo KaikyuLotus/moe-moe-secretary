@@ -21,21 +21,6 @@ public class File extends IWaifuAdapter {
     }
 
     @Override
-    public String onTouchEventKey() {
-        return "OnTouch";
-    }
-
-    @Override
-    public String onIdleEventKey() {
-        return "OnIdle";
-    }
-
-    @Override
-    public String onLoginEventKey() {
-        return "OnLogin";
-    }
-
-    @Override
     public List<Dialog> getDialogs(String event) {
         return data.getDialogs().stream()
                 .filter(d -> d.getEvent().equalsIgnoreCase(event))

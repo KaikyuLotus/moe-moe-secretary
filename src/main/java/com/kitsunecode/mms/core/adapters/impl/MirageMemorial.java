@@ -1,11 +1,8 @@
 package com.kitsunecode.mms.core.adapters.impl;
 
-
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
-import com.kitsunecode.mms.core.entities.Dialog;
 import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
-import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -28,9 +25,6 @@ public class MirageMemorial extends IWaifuAdapter {
         super(name);
     }
 
-    /**
-     * Loads data from Wiki, we MUST use it only once in a while
-     */
     @Override
     protected WaifuData loadFromCustomSource() throws IOException {
         System.out.println("Getting servant from wiki");
@@ -60,21 +54,6 @@ public class MirageMemorial extends IWaifuAdapter {
             return null;
         }
         return image.attr("src").split("\\.png")[0] + ".png";
-    }
-
-    @Override
-    public String onTouchEventKey() {
-        return "onClick";
-    }
-
-    @Override
-    public String onIdleEventKey() {
-        return "onIdle";
-    }
-
-    @Override
-    public String onLoginEventKey() {
-        return "onLogin";
     }
 
 }

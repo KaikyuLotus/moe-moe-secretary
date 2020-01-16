@@ -321,7 +321,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     @Override
     public void keyTyped(KeyEvent e) {
         try {
-            switch (e.getKeyChar()) {
+            switch (Character.toLowerCase(e.getKeyChar())) {
                 case 'k':
                     skinIndex++;
                     reloadSkin();

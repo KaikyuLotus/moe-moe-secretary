@@ -25,6 +25,9 @@ public class SIFIdol extends IWaifuAdapter {
     private static final String SKIN_LINKS = "td > a";
     private static final String QUOTES_SEL = "#mw-content-text > *";
 
+    private static final String WIKI_ON_CLICK_EVENT_KEY = "Tapping the Character";
+    private static final String WIKI_ON_LOGIN_EVENT_KEY = "Home Screen";
+
     private String idolName;
 
     public SIFIdol(String code) {
@@ -41,8 +44,9 @@ public class SIFIdol extends IWaifuAdapter {
         List<Dialog> dialogs = new ArrayList<>();
         try {
             Document quotesDoc = Jsoup.connect(String.format(QUOTES_WIKI_URL, this.idolName)).get();
-            dialogs = getDialogsFromWiki(quotesDoc, onIdleEventKey());
-            dialogs.addAll(getDialogsFromWiki(quotesDoc, onTouchEventKey()));
+            dialogs.addAll(getDialogsFromWiki(quotesDoc, WIKI_ON_LOGIN_EVENT_KEY, onLoginEventKey()));
+            dialogs.addAll(getDialogsFromWiki(quotesDoc, WIKI_ON_LOGIN_EVENT_KEY, onIdleEventKey()));
+            dialogs.addAll(getDialogsFromWiki(quotesDoc, WIKI_ON_CLICK_EVENT_KEY, onTouchEventKey()));
         } catch (Exception e) {
             System.out.println("Cannot load waifu dialogs...");
         }
@@ -58,7 +62,6 @@ public class SIFIdol extends IWaifuAdapter {
         }
 
         if (info != null && !info.equals("")) {
-            // Filter here
             if (info.contains("#") && !info.contains(this.name)) {
                 return null;
             }
@@ -66,7 +69,7 @@ public class SIFIdol extends IWaifuAdapter {
         return dialog;
     }
 
-    private List<Dialog> getDialogsFromWiki(Document doc, String section) {
+    private List<Dialog> getDialogsFromWiki(Document doc, String section, String mmsEventKey) {
         List<Dialog> dialogs = new ArrayList<>();
         boolean isDialog = false;
         for (Element elem : Selector.select(QUOTES_SEL, doc)) {
@@ -91,7 +94,7 @@ public class SIFIdol extends IWaifuAdapter {
                 boolean hasJap = !elem.select("br").isEmpty();
                 String elaborated = elaborateDialog(elem.text().trim(), infoText, hasJap);
                 if (elaborated != null) {
-                    dialogs.add(new Dialog("english", elaborated, section, null));
+                    dialogs.add(new Dialog("english", elaborated, mmsEventKey, null));
                 }
             }
         }
@@ -108,21 +111,6 @@ public class SIFIdol extends IWaifuAdapter {
     private String getIdolName(Document doc) {
         Elements nameElem = Selector.select(NAME_SELECTOR, doc);
         return nameElem.isEmpty() ? null : nameElem.text();
-    }
-
-    @Override
-    public String onTouchEventKey() {
-        return "Tapping the Character";
-    }
-
-    @Override
-    public String onIdleEventKey() {
-        return "Home Screen";
-    }
-
-    @Override
-    public String onLoginEventKey() {
-        return "Home Screen";
     }
 
     @Override

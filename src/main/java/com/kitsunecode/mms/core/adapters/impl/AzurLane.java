@@ -30,15 +30,16 @@ public class AzurLane extends IWaifuAdapter {
     private static final String DIALOG_NATIVE_COL = "td:nth-child(3)";
     private static final String DIALOG_TRANSL_COL = "td:nth-child(4)";
 
+    private static final String WIKI_ON_CLICK_EVENT_KEY = "Secretary (Touch)";
+    private static final String WIKI_ON_LOGIN_EVENT_KEY = "Login";
+    private static final String WIKI_ON_IDLE_EVENT_KEY  = "Idle";
+
     private static final String lang = Settings.getWaifuLanguage();
 
     public AzurLane(String name) {
         super(name);
     }
 
-    /**
-     * Loads data from Wiki, we MUST use it only once in a while
-     */
     @Override
     protected WaifuData loadFromCustomSource() throws IOException {
         System.out.println("Getting ship quotes");
@@ -82,6 +83,12 @@ public class AzurLane extends IWaifuAdapter {
             if (eventText.contains("Idle")) {
                 eventText = "Idle";
             }
+
+            // Replace event with our own
+            eventText = eventText.replace(WIKI_ON_IDLE_EVENT_KEY, onIdleEventKey())
+                    .replace(WIKI_ON_CLICK_EVENT_KEY, onTouchEventKey())
+                    .replace(WIKI_ON_LOGIN_EVENT_KEY, onLoginEventKey());
+
             String dialogText = row.selectFirst(DIALOG_TRANSL_COL).text();
             String dialogTextNative = row.selectFirst(DIALOG_NATIVE_COL).text();
 
@@ -117,21 +124,6 @@ public class AzurLane extends IWaifuAdapter {
                 .filter(d -> d.getEvent().equals(event))
                 .filter(d -> d.getLanguage().equalsIgnoreCase(lang))
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public String onTouchEventKey() {
-        return "Secretary (Touch)";
-    }
-
-    @Override
-    public String onIdleEventKey() {
-        return "Idle";
-    }
-
-    @Override
-    public String onLoginEventKey() {
-        return "Login";
     }
 
 }

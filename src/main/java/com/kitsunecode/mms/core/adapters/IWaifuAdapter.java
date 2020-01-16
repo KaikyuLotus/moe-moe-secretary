@@ -18,16 +18,14 @@ import java.util.List;
 
 public abstract class IWaifuAdapter {
 
+    private static final String ON_IDLE_EVENT_KEY = "onIdle";
+    private static final String ON_LOGIN_EVENT_KEY = "onLogin";
+    private static final String ON_CLICK_EVENT_KEY = "onClick";
+
     private long startTimeMillis;
 
     protected String name;
     protected WaifuData data;
-
-    public abstract String onTouchEventKey();
-
-    public abstract String onIdleEventKey();
-
-    public abstract String onLoginEventKey();
 
     protected abstract WaifuData loadFromCustomSource() throws Exception;
 
@@ -153,6 +151,18 @@ public abstract class IWaifuAdapter {
 
     public String getName() {
         return name;
+    }
+
+    public String onTouchEventKey() {
+        return ON_CLICK_EVENT_KEY;
+    }
+
+    public String onIdleEventKey() {
+        return ON_IDLE_EVENT_KEY;
+    }
+
+    public String onLoginEventKey() {
+        return ON_LOGIN_EVENT_KEY;
     }
 
 }

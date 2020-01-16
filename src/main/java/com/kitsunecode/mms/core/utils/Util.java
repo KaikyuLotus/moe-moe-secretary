@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
 import com.kitsunecode.mms.core.settings.Settings;
 import org.apache.commons.io.IOUtils;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 
@@ -23,14 +24,27 @@ import java.nio.file.Paths;
 
 public class Util {
 
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = generateGson();
 
-    private static final Yaml YAML = new Yaml();
+    private static final Yaml YAML = generateYaml();
 
     private static final String AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36";
 
-    static {
-        YAML.setBeanAccess(BeanAccess.FIELD);
+    private static Gson generateGson() {
+        return new Gson();
+    }
+
+    private static Yaml generateYaml() {
+        DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setPrettyFlow(true);
+        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        dumperOptions.setIndent(4);
+        dumperOptions.setIndicatorIndent(2);
+
+        Yaml yaml = new Yaml(dumperOptions);
+        yaml.setBeanAccess(BeanAccess.FIELD);
+
+        return yaml;
     }
 
     public static void sleep(long millDurationFloat) {
@@ -45,7 +59,7 @@ public class Util {
         // Flip the image horizontally
         AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
         tx.translate(-image.getWidth(null), 0);
-        AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BICUBIC);
         return op.filter(image, null);
     }
 
