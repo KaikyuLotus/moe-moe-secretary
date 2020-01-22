@@ -8,6 +8,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 
 public class WaifuUtils {
 
@@ -43,7 +44,7 @@ public class WaifuUtils {
         System.out.println("Getting skin index: " + skinIndex);
         String url = waifuAdapter.getSkin(skinIndex);
         String fileName = Util.fileFromUrl(url);
-        return waifuAdapter.downloadFile(url, fileName);
+        return Files.readAllBytes(waifuAdapter.downloadFile(url, fileName).toPath());
     }
 
     public static Area getOutline(BufferedImage i, int targetTransp) {

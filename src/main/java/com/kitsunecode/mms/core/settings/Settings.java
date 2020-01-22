@@ -17,10 +17,10 @@ import java.util.function.Function;
 
 public class Settings {
 
-    private static final String currentVersion = "1.1";
+    private static final String currentVersion = "1.2";
 
-    public static final String configFolder = "config";
-    public static final String configPath = "config/config.properties";
+    public static final String configFolder  = "config";
+    public static final String configPath    = "config/config.properties";
     public static final String configBckPath = "config/config_bck.properties";
 
     private static Properties properties = null;
@@ -134,10 +134,6 @@ public class Settings {
 
     private static double[] get(String property, double[] defVal, String divider) {
         return getProperty(property, defVal, (data) -> Arrays.stream(data.split(divider)).mapToDouble(Double::parseDouble).toArray());
-    }
-
-    public static String get(String defaultValue) {
-        return get("baloon.highQuality", defaultValue);
     }
 
     public static String getAdapter() {
@@ -310,6 +306,14 @@ public class Settings {
 
     public static boolean isWaifuYDragEnabled() {
         return get("waifu.enableYdrag", false);
+    }
+
+    public static String getArknightsLanguage() {
+        return get("arknights.language", "en");
+    }
+
+    public static String getArknightsNickname() {
+        return get("arknights.nickname", "Doctah");
     }
 
 }

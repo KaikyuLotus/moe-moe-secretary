@@ -3,8 +3,15 @@ package com.kitsunecode.mms.core.audio;
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.utils.Util;
 
-import javax.sound.sampled.*;
-import java.io.ByteArrayInputStream;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.DataLine.Info;
+
+import java.io.File;
 import java.io.IOException;
 
 
@@ -19,9 +26,9 @@ public class AudioManager {
             String fileName = Util.fileFromUrl(url);
 
             try {
-                byte[] audio = adapter.downloadFile(url, fileName);
+                File audioFile = adapter.downloadFile(url, fileName);
                 // Get AudioInputStream from given bytes!
-                try (AudioInputStream in = AudioSystem.getAudioInputStream(new ByteArrayInputStream(audio))) {
+                try (AudioInputStream in = AudioSystem.getAudioInputStream(audioFile)) {
                     AudioFormat baseFormat = in.getFormat();
                     AudioFormat decodedFormat = new AudioFormat(
                             AudioFormat.Encoding.PCM_SIGNED,
@@ -63,9 +70,11 @@ public class AudioManager {
     private void rawplay(AudioFormat targetFormat,
                          AudioInputStream din, int volValue) throws IOException, LineUnavailableException {
         byte[] data = new byte[4096];
+
         SourceDataLine line = getLine(targetFormat);
         if (line != null) {
             // Start
+            line.open(targetFormat);
             line.start();
 
             setVolume(line, volValue);
@@ -84,9 +93,7 @@ public class AudioManager {
     }
 
     private static SourceDataLine getLine(AudioFormat audioFormat) throws LineUnavailableException {
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
-        SourceDataLine res = (SourceDataLine) AudioSystem.getLine(info);
-        res.open(audioFormat);
-        return res;
+        Info info = new Info(SourceDataLine.class, audioFormat);
+        return (SourceDataLine) AudioSystem.getLine(info);
     }
 }

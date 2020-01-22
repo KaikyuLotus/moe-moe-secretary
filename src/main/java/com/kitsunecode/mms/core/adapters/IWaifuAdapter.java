@@ -93,31 +93,27 @@ public abstract class IWaifuAdapter {
      * @return File's byte array
      * @throws IOException If something goes wrong while reading/wrinting
      */
-    public byte[] downloadFile(String url, String fileName) throws IOException {
-        String specificFolder = (Util.isUrl(url)) ? (url.endsWith(".ogg") ? "audios" : "skins") : "";
+    public File downloadFile(String url, String fileName) throws IOException {
+        String specificFolder = (Util.isUrl(url)) ? (url.endsWith(".ogg") || url.endsWith(".mp3") ? "audios" : "skins") : "";
         File resourceFile = Paths.get("resources", getName(), specificFolder, fileName).toFile();
-
-        byte[] resourceData = null;
 
         // Use local if exists
         if (resourceFile.exists()) {
-            resourceData = Files.readAllBytes(resourceFile.toPath());
+            return resourceFile;
         }
 
         // Try to download
-        if (resourceData == null && !Util.isUrl(url)) {
+        if (!Util.isUrl(url)) {
             throw new RuntimeException("Can't find file " + fileName + " from path " + url);
         }
 
-        if (resourceData == null) {
-            resourceData = Util.downloadFile(url, resourceFile);
-        }
+        boolean downloaded = Util.downloadFile(url, resourceFile);
 
-        if (resourceData == null) {
+        if (!downloaded) {
             throw new RuntimeException("Can't download/find file " + fileName + " from url/path " + url);
         }
 
-        return resourceData;
+        return resourceFile;
 
     }
 

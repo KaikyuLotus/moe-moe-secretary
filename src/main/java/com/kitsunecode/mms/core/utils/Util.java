@@ -4,6 +4,11 @@ import com.google.gson.Gson;
 import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
 import com.kitsunecode.mms.core.settings.Settings;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.BeanAccess;
@@ -20,6 +25,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
 
 public class Util {
@@ -45,6 +51,14 @@ public class Util {
         yaml.setBeanAccess(BeanAccess.FIELD);
 
         return yaml;
+    }
+
+    public static Gson getGSON() {
+        return GSON;
+    }
+
+    public static Yaml getYAML() {
+        return YAML;
     }
 
     public static void sleep(long millDurationFloat) {
@@ -82,11 +96,11 @@ public class Util {
     /**
      * Warning, this function does not check if the file already exists, do it before calling it!
      */
-    public static byte[] downloadFile(String url, File resourceFile) {
+    public static boolean downloadFile(String url, File resourceFile) {
         try {
             if (!Util.isUrl(url)) {
                 // Not an URL!
-                return null;
+                return false;
             }
 
             System.out.println("Downloading: " + url + " to " + resourceFile);
@@ -97,14 +111,14 @@ public class Util {
                     connection.setRequestProperty("User-Agent", AGENT);
                     byte[] data = IOUtils.toByteArray(connection.getInputStream());
                     fos.write(data);
-                    return data;
+                    return true;
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
         // Oh no, I failed...
-        return null;
+        return false;
     }
 
     public static void checkFolders(String name) {
@@ -180,4 +194,14 @@ public class Util {
         return bufferedImage;
     }
 
+    public static String downloadString(String url) throws IOException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                return IOUtils.toString(entity.getContent(), Charset.defaultCharset());
+            }
+        }
+        throw new RuntimeException();
+    }
 }

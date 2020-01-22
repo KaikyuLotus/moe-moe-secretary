@@ -1,4 +1,4 @@
-# AzurLaneDesktop
-AzurLane Desktop - Your waifu (almost) always with you!
+# Moe Moe Secretary
+Moe Moe Secretary - Your waifu (almost) always with you!
 
--- TODO
+Now with more javazoom spi hate!!

@@ -42,4 +42,9 @@ public class Dialog {
     public String getAudio() {
         return audio;
     }
+
+    public Dialog setDialog(String dialog) {
+        this.dialog = dialog;
+        return this;
+    }
 }
