@@ -37,11 +37,6 @@ public class SecretaryLabel extends JLabel {
 
     public void startFloating() {
 
-        if (!Settings.isFloatingEnabled()) {
-            System.out.println("Floating is disabled");
-            return;
-        }
-
         AtomicBoolean raise = new AtomicBoolean(true);
 
         int stepSleep = Settings.getFloatingStepSleep();

@@ -1,6 +1,6 @@
 package com.kitsunecode.mms.core.audio;
 
-import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
+import com.kitsunecode.mms.core.entities.Secretary;
 import com.kitsunecode.mms.core.utils.Util;
 
 import javax.sound.sampled.AudioFormat;
@@ -13,20 +13,20 @@ import javax.sound.sampled.DataLine.Info;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 
 public class AudioManager {
 
     private Float volume = null;
 
-    public void play(IWaifuAdapter adapter, String url, int volValue) {
+    public void play(Secretary secretary, String url, int volValue) {
 
         if (url != null && !url.equals("")) {
 
             String fileName = Util.fileFromUrl(url);
-
             try {
-                File audioFile = adapter.downloadFile(url, fileName);
+                File audioFile = secretary.getWaifuInterface().downloadFile(url, fileName);
                 // Get AudioInputStream from given bytes!
                 try (AudioInputStream in = AudioSystem.getAudioInputStream(audioFile)) {
                     AudioFormat baseFormat = in.getFormat();
@@ -41,7 +41,7 @@ public class AudioManager {
                     // Get AudioInputStream that will be decoded by underlying VorbisSPI
                     AudioInputStream din = AudioSystem.getAudioInputStream(decodedFormat, in);
                     System.out.println("Playing audio...");
-                    rawplay(decodedFormat, din, volValue);
+                    rawplay(secretary, decodedFormat, din, volValue);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -67,7 +67,7 @@ public class AudioManager {
         gainControl.setValue(volume);
     }
 
-    private void rawplay(AudioFormat targetFormat,
+    private void rawplay(Secretary secretary, AudioFormat targetFormat,
                          AudioInputStream din, int volValue) throws IOException, LineUnavailableException {
         byte[] data = new byte[4096];
 
@@ -80,10 +80,22 @@ public class AudioManager {
             setVolume(line, volValue);
 
             int nBytesRead = 0;
-            while (nBytesRead != -1) {
+            while (nBytesRead != -1 && secretary.isRunning()) {
                 nBytesRead = din.read(data, 0, data.length);
                 if (nBytesRead != -1) line.write(data, 0, nBytesRead);
+
             }
+
+            new Thread(() -> {
+                while (line.isOpen()) {
+                    if (!secretary.isRunning()) {
+                        line.stop();
+                        line.close();
+                    }
+                    Util.sleep(10);
+                }
+            }).start();
+
             // Stop
             line.drain();
             line.stop();

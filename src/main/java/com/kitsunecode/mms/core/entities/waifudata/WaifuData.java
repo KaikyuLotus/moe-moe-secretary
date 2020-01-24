@@ -17,7 +17,19 @@ public class WaifuData {
     private List<String> skins;
 
     @SerializedName("lastPosition")
-    private int position;
+    private int position = 20;
+
+    @SerializedName("skinIndex")
+    private int skinIndex = 0;
+
+    @SerializedName("mirrored")
+    private boolean mirrored = false;
+
+    @SerializedName("alwaysOnTop")
+    private boolean alwaysOnTop = true;
+
+    @SerializedName("floatingEnabled")
+    private boolean floatingEnabled = true;
 
     private WaifuData() {
         // Private impl
@@ -42,5 +54,37 @@ public class WaifuData {
 
     public void setPosition(int position) {
         this.position = position;
+    }
+
+    public int getSkinIndex() {
+        return skinIndex;
+    }
+
+    public boolean isMirrored() {
+        return mirrored;
+    }
+
+    public boolean isAlwaysOnTop() {
+        return alwaysOnTop;
+    }
+
+    public boolean isFloatingEnabled() {
+        return floatingEnabled;
+    }
+
+    public void setSkinIndex(int skinIndex) {
+        this.skinIndex = skinIndex;
+    }
+
+    public void setMirrored(boolean mirrored) {
+        this.mirrored = mirrored;
+    }
+
+    public void setAlwaysOnTop(boolean alwaysOnTop) {
+        this.alwaysOnTop = alwaysOnTop;
+    }
+
+    public void setFloatingEnabled(boolean floatingEnabled) {
+        this.floatingEnabled = floatingEnabled;
     }
 }

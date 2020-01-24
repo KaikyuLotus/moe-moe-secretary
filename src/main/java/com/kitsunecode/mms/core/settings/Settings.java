@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 public class Settings {
 
-    private static final String currentVersion = "1.2";
+    private static final String currentVersion = "1.3";
 
     public static final String configFolder  = "config";
     public static final String configPath    = "config/config.properties";
@@ -184,10 +184,6 @@ public class Settings {
         return get("waifu.height", 800);
     }
 
-    public static boolean isWaifuMirrored() {
-        return get("waifu.mirrored", false);
-    }
-
     public static boolean isWaifuWelcomeEnabled() {
         return get("waifu.welcome.enabled", true);
     }
@@ -220,24 +216,12 @@ public class Settings {
         return get("dialogs.baloon.noVoiceDuration", 3);
     }
 
-    public static boolean isWaifuAlwaysOnTop() {
-        return get("waifu.alwaysOnTop", true);
-    }
-
     public static String getBaloonFormatString() {
         return get("baloon.formatString", "[[text]]");
     }
 
     public static String getWaifuStartY() {
         return get("waifu.startY", "auto");
-    }
-
-    public static int getWaifuSkinIndex() {
-        return get("waifu.skinIndex", 0);
-    }
-
-    public static boolean isFloatingEnabled() {
-        return get("floating.enabled", true);
     }
 
     public static int getFloatingPixelPerStep() {

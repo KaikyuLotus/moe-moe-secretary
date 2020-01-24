@@ -2,6 +2,7 @@ package com.kitsunecode.mms.core.entities;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.audio.AudioManager;
+import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
 import com.kitsunecode.mms.core.settings.Settings;
 import com.kitsunecode.mms.core.utils.Util;
 import com.kitsunecode.mms.core.utils.WaifuUtils;
@@ -25,7 +26,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     private final IWaifuAdapter waifuInterface;
 
-    private boolean floatingToggle = true;
+    private boolean floatingToggle;
 
     private int xClickPosition;
     private int yClickPosition;
@@ -35,9 +36,10 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     private int yDifference = 0;
 
     private boolean running;
-    private boolean alwaysOnTop = Settings.isWaifuAlwaysOnTop();
+    private boolean alwaysOnTop;
+    private boolean mirrored;
 
-    private int skinIndex = 0;
+    private int skinIndex;
 
     private Baloon baloon;
     private SecretaryLabel secretaryLabel;
@@ -46,6 +48,8 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     private boolean isManual = false;
     private boolean isDragging = false;
+
+    private Thread speekingThread;
 
     /**
      * Application start point
@@ -56,6 +60,11 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     public Secretary(IWaifuAdapter waifu) throws Exception {
 
         waifuInterface = waifu;
+        WaifuData data = waifu.getWaifuData();
+        skinIndex = data.getSkinIndex();
+        alwaysOnTop = data.isAlwaysOnTop();
+        floatingToggle = data.isFloatingEnabled();
+        mirrored = data.isMirrored();
 
         swingSetup();
 
@@ -92,7 +101,10 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         );
         setShape(null);
         isManual = true;
-        component.printAll(image.getGraphics());
+        Graphics graphics = image.getGraphics();
+        if (graphics != null) {
+            component.printAll(graphics);
+        }
         isManual = false;
 
         // Debug screenshot
@@ -137,7 +149,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         byte[] imgData = WaifuUtils.getShipImage(waifuInterface, index);
 
         buffImage = ImageIO.read(new ByteArrayInputStream(imgData));
-        if (Settings.isWaifuMirrored()) {
+        if (mirrored) {
             buffImage = Util.flipImage(buffImage);
         }
 
@@ -156,6 +168,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         System.out.println("Flipping skin");
         buffImage = Util.flipImage(Util.toBufferedImage((ImageIcon) secretaryLabel.getIcon()));
         secretaryLabel.setIcon(new ImageIcon(buffImage));
+        mirrored = !mirrored;
     }
 
     public int getStartY() {
@@ -186,7 +199,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         setUndecorated(true);
         setBackground(new Color(0, 0, 0, 0));
 
-        ImageIcon icn = new ImageIcon(loadSkin(Settings.getWaifuSkinIndex()));
+        ImageIcon icn = new ImageIcon(loadSkin(skinIndex));
         secretaryLabel = new SecretaryLabel(icn, this);
         secretaryLabel.setBounds(secretaryLabel.getDesiredBounds(icn.getIconWidth(), icn.getIconHeight()));
 
@@ -253,16 +266,17 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
             // Activate baloon only if there is text to show
             baloon.toggle(!dialog.getDialog().equals(""));
-            new Thread(() -> {
+            speekingThread = new Thread(() -> {
                 if (Settings.isVoiceEnabled() && dialog.getAudio() != null && !dialog.getAudio().equals("")) {
-                    audioManager.play(this.waifuInterface, dialog.getAudio(), Settings.getVoiceVolume());
+                    audioManager.play(this, dialog.getAudio(), Settings.getVoiceVolume());
                 } else {
                     Util.sleep(Settings.getDialogsBaloonNoVoiceDuration());
                 }
 
                 baloon.toggle(false);
                 secretaryLabel.speak(false);
-            }).start();
+            });
+            speekingThread.start();
         });
     }
 
@@ -272,8 +286,15 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     public void close() {
         this.running = false;
+        if (speekingThread != null && speekingThread.isAlive()) {
+            speekingThread.interrupt();
+        }
         try {
             waifuInterface.getWaifuData().setPosition(getX());
+            waifuInterface.getWaifuData().setAlwaysOnTop(alwaysOnTop);
+            waifuInterface.getWaifuData().setFloatingEnabled(floatingToggle);
+            waifuInterface.getWaifuData().setMirrored(mirrored);
+            waifuInterface.getWaifuData().setSkinIndex(skinIndex);
             waifuInterface.saveDataToFile();
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -287,6 +308,14 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         if (Settings.isDialogsOnClick()) {
             speak(waifuInterface.getDialogs(waifuInterface.onTouchEventKey()));
         }
+    }
+
+    public IWaifuAdapter getWaifuInterface() {
+        return waifuInterface;
+    }
+
+    public boolean isRunning() {
+        return running;
     }
 
     // Region: Swing Mouse Events
