@@ -13,9 +13,9 @@ import java.util.Collections;
  */
 public class JarSpiFixer {
 
-    private static final String JAR_FILE           = "target\\moe-moe-secretary.jar";
-    private static final String CONV_PROVIDER_FILE = "META-INF\\services\\javax.sound.sampled.spi.FormatConversionProvider";
-    private static final String READER_FILE        = "META-INF\\services\\javax.sound.sampled.spi.AudioFileReader";
+    private static final String JAR_FILE           = "target/moe-moe-secretary.jar";
+    private static final String CONV_PROVIDER_FILE = "META-INF/services/javax.sound.sampled.spi.FormatConversionProvider";
+    private static final String READER_FILE        = "META-INF/services/javax.sound.sampled.spi.AudioFileReader";
 
     private static void writeFile(FileSystem fs, String file, String content) throws IOException {
         Path nf = fs.getPath(file);
