@@ -8,6 +8,8 @@ on:
 jobs:
   build:
 
+    runs-on: ubuntu-latest
+
     env: # Or as an environment variable
       BOT_TOKEN: ${{ secrets.DEPLOY_BOT_TOKEN }}
       TARGET_CHAT_IDS: "[487353090]"
