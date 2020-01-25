@@ -53,3 +53,15 @@ def maven_build_failed():
 
 def github_deploy_failed():
     broadcast_message("GitHub deploy failed, please check the logs.")
+
+
+if mode == "github_deploy_failed":
+    github_deploy_failed()
+elif mode == "maven_build_failed":
+    maven_build_failed()
+elif mode == "telegram_deploy_failed":
+    telegram_deploy_failed()
+elif mode == "deploy_to_telegram":
+    deploy_to_telegram()
+else:
+    raise NotImplemented(f"Mode '{mode}' is not implemented.")
