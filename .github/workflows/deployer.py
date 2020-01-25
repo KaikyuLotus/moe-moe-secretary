@@ -4,6 +4,7 @@ import os
 import json
 import sys
 
+from random import choice
 from telegram import Bot
 
 mode = sys.argv[1]
@@ -15,17 +16,35 @@ commit_message = os.environ["COMMIT_MESSAGE"]
 short_commit = os.environ["GITHUB_SHA"][:7]
 target_chat_ids = json.loads(os.environ["TARGET_CHAT_IDS"])
 
+# Stickers
+
+success_stickers = [
+    "CAACAgQAAxkBAAMSXizBH6EVAcELC6oDWD_TEeXZPsIAAuIBAAK6gRoGPKkaIcuBR1MYBA",
+    "CAACAgQAAxkBAAMUXizBRicRjwzyVtNUNWhn0H_mbbAAAhUCAAK6gRoG7cgonAUMHpcYBA",
+    "CAACAgIAAxkBAAMWXizBk1KXfmaN1iMaePxXZNYRwDgAAgkfAALgo4IHEHOZU6ZS6-MYBA",
+    "CAACAgIAAxkBAAMXXizBo_k5PzSVorOq5vvR3afOy1IAAhIfAALgo4IHhx_wVc2O_C0YBA",
+    "CAACAgQAAxkBAAMYXizBuRrzhY5ektJe7vi6BkhQsHMAAhQCAAK6gRoGU6MKcVTDAAFsGAQ"
+]
+
+fail_stickers = [
+    "CAACAgUAAxkBAAMPXizAmFazxh4eyBrwPV477f9sNVgAAmgAAwM94R-m0c-xo2e6rxgE",
+    "CAACAgUAAxkBAAMQXizAwPsfYxht2TY_aT6oITAozIYAAmcAAwM94R_zYjyOZ62F1BgE",
+    "CAACAgQAAxkBAAMRXizBEDFfLZWkMWI3hW6wb_tZqdYAAhgCAAK6gRoGOiitY2QfK-IYBA",
+    "CAACAgQAAxkBAAMTXizBNM7tAuwB48O3wbr9OVERjW8AAhICAAK6gRoGxqOdW8kSa0IYBA",
+    "CAACAgUAAxkBAAMVXizBVrzA9F07fxdUCTEM6-X156sAAlAAA1rTAyifa33NO5J2LxgE"
+
+]
+
 bot = Bot(token)
 
 
 def deploy_to_telegram():
     time_taken = os.environ["BUILD_TIME_TAKEN"]
+    sticker = choice(success_stickers)
     print(f"Sending '{artifact}' to the following chat IDs: {target_chat_ids}")
     print(f"Issued by user {actor}")
     print(f"With commit message '{commit_message}'")
     print(f"Maven time taken: {time_taken}")
-
-    y = 1 / int("0")
 
     caption = f"*New MMS release*\n\n" \
               f"'{commit_message}'\n\n" \
@@ -34,12 +53,15 @@ def deploy_to_telegram():
 
     for target_chat_id in target_chat_ids:
         bot.send_document(target_chat_id, open(artifact, 'rb'), caption=caption, parse_mode="markdown")
+        bot.send_sticker(target_chat_id, sticker)
 
 
 def broadcast_message(fail_message):
+    sticker = choice(fail_stickers)
     print(fail_message)
     for target_chat_id in target_chat_ids:
         bot.send_message(target_chat_id, fail_message, parse_mode="markdown")
+        bot.send_sticker(target_chat_id, sticker)
     print("Notifications sent")
 
 

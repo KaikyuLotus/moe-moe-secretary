@@ -32,7 +32,7 @@ jobs:
       run: python3 -m pip -q install -r .github/workflows/requirements.txt
 
     - name: Build with Maven
-      id: maven_build
+      id: build
       run: mvn -q -ntp -B package
     - name: Maven build failed
       if: failure()
@@ -50,7 +50,7 @@ jobs:
     - name: Deploy to Telegram
       run: python3 .github/workflows/deployer.py deploy_to_telegram
       env:
-        BUILD_TIME_TAKEN: ${{ steps.maven_build.outputs.time }}
+        BUILD_TIME_TAKEN: ${{ steps.build.outputs.time }}
     - name: Telegram deploy failed
       if: failure()
       run: python3 .github/workflows/deployer.py telegram_deploy_failed
