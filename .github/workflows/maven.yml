@@ -41,5 +41,4 @@ jobs:
         TARGET_CHAT_IDS: "[487353090]"
         COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         ARTIFACT: "target/moe-moe-secretary.jar"
-        SHA7: ${GITHUB_SHA:7}
       run: python3 .github/workflows/deployer.py
