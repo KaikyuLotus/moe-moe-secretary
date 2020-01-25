@@ -39,12 +39,10 @@ bot = Bot(token)
 
 
 def deploy_to_telegram():
-    time_taken = os.environ["BUILD_TIME_TAKEN"]
     sticker = choice(success_stickers)
     print(f"Sending '{artifact}' to the following chat IDs: {target_chat_ids}")
     print(f"Issued by user {actor}")
     print(f"With commit message '{commit_message}'")
-    print(f"Maven time taken: {time_taken}")
 
     caption = f"*New MMS release*\n\n" \
               f"'{commit_message}'\n\n" \
