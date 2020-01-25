@@ -8,7 +8,11 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    env: # Or as an environment variable
+      BOT_TOKEN: ${{ secrets.DEPLOY_BOT_TOKEN }}
+      TARGET_CHAT_IDS: "[487353090]"
+      COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+      ARTIFACT: "target/moe-moe-secretary.jar"
 
     steps:
     - uses: actions/checkout@v1
@@ -18,27 +22,33 @@ jobs:
       with:
         java-version: 11
 
-    - name: Build with Maven
-      run: mvn -q -ntp -B package
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v1.0.0
-      with:
-        name: "moe-moe-secretary.jar" # Artifact name
-        path: "target/moe-moe-secretary.jar" # Directory containing files to upload
-
     - name: Install Python 3.7
       uses: actions/setup-python@v1
       with:
         python-version: '3.7'
-
     - name: Install requirements
       run: python3 -m pip -q install -r .github/workflows/requirements.txt
 
+    - name: Build with Maven
+      id: maven_build
+      run: mvn -q -ntp -B package
+    - name: Maven build failed
+      if: failure()
+      run: python3 .github/workflows/deployer.py maven_build_failed
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: "moe-moe-secretary.jar"
+        path: "target/moe-moe-secretary.jar"
+    - name: GitHub deploy failed
+      if: failure()
+      run: python3 .github/workflows/deployer.py github_deploy_failed
+
     - name: Deploy to Telegram
-      env: # Or as an environment variable
-        BOT_TOKEN: ${{ secrets.DEPLOY_BOT_TOKEN }}
-        TARGET_CHAT_IDS: "[487353090]"
-        COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-        ARTIFACT: "target/moe-moe-secretary.jar"
-      run: python3 .github/workflows/deployer.py
+      run: python3 .github/workflows/deployer.py deploy_to_telegram
+      env:
+        BUILD_TIME_TAKEN: ${{ steps.hello.outputs.time }}
+    - name: Telegram deploy failed
+      if: failure()
+      run: python3 .github/workflows/deployer.py telegram_deploy_failed
