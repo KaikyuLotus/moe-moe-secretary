@@ -6,7 +6,7 @@ import json
 from telegram import Bot
 
 token = os.environ["bot_token"]
-target_chat_ids = json.loads(os.environ["INPUT_chat_ids"])
+target_chat_ids = json.loads(os.environ["chat_ids"])
 
 print(f"Sending to the following chat IDs: {target_chat_ids}")
 

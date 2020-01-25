@@ -38,6 +38,5 @@ jobs:
     - name: Deploy to Telegram
       env: # Or as an environment variable
         bot_token: ${{ secrets.DEPLOY_BOT_TOKEN }}
-      with:
         chat_ids: "[487353090]"
       run: python3 .github/workflows/deployer.py
