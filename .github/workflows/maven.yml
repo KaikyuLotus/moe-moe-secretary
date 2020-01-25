@@ -1,7 +1,3 @@
-output.path: &output-path "target/moe-moe-secretary.jar"
-output.name: &output-name "moe-moe-secretary.jar"
-target.users: &target-users "[487353090]"
-
 name: Java CI
 
 on:
@@ -28,8 +24,8 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
       with:
-        name: *output-name # Artifact name
-        path: *output-path # Directory containing files to upload
+        name: "moe-moe-secretary.jar" # Artifact name
+        path: "target/moe-moe-secretary.jar" # Directory containing files to upload
 
     - name: Install Python 3.7
       uses: actions/setup-python@v1
@@ -42,8 +38,8 @@ jobs:
     - name: Deploy to Telegram
       env: # Or as an environment variable
         BOT_TOKEN: ${{ secrets.DEPLOY_BOT_TOKEN }}
-        TARGET_CHAT_IDS: *target-users
+        TARGET_CHAT_IDS: "[487353090]"
         COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-        ARTIFACT: *output-path
+        ARTIFACT: "target/moe-moe-secretary.jar"
         SHA7: ${GITHUB_SHA:7}
       run: python3 .github/workflows/deployer.py
