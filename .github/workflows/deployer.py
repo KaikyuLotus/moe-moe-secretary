@@ -15,7 +15,7 @@ commit_message = os.environ["COMMIT_MESSAGE"]
 short_commit = os.environ["GITHUB_SHA"][:7]
 target_chat_ids = json.loads(os.environ["TARGET_CHAT_IDS"])
 
-bot = Bot("asdasd")
+bot = Bot(token)
 
 
 def deploy_to_telegram():
@@ -24,6 +24,8 @@ def deploy_to_telegram():
     print(f"Issued by user {actor}")
     print(f"With commit message '{commit_message}'")
     print(f"Maven time taken: {time_taken}")
+
+    y = 1 / int("0")
 
     caption = f"*New MMS release*\n\n" \
               f"'{commit_message}'\n\n" \
