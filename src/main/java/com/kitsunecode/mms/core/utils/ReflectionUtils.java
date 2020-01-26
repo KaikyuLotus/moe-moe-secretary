@@ -13,10 +13,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ReflectionUtils {
 
@@ -42,19 +40,21 @@ public class ReflectionUtils {
         return reflections;
     }
 
+    private static URL asJarURL(File file) {
+        try {
+            return new URL("jar:" + file.toURI().toURL() + "!/");
+        } catch (MalformedURLException ex) {
+            ex.printStackTrace(); // Should not happen
+            return null;
+        }
+    }
+
     private static URL[] getExternalJarLibs() {
-        List<File> files = Util.listFiles(EXTERNAL_LIB_PATH).stream()
-                .filter(e -> e.endsWith(".jar"))
-                .map(e -> Paths.get(EXTERNAL_LIB_PATH.toAbsolutePath().toString(), e).toFile())
-                .collect(Collectors.toList());
-        return files.stream().map(e -> {
-            try {
-                return new URL("jar:" + e.toURI().toURL().toString() + "!/");
-            } catch (MalformedURLException ex) {
-                ex.printStackTrace();
-                return null;
-            }
-        }).filter(Objects::nonNull).toArray(URL[]::new);
+        return Util.listFiles(EXTERNAL_LIB_PATH).stream()
+                                                .filter(e -> e.getName().endsWith(".jar"))
+                                                .map(ReflectionUtils::asJarURL)
+                                                .filter(Objects::nonNull)
+                                                .toArray(URL[]::new);
     }
 
     private static URLClassLoader getJarsClassLoader() {

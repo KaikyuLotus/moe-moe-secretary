@@ -35,8 +35,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Util {
 
@@ -205,12 +207,6 @@ public class Util {
 
     public static IWaifuAdapter getWaifuFromAdapterName(String adapterName, String shipName) {
         try {
-
-            Set<String> classesNames = ReflectionUtils.getAllClassesNames();
-            for (String className : classesNames) {
-                System.out.println(className);
-            }
-
             Set<Class<?>> adapterClasses = ReflectionUtils.getAllClassesAnnotatedWith(Adapter.class);
             for (Class<?> clazz : adapterClasses) {
                 if (!IWaifuAdapter.class.isAssignableFrom(clazz)) {
@@ -279,18 +275,12 @@ public class Util {
         return new Area(gp);
     }
 
-    public static java.util.List<String> listFiles(Path path) {
-        java.util.List<String> results = new ArrayList<>();
-
+    public static java.util.List<File> listFiles(Path path) {
         File[] files = path.toFile().listFiles();
-        if (files == null) return results;
-
-        for (File file : files) {
-            if (file.isFile()) {
-                results.add(file.getName());
-            }
+        if (files == null) {
+            return Collections.emptyList();
         }
 
-        return results;
+        return Arrays.stream(files).filter(File::isFile).collect(Collectors.toList());
     }
 }
