@@ -25,11 +25,8 @@ public class ReflectionUtils {
     private static Reflections getReflect() {
         if (reflections == null) {
             ConfigurationBuilder config = new ConfigurationBuilder()
-                    .addUrls(ClasspathHelper.forManifest())
-                    .addUrls(ClasspathHelper.forPackage(""))
-                    .addClassLoaders(getJarsClassLoader())
-                    .setScanners(new SubTypesScanner(false),
-                                 new TypeAnnotationsScanner());
+                    .addUrls(ClasspathHelper.forJavaClassPath())
+                    .addClassLoaders(getJarsClassLoader(), ReflectionUtils.class.getClassLoader());
 
             for(URL jarUrl : getExternalJarLibs()) {
                 config.addUrls(ClasspathHelper.forManifest(jarUrl));
