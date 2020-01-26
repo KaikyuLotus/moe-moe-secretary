@@ -25,7 +25,7 @@ public class ReflectionUtils {
     private static Reflections getReflect() {
         if (reflections == null) {
             ConfigurationBuilder config = new ConfigurationBuilder()
-                    .addUrls()
+                    .addUrls(ClasspathHelper.forManifest())
                     .addUrls(ClasspathHelper.forPackage(""))
                     .addClassLoaders(getJarsClassLoader())
                     .setScanners(new SubTypesScanner(false),
@@ -63,10 +63,6 @@ public class ReflectionUtils {
 
     public static Set<Class<?>> getAllClassesAnnotatedWith(Class<? extends Annotation> annotation) {
         return getReflect().getTypesAnnotatedWith(annotation);
-    }
-
-    public static Set<String> getAllClassesNames() {
-        return getReflect().getAllTypes();
     }
 
 }
