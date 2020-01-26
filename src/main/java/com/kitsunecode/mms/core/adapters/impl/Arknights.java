@@ -9,6 +9,7 @@ import com.kitsunecode.mms.core.adapters.impl.adapterentities.arknights.skin.Ski
 import com.kitsunecode.mms.core.adapters.impl.adapterentities.arknights.skin.SkinData;
 import com.kitsunecode.mms.core.entities.Dialog;
 import com.kitsunecode.mms.core.entities.WaifuData;
+import com.kitsunecode.mms.core.entities.annotations.Adapter;
 import com.kitsunecode.mms.core.utils.Settings;
 import com.kitsunecode.mms.core.utils.Util;
 
@@ -21,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@Adapter
 public class Arknights extends IWaifuAdapter {
 
     private static final String CHAR_DATA_URL    = "https://raw.githubusercontent.com/Aceship/AN-EN-Tags/master/json/gamedata/en/excel/character_table.json";
@@ -28,7 +30,7 @@ public class Arknights extends IWaifuAdapter {
     private static final String CHWD_EN_DATA_URL = "https://raw.githubusercontent.com/Aceship/AN-EN-Tags/master/json/gamedata/en/excel/charword_table.json";
 
     public Arknights(String name) throws IOException {
-        super("asd/" + name);
+        super(name);
     }
 
     @Override

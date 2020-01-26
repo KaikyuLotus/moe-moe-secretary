@@ -1,0 +1,72 @@
+package com.kitsunecode.mms.core.utils;
+
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public class ReflectionUtils {
+
+    private static final Path EXTERNAL_LIB_PATH = Paths.get("adapters");
+
+    private static Reflections reflections;
+
+    private static Reflections getReflect() {
+        if (reflections == null) {
+            ConfigurationBuilder config = new ConfigurationBuilder()
+                    .addUrls()
+                    .addUrls(ClasspathHelper.forPackage(""))
+                    .addClassLoaders(getJarsClassLoader())
+                    .setScanners(new SubTypesScanner(false),
+                                 new TypeAnnotationsScanner());
+
+            for(URL jarUrl : getExternalJarLibs()) {
+                config.addUrls(ClasspathHelper.forManifest(jarUrl));
+            }
+
+            reflections = new Reflections(config);
+        }
+        return reflections;
+    }
+
+    private static URL[] getExternalJarLibs() {
+        List<File> files = Util.listFiles(EXTERNAL_LIB_PATH).stream()
+                .filter(e -> e.endsWith(".jar"))
+                .map(e -> Paths.get(EXTERNAL_LIB_PATH.toAbsolutePath().toString(), e).toFile())
+                .collect(Collectors.toList());
+        return files.stream().map(e -> {
+            try {
+                return new URL("jar:" + e.toURI().toURL().toString() + "!/");
+            } catch (MalformedURLException ex) {
+                ex.printStackTrace();
+                return null;
+            }
+        }).filter(Objects::nonNull).toArray(URL[]::new);
+    }
+
+    private static URLClassLoader getJarsClassLoader() {
+        return URLClassLoader.newInstance(getExternalJarLibs());
+    }
+
+    public static Set<Class<?>> getAllClassesAnnotatedWith(Class<? extends Annotation> annotation) {
+        return getReflect().getTypesAnnotatedWith(annotation);
+    }
+
+    public static Set<String> getAllClassesNames() {
+        return getReflect().getAllTypes();
+    }
+
+}

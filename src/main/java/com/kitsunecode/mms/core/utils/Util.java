@@ -3,6 +3,8 @@ package com.kitsunecode.mms.core.utils;
 import com.google.gson.Gson;
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.entities.WaifuData;
+import com.kitsunecode.mms.core.entities.annotations.Adapter;
+import com.kitsunecode.mms.core.entities.exceptions.BrokenAdapterException;
 import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -34,6 +36,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Set;
 
 public class Util {
 
@@ -202,17 +205,24 @@ public class Util {
 
     public static IWaifuAdapter getWaifuFromAdapterName(String adapterName, String shipName) {
         try {
-            Class<?> c = Class.forName("com.kitsunecode.mms.core.adapters.impl." + adapterName);
 
-            // Someone could cheat in some way (??)
-            // Prevention is better than cure lol
-            if (IWaifuAdapter.class.isAssignableFrom(c)) {
-                return (IWaifuAdapter) c.getConstructor(String.class).newInstance(shipName);
+            Set<String> classesNames = ReflectionUtils.getAllClassesNames();
+            for (String className : classesNames) {
+                System.out.println(className);
             }
 
+            Set<Class<?>> adapterClasses = ReflectionUtils.getAllClassesAnnotatedWith(Adapter.class);
+            for (Class<?> clazz : adapterClasses) {
+                if (!IWaifuAdapter.class.isAssignableFrom(clazz)) {
+                    throw new BrokenAdapterException(
+                            "Found class '" + clazz.getName() + "' annotated with @Adapter but that does not extend IWaifuAdapter");
+                }
+                if (adapterName.equals(clazz.getSimpleName())) {
+                    return (IWaifuAdapter) clazz.getConstructor(String.class).newInstance(shipName);
+                }
+
+            }
             throw new StartFailedException("The chosen adapter is not a WaifuAdapter!");
-        } catch (ClassNotFoundException e) {
-            throw new StartFailedException("Adapter '" + adapterName + "' does not exist");
         } catch (NoSuchMethodException e) {
             throw new StartFailedException("Adapter has no constructor that takes the name as parameter");
         } catch (IllegalAccessException | InstantiationException e) {
@@ -267,5 +277,20 @@ public class Util {
         gp.closePath();
         // construct the Area from the GP & return it
         return new Area(gp);
+    }
+
+    public static java.util.List<String> listFiles(Path path) {
+        java.util.List<String> results = new ArrayList<>();
+
+        File[] files = path.toFile().listFiles();
+        if (files == null) return results;
+
+        for (File file : files) {
+            if (file.isFile()) {
+                results.add(file.getName());
+            }
+        }
+
+        return results;
     }
 }

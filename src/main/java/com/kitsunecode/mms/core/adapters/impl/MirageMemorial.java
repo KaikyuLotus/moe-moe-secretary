@@ -1,6 +1,7 @@
 package com.kitsunecode.mms.core.adapters.impl;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
+import com.kitsunecode.mms.core.entities.annotations.Adapter;
 import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 import com.kitsunecode.mms.core.entities.WaifuData;
 import org.jsoup.Jsoup;
@@ -13,7 +14,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-
+@Adapter
 public class MirageMemorial extends IWaifuAdapter {
 
     private static final String BASE_URL = "https://miragememorialglobal.fandom.com/wiki/";

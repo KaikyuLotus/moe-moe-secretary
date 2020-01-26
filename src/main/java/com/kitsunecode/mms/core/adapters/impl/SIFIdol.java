@@ -3,6 +3,7 @@ package com.kitsunecode.mms.core.adapters.impl;
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.entities.Dialog;
 import com.kitsunecode.mms.core.entities.WaifuData;
+import com.kitsunecode.mms.core.entities.annotations.Adapter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Adapter
 public class SIFIdol extends IWaifuAdapter {
 
     private static final String QUOTES_WIKI_URL = "https://decaf.kouhi.me/lovelive/index.php?title=%s";
