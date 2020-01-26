@@ -1,11 +1,11 @@
-package com.kitsunecode.mms.core.entities;
+package com.kitsunecode.mms.core.entities.swing;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
-import com.kitsunecode.mms.core.audio.AudioManager;
-import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
-import com.kitsunecode.mms.core.settings.Settings;
+import com.kitsunecode.mms.core.entities.Dialog;
+import com.kitsunecode.mms.core.utils.Settings;
+import com.kitsunecode.mms.core.entities.WaifuData;
+import com.kitsunecode.mms.core.utils.AudioUtils;
 import com.kitsunecode.mms.core.utils.Util;
-import com.kitsunecode.mms.core.utils.WaifuUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -22,7 +22,7 @@ import java.util.Random;
 public class Secretary extends JFrame implements MouseListener, MouseMotionListener,
         MouseWheelListener, KeyListener, WindowListener {
 
-    private final AudioManager audioManager = new AudioManager();
+    private final AudioUtils audioUtils = new AudioUtils();
 
     private final IWaifuAdapter waifuInterface;
 
@@ -87,7 +87,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         if (!isManual) {
             new Thread(() -> {
                 BufferedImage image = getScreenShot(this);
-                Area area = WaifuUtils.getOutline(image, 0);
+                Area area = Util.getOutline(image, 0);
                 setShape(area);
             }).start();
         }
@@ -146,7 +146,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
         skinIndex = index;
 
-        byte[] imgData = WaifuUtils.getShipImage(waifuInterface, index);
+        byte[] imgData = Util.getShipImage(waifuInterface, index);
 
         buffImage = ImageIO.read(new ByteArrayInputStream(imgData));
         if (mirrored) {
@@ -245,7 +245,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         setLocation(getX(), getStartY());
     }
 
-    public void speak(List<Dialog> dialogs) {
+    public void speak(List<com.kitsunecode.mms.core.entities.Dialog> dialogs) {
         if (secretaryLabel.isSpeaking() || !Settings.isDialogsEnabled() || !running) {
             return;
         }
@@ -268,7 +268,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             baloon.toggle(!dialog.getDialog().equals(""));
             speekingThread = new Thread(() -> {
                 if (Settings.isVoiceEnabled() && dialog.getAudio() != null && !dialog.getAudio().equals("")) {
-                    audioManager.play(this, dialog.getAudio(), Settings.getVoiceVolume());
+                    audioUtils.play(this, dialog.getAudio(), Settings.getVoiceVolume());
                 } else {
                     Util.sleep(Settings.getDialogsBaloonNoVoiceDuration());
                 }

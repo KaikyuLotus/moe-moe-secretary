@@ -2,7 +2,7 @@ package com.kitsunecode.mms.core.adapters.impl;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.entities.Dialog;
-import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
+import com.kitsunecode.mms.core.entities.WaifuData;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -30,7 +30,7 @@ public class SIFIdol extends IWaifuAdapter {
 
     private String idolName;
 
-    public SIFIdol(String code) {
+    public SIFIdol(String code) throws IOException {
         super(code);
     }
 

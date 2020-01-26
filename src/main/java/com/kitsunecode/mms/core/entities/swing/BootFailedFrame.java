@@ -1,4 +1,4 @@
-package com.kitsunecode.mms.core.entities;
+package com.kitsunecode.mms.core.entities.swing;
 
 import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 import com.kitsunecode.mms.core.utils.Util;

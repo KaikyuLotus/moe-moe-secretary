@@ -1,4 +1,4 @@
-package com.kitsunecode.mms.core.entities.waifudata;
+package com.kitsunecode.mms.core.entities;
 
 import com.google.gson.annotations.SerializedName;
 import com.kitsunecode.mms.core.entities.Dialog;

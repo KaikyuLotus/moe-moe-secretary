@@ -1,7 +1,6 @@
-package com.kitsunecode.mms.core.audio;
+package com.kitsunecode.mms.core.utils;
 
-import com.kitsunecode.mms.core.entities.Secretary;
-import com.kitsunecode.mms.core.utils.Util;
+import com.kitsunecode.mms.core.entities.swing.Secretary;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -13,10 +12,9 @@ import javax.sound.sampled.DataLine.Info;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
 
-public class AudioManager {
+public class AudioUtils {
 
     private Float volume = null;
 

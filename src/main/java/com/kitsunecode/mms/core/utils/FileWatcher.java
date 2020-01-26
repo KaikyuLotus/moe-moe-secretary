@@ -1,4 +1,4 @@
-package com.kitsunecode.mms.core.entities;
+package com.kitsunecode.mms.core.utils;
 
 import java.io.IOException;
 import java.nio.file.*;

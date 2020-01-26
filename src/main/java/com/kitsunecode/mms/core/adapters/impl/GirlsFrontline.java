@@ -2,7 +2,7 @@ package com.kitsunecode.mms.core.adapters.impl;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.entities.Dialog;
-import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
+import com.kitsunecode.mms.core.entities.WaifuData;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -28,7 +28,7 @@ public class GirlsFrontline extends IWaifuAdapter {
     private static final String WIKI_ON_LOGIN_EVENT_KEY = "Greeting";
     private static final String WIKI_ON_IDLE_EVENT_KEY  = "Secretary";
 
-    public GirlsFrontline(String name) {
+    public GirlsFrontline(String name) throws IOException  {
         super(name);
     }
 

@@ -2,8 +2,8 @@ package com.kitsunecode.mms.core.adapters.impl;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.entities.Dialog;
-import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
-import com.kitsunecode.mms.core.settings.Settings;
+import com.kitsunecode.mms.core.entities.WaifuData;
+import com.kitsunecode.mms.core.utils.Settings;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -36,7 +36,7 @@ public class AzurLane extends IWaifuAdapter {
 
     private static final String lang = Settings.getWaifuLanguage();
 
-    public AzurLane(String name) {
+    public AzurLane(String name) throws IOException  {
         super(name);
     }
 

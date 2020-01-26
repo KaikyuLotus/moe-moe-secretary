@@ -1,4 +1,4 @@
-package com.kitsunecode.mms.core.settings;
+package com.kitsunecode.mms.core.utils;
 
 import com.kitsunecode.mms.core.Main;
 import org.apache.commons.io.FileUtils;

@@ -1,6 +1,6 @@
-package com.kitsunecode.mms.core.entities;
+package com.kitsunecode.mms.core.entities.swing;
 
-import com.kitsunecode.mms.core.settings.Settings;
+import com.kitsunecode.mms.core.utils.Settings;
 import com.kitsunecode.mms.core.utils.Util;
 
 import javax.swing.*;

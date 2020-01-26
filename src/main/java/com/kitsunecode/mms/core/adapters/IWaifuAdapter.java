@@ -2,8 +2,8 @@ package com.kitsunecode.mms.core.adapters;
 
 import com.kitsunecode.mms.core.entities.Dialog;
 import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
-import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
-import com.kitsunecode.mms.core.settings.Settings;
+import com.kitsunecode.mms.core.entities.WaifuData;
+import com.kitsunecode.mms.core.utils.Settings;
 import com.kitsunecode.mms.core.utils.Util;
 import org.apache.commons.io.FileUtils;
 import org.jsoup.HttpStatusException;
@@ -29,9 +29,11 @@ public abstract class IWaifuAdapter {
 
     protected abstract WaifuData loadFromCustomSource() throws Exception;
 
-    public IWaifuAdapter(String name) {
+    public IWaifuAdapter(String name) throws IOException {
         this.startTimeMillis = System.currentTimeMillis();
         this.name = name;
+
+        Util.checkFolders(this.name); // Create folders
 
         try {
             if (hasSavedFile()) {

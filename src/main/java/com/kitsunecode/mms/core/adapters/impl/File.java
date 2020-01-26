@@ -3,14 +3,15 @@ package com.kitsunecode.mms.core.adapters.impl;
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.entities.Dialog;
 import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
-import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
+import com.kitsunecode.mms.core.entities.WaifuData;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class File extends IWaifuAdapter {
 
-    public File(String shipName) throws StartFailedException {
+    public File(String shipName) throws IOException, StartFailedException {
         super(shipName);
     }
 

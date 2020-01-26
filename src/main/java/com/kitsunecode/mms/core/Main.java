@@ -1,11 +1,11 @@
 package com.kitsunecode.mms.core;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
-import com.kitsunecode.mms.core.entities.BootFailedFrame;
-import com.kitsunecode.mms.core.entities.FileWatcher;
-import com.kitsunecode.mms.core.entities.Secretary;
-import com.kitsunecode.mms.core.settings.Settings;
-import com.kitsunecode.mms.core.utils.WaifuUtils;
+import com.kitsunecode.mms.core.entities.swing.BootFailedFrame;
+import com.kitsunecode.mms.core.utils.FileWatcher;
+import com.kitsunecode.mms.core.entities.swing.Secretary;
+import com.kitsunecode.mms.core.utils.Settings;
+import com.kitsunecode.mms.core.utils.Util;
 
 import java.nio.file.Paths;
 
@@ -26,7 +26,7 @@ public class Main {
         System.out.println("Starting " + adapter + " with name " + name);
 
         try {
-            IWaifuAdapter waifu = WaifuUtils.getWaifuFromAdapterName(adapter, name);
+            IWaifuAdapter waifu = Util.getWaifuFromAdapterName(adapter, name);
             secretary = new Secretary(waifu);
         } catch (Exception e) {
             e.printStackTrace();

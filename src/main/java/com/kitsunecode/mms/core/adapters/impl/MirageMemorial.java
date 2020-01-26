@@ -2,7 +2,7 @@ package com.kitsunecode.mms.core.adapters.impl;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
-import com.kitsunecode.mms.core.entities.waifudata.WaifuData;
+import com.kitsunecode.mms.core.entities.WaifuData;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -21,7 +21,7 @@ public class MirageMemorial extends IWaifuAdapter {
 
     private static final String IMAGE_SELECTOR = "#%s-png img";
 
-    public MirageMemorial(String name) {
+    public MirageMemorial(String name) throws IOException  {
         super(name);
     }
 
