@@ -298,12 +298,16 @@ public class Util {
         return parsedDialog;
     }
 
-    public static String md5Java(String message){
+    public static String md5(String message){
         try {
             byte[] hash = MessageDigest.getInstance("MD5").digest(message.getBytes(StandardCharsets.UTF_8));
             //converting byte array to Hexadecimal String
-            StringBuilder sb = new StringBuilder(2*hash.length);
+            StringBuilder sb = new StringBuilder();
             for(byte b : hash){
+                if (b == '\r') {
+                    System.out.println("Skin");
+                    continue;
+                }
                 sb.append(String.format("%02x", b&0xff));
             }
             return sb.toString();
@@ -329,8 +333,6 @@ public class Util {
         }
     }
 
-
-
     public static void windowsStartupProcedure() throws IOException, URISyntaxException {
 
         File mmsPath = Paths.get(System.getenv("APPDATA"), "mms").toFile();
@@ -349,8 +351,14 @@ public class Util {
             throw new RuntimeException("Cannot read template files.");
         }
 
-        if (!"a5a7fd3bb5d3e83dac4b258599199620".equals(md5Java(regString))
-                || !"b99081f74bbe2c77d05266cbcd01363e".equals(md5Java(batString))) {
+        System.out.println(md5(regString));
+        System.out.println("a5a7fd3bb5d3e83dac4b258599199620");
+
+        System.out.println(md5(batString));
+        System.out.println("b99081f74bbe2c77d05266cbcd01363e");
+
+        if (!"a5a7fd3bb5d3e83dac4b258599199620".equals(md5(regString))
+                || !"b99081f74bbe2c77d05266cbcd01363e".equals(md5(batString))) {
             throw new RuntimeException("Corrupted resources found");
         }
 
@@ -384,9 +392,14 @@ public class Util {
     }
 
     public static void logToFile() throws IOException {
-        if (!Paths.get("logs").toFile().mkdir()){
-            throw new StartFailedException("Cannot create logs directory, check you MMS folder");
+        if(!Paths.get("logs").toFile().exists()) {
+            if (!Paths.get("logs").toFile().mkdir()){
+                System.out.println("Cannot create logs directory, check you MMS folder");
+                System.out.println("Logging to console or /dev/null if the console is not attached");
+                return;
+            }
         }
+
 
         // Creating a File object that represents the disk file.
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss.'log'");
