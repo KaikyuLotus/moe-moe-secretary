@@ -300,14 +300,13 @@ public class Util {
 
     public static String md5(String message){
         try {
-            byte[] hash = MessageDigest.getInstance("MD5").digest(message.getBytes(StandardCharsets.UTF_8));
+
+            byte[] hash = MessageDigest.getInstance("MD5")
+                    .digest(message.replace("\r", "")
+                            .getBytes(StandardCharsets.UTF_8));
             //converting byte array to Hexadecimal String
             StringBuilder sb = new StringBuilder();
             for(byte b : hash){
-                if (b == '\r') {
-                    System.out.println("Skin");
-                    continue;
-                }
                 sb.append(String.format("%02x", b&0xff));
             }
             return sb.toString();
