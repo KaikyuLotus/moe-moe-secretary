@@ -1,11 +1,14 @@
 package com.kitsunecode.mms.core.utils;
 
 import com.google.gson.Gson;
+import com.kitsunecode.mms.core.Main;
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
+import com.kitsunecode.mms.core.entities.CommandOutput;
 import com.kitsunecode.mms.core.entities.WaifuData;
 import com.kitsunecode.mms.core.entities.annotations.Adapter;
 import com.kitsunecode.mms.core.entities.exceptions.BrokenAdapterException;
 import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
+import com.kitsunecode.mms.core.entities.swing.BootFailedFrame;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -23,24 +26,27 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Util {
+
+    private static final CommandExecutor SH = new CommandExecutor();
 
     private static final Gson GSON = generateGson();
 
@@ -283,4 +289,115 @@ public class Util {
 
         return Arrays.stream(files).filter(File::isFile).collect(Collectors.toList());
     }
+
+    public static String parseDialog(String dialog) {
+        String parsedDialog = dialog;
+        if (dialog.contains("{@battery.level}")) {
+            parsedDialog = parsedDialog.replace("{@battery.level}", HWUtils.getBatteryPercentage() + "");
+        }
+        return parsedDialog;
+    }
+
+    public static String md5Java(String message){
+        try {
+            byte[] hash = MessageDigest.getInstance("MD5").digest(message.getBytes(StandardCharsets.UTF_8));
+            //converting byte array to Hexadecimal String
+            StringBuilder sb = new StringBuilder(2*hash.length);
+            for(byte b : hash){
+                sb.append(String.format("%02x", b&0xff));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String readResourceString(String resourceFile) throws IOException {
+        InputStream is = Main.class.getClassLoader().getResourceAsStream(resourceFile);
+        if (is == null) return null;
+        return IOUtils.toString(is, StandardCharsets.UTF_8);
+    }
+
+    public static void catchMoeMoeExceptionsAndExit(FunctionalInterfaces.CheckedRunnable runnable) {
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            e.printStackTrace();
+            new BootFailedFrame(e);
+            System.exit(7);
+        }
+    }
+
+
+
+    public static void windowsStartupProcedure() throws IOException, URISyntaxException {
+
+        File mmsPath = Paths.get(System.getenv("APPDATA"), "mms").toFile();
+        File jarPathName = new File(Util.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        File batRunnerFile = Paths.get(mmsPath.toString(), "startup.bat").toFile();
+        Path regfilepath = Paths.get("regfile");
+
+        if (!mmsPath.exists() && !mmsPath.mkdir()) {
+            throw new RuntimeException("Cannot create file in APPDATA (" + mmsPath.toString() + ")");
+        }
+
+        String regString = readResourceString("utilfiles/regtemplate");
+        String batString = readResourceString("utilfiles/battemplate");
+
+        if (regString == null || batString == null) {
+            throw new RuntimeException("Cannot read template files.");
+        }
+
+        if (!"a5a7fd3bb5d3e83dac4b258599199620".equals(md5Java(regString))
+                || !"b99081f74bbe2c77d05266cbcd01363e".equals(md5Java(batString))) {
+            throw new RuntimeException("Corrupted resources found");
+        }
+
+        regString = regString.replace("{batpath}", batRunnerFile.toString().replace("\\", "\\\\"));
+        batString = batString.replace("{jarpath}", jarPathName.getParent())
+                             .replace("{jarname}", jarPathName.getName());
+
+        Files.write(batRunnerFile.toPath(), batString.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        Files.write(regfilepath, regString.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+        try {
+            if (SH.executeCommand("reg", "IMPORT", regfilepath.toString()).getExitCode() != 0) {
+                System.out.println("String used:\n" + regString);
+                throw new RuntimeException("Cannot add the boot key to the registry");
+            }
+        } finally {
+            regfilepath.toFile().delete();
+        }
+    }
+
+    public static void unixStartupProcedure() {
+        System.out.println("NOT IMPLEMENTED YET");
+    }
+
+    public static void startupProcedure() throws Exception {
+        if(isWindows()) {
+            windowsStartupProcedure();
+        } else {
+            unixStartupProcedure();
+        }
+    }
+
+    public static void logToFile() throws IOException {
+        if (!Paths.get("logs").toFile().mkdir()){
+            throw new StartFailedException("Cannot create logs directory, check you MMS folder");
+        }
+
+        // Creating a File object that represents the disk file.
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss.'log'");
+        File output = new File("logs", dateFormat.format(new Date()));
+        if (!output.createNewFile()) {
+            throw new RuntimeException("Cannot create log file!");
+        }
+        System.out.println("Sending logs to file: " + output.getAbsolutePath());
+        PrintStream o = new PrintStream(output);
+        System.setOut(o);
+        System.setErr(o);
+    }
+
 }

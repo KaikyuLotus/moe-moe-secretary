@@ -41,7 +41,7 @@ public class Charword {
         if (voiceTitle.contains("Greeting")) {
             return voiceTitle.replace("Greeting", "onLogin");
         }
-        return voiceTitle.replace(voiceTitle, "any");
+        return voiceTitle.replace(voiceTitle, "onClick");
     }
 
     public String getVoiceUrl() {

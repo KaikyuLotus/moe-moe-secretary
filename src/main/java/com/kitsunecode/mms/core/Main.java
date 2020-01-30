@@ -1,7 +1,6 @@
 package com.kitsunecode.mms.core;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
-import com.kitsunecode.mms.core.entities.swing.BootFailedFrame;
 import com.kitsunecode.mms.core.utils.FileWatcher;
 import com.kitsunecode.mms.core.entities.swing.Secretary;
 import com.kitsunecode.mms.core.utils.Settings;
@@ -13,7 +12,7 @@ public class Main {
 
     private static Secretary secretary = null;
 
-    private static void inizialize() {
+    private static void initialize() {
         if (secretary != null) {
             secretary.close();
         }
@@ -25,17 +24,20 @@ public class Main {
 
         System.out.println("Starting " + adapter + " with name " + name);
 
-        try {
+        Util.catchMoeMoeExceptionsAndExit(() -> {
             IWaifuAdapter waifu = Util.getWaifuFromAdapterName(adapter, name);
             secretary = new Secretary(waifu);
-        } catch (Exception e) {
-            e.printStackTrace();
-            BootFailedFrame frame = new BootFailedFrame(e);
-        }
+        });
     }
 
     public static void main(String[] args) {
-        inizialize();
-        new FileWatcher(Paths.get(Settings.configPath), Main::inizialize).watch();
+
+        Util.catchMoeMoeExceptionsAndExit(() -> {
+            Util.logToFile();
+            Util.startupProcedure();
+        });
+
+        initialize();
+        new FileWatcher(Paths.get(Settings.configPath), Main::initialize).watch();
     }
 }

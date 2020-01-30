@@ -1,11 +1,10 @@
 package com.kitsunecode.mms.core.entities.swing;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
+import com.kitsunecode.mms.core.entities.CommandOutput;
 import com.kitsunecode.mms.core.entities.Dialog;
-import com.kitsunecode.mms.core.utils.Settings;
+import com.kitsunecode.mms.core.utils.*;
 import com.kitsunecode.mms.core.entities.WaifuData;
-import com.kitsunecode.mms.core.utils.AudioUtils;
-import com.kitsunecode.mms.core.utils.Util;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -16,6 +15,10 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -78,6 +81,10 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             onLogin(); // Say Hi!
         }
 
+        if (Settings.isExtraDialogsEnabled()) {
+            extraDialogsThread();
+        }
+
     }
 
     @Override
@@ -128,13 +135,28 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         }).start();
     }
 
+
+    private void extraDialogsThread() {
+//        CommandExecutor executor = new CommandExecutor();
+//        new Thread(() -> {
+//            while (running) {
+//                try {
+//                    speak( waifuInterface.getDialogs(waifuInterface.onLowBatteryEventKey()));
+//                    Util.sleep(Settings.getWaifuEventsRefreshRate());
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    return;
+//                }
+//            }
+//        }).start();
+    }
+
     private void onLogin() {
         new Thread(() -> {
             Util.sleep(Settings.getWaifuWelcomeDelay());
             speak(waifuInterface.getDialogs(waifuInterface.onLoginEventKey()));
         }).start();
     }
-
 
     private Image loadSkin(int index) throws IOException {
 
@@ -259,15 +281,16 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         SwingUtilities.invokeLater(() -> {
             secretaryLabel.speak(true);
 
+            String text = Util.parseDialog(dialog.getDialog());
+
             baloon.setText(
-                    Settings.getBaloonFormatString().replace("[[text]]",
-                            dialog.getDialog() + "<br>&zwnj;")
+                    Settings.getBaloonFormatString().replace("[[text]]",text + "<br>&zwnj;")
             );
 
             // Activate baloon only if there is text to show
-            baloon.toggle(!dialog.getDialog().equals(""));
+            baloon.toggle(!text.equals(""));
             speekingThread = new Thread(() -> {
-                if (Settings.isVoiceEnabled() && dialog.getAudio() != null && !dialog.getAudio().equals("")) {
+                if (Settings.isVoiceEnabled() && dialog.getAudio() != null && !text.equals("")) {
                     audioUtils.play(this, dialog.getAudio(), Settings.getVoiceVolume());
                 } else {
                     Util.sleep(Settings.getDialogsBaloonNoVoiceDuration());

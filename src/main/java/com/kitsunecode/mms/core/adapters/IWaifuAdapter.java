@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public abstract class IWaifuAdapter {
@@ -21,6 +22,8 @@ public abstract class IWaifuAdapter {
     private static final String ON_IDLE_EVENT_KEY = "onIdle";
     private static final String ON_LOGIN_EVENT_KEY = "onLogin";
     private static final String ON_CLICK_EVENT_KEY = "onClick";
+    private static final String ON_LOW_BATTERY_EVENT_KEY = "onLowBattery";
+    private static final String ON_HIGH_CPU_USAGE_KEY = "onHighCpu";
 
     private long startTimeMillis;
 
@@ -140,7 +143,7 @@ public abstract class IWaifuAdapter {
     }
 
     public List<Dialog> getDialogs(String event) {
-        return this.data.getDialogs();
+        return this.data.getDialogs().stream().filter(e -> e.getEvent().equals(event)).collect(Collectors.toList());
     }
 
     public String getShowableName() {
@@ -157,6 +160,14 @@ public abstract class IWaifuAdapter {
 
     public String onIdleEventKey() {
         return ON_IDLE_EVENT_KEY;
+    }
+
+    public String onLowBatteryEventKey() {
+        return ON_LOW_BATTERY_EVENT_KEY;
+    }
+
+    public String onHighCpuUsageKey() {
+        return ON_HIGH_CPU_USAGE_KEY;
     }
 
     public String onLoginEventKey() {

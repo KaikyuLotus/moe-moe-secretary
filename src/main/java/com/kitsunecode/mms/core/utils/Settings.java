@@ -192,6 +192,10 @@ public class Settings {
         return get("waifu.welcome.delay", 5000);
     }
 
+    public static int getWaifuEventsRefreshRate() {
+        return get("waifu.events.rate", 1000);
+    }
+
     public static boolean isVoiceEnabled() {
         return get("voice.enabled", true);
     }
@@ -298,6 +302,10 @@ public class Settings {
 
     public static String getArknightsNickname() {
         return get("arknights.nickname", "Doctah");
+    }
+
+    public static boolean isExtraDialogsEnabled() {
+        return get("waifu.extradialogs", true);
     }
 
 }

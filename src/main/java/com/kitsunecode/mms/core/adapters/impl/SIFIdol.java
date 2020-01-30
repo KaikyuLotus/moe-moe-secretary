@@ -106,7 +106,7 @@ public class SIFIdol extends IWaifuAdapter {
     private List<String> getIdolSkinUrls(Document doc) {
         return Selector.select(SKIN_LINKS, doc).stream()
                 .filter(e -> e.text().toLowerCase().contains("transparent: "))
-                .map(e -> "https:" + e.attr("href"))
+                .map(e -> "https:" + e.attr("href").split("\\?")[0])
                 .collect(Collectors.toList());
     }
 
