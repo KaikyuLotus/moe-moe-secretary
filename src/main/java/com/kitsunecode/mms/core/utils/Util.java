@@ -356,8 +356,8 @@ public class Util {
         System.out.println(md5(batString));
         System.out.println("b99081f74bbe2c77d05266cbcd01363e");
 
-        if (!"a5a7fd3bb5d3e83dac4b258599199620".equals(md5(regString))
-                || !"b99081f74bbe2c77d05266cbcd01363e".equals(md5(batString))) {
+        if (!"25120671a9a31ccb19c4aac41bc13178".equals(md5(regString))
+                || !"0f3aa7cbef25f2d25f0df1de6cafbef1".equals(md5(batString))) {
             throw new RuntimeException("Corrupted resources found");
         }
 
