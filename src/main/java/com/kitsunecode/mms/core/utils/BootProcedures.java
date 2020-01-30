@@ -99,18 +99,17 @@ public class BootProcedures {
                 return;
             }
         }
-        ParsePosition parsePos = new ParsePosition(0);
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss.'log'");
         Comparator<File> fileDateComparator = (e1, e2) ->
-                dateFormat.parse(e2.getName(), parsePos).compareTo(dateFormat.parse(e1.getName(), parsePos));
+                dateFormat.parse(e2.getName(), new ParsePosition(0)).compareTo(dateFormat.parse(e1.getName(), new ParsePosition(0)));
 
         File[] files = new File("logs").listFiles();
         if (files != null) {
             Arrays.stream(files)
                     .sorted(fileDateComparator)
                     .skip(2)
-                    .map(File::delete)
-                    .close();
+                    .forEach(File::delete);
         }
 
         // Creating a File object that represents the disk file.

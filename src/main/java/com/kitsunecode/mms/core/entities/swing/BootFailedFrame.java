@@ -27,7 +27,7 @@ public class BootFailedFrame extends JDialog {
 
     public BootFailedFrame(Exception ex) {
 
-        String error = ex.getMessage();
+        String error = ex.getMessage() != null ? ex.getMessage() : "Null Pointer Exception";
 
         setLayout(null);
         setResizable(false);

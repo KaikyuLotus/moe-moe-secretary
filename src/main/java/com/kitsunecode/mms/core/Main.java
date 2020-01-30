@@ -26,18 +26,14 @@ public class Main {
         System.out.println("Starting " + adapter + " with name " + name);
 
         Util.catchMoeMoeExceptionsAndExit(() -> {
+            BootProcedures.startupProcedure();
             IWaifuAdapter waifu = Util.getWaifuFromAdapterName(adapter, name);
             secretary = new Secretary(waifu);
         });
     }
 
     public static void main(String[] args) {
-
-        Util.catchMoeMoeExceptionsAndExit(() -> {
-            BootProcedures.logToFile();
-            BootProcedures.startupProcedure();
-        });
-
+        Util.catchMoeMoeExceptionsAndExit(BootProcedures::logToFile);
         initialize();
         new FileWatcher(Paths.get(Settings.configPath), Main::initialize).watch();
     }
