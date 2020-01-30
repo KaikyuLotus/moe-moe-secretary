@@ -1,4 +1,4 @@
-package com.kitsunecode.mms.core.utils;
+package com.kitsunecode.mms.core.entities;
 
 import com.kitsunecode.mms.core.Main;
 import org.apache.commons.io.FileUtils;
@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 public class Settings {
 
-    private static final String currentVersion = "1.3";
+    private static final String currentVersion = "1.4";
 
     public static final String configFolder  = "config";
     public static final String configPath    = "config/config.properties";
@@ -307,5 +307,7 @@ public class Settings {
     public static boolean isExtraDialogsEnabled() {
         return get("waifu.extradialogs", true);
     }
+
+    public static boolean isAutoStartupEnabled() { return get("waifu.autoStartupEnabled", true); }
 
 }

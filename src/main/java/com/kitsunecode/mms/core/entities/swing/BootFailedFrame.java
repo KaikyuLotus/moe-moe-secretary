@@ -8,21 +8,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Random;
 
 public class BootFailedFrame extends JDialog {
-
-    private static final String[] ERRORS = new String[]{
-            "That hurts! &gt;~&lt;",
-            "Maybe take a look at the stack trace located at... i don't know!",
-            "I hate errors... T.T",
-            "Are you trying to kill us?!",
-            "That was fun, let's fucking do that again!"
-    };
 
     private int fullWidth = 565;
     private int fullHeight = 700;
@@ -37,7 +26,6 @@ public class BootFailedFrame extends JDialog {
 
 
     public BootFailedFrame(Exception ex) {
-        // super();"Moe Moe Error"
 
         String error = ex.getMessage();
 
@@ -113,12 +101,10 @@ public class BootFailedFrame extends JDialog {
             public void mouseReleased(MouseEvent mouseEvent) { }
 
             @Override
-            public void mouseEntered(MouseEvent mouseEvent) {
-            }
+            public void mouseEntered(MouseEvent mouseEvent) { }
 
             @Override
-            public void mouseExited(MouseEvent mouseEvent) {
-            }
+            public void mouseExited(MouseEvent mouseEvent) { }
         });
 
         setLocationRelativeTo(null);

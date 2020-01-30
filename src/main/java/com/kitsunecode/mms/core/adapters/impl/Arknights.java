@@ -10,7 +10,7 @@ import com.kitsunecode.mms.core.adapters.impl.adapterentities.arknights.skin.Ski
 import com.kitsunecode.mms.core.entities.Dialog;
 import com.kitsunecode.mms.core.entities.WaifuData;
 import com.kitsunecode.mms.core.entities.annotations.Adapter;
-import com.kitsunecode.mms.core.utils.Settings;
+import com.kitsunecode.mms.core.entities.Settings;
 import com.kitsunecode.mms.core.utils.Util;
 
 import java.io.IOException;

@@ -1,5 +1,4 @@
-package com.kitsunecode.mms.core.utils;
-
+package com.kitsunecode.mms.core.entities;
 
 import com.kitsunecode.mms.core.entities.CommandOutput;
 import org.apache.commons.io.IOUtils;

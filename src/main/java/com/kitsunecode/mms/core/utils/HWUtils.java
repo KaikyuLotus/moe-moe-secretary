@@ -1,5 +1,6 @@
 package com.kitsunecode.mms.core.utils;
 
+import com.kitsunecode.mms.core.entities.CommandExecutor;
 import com.kitsunecode.mms.core.entities.CommandOutput;
 
 import java.util.Collections;
@@ -17,6 +18,7 @@ public class HWUtils {
         return Integer.parseInt(output.getStdout().trim());
     }
 
+    // Not tested
     private static int getBatteryPercentageLinux() {
         CommandOutput output = EXECUTOR.executeCommand("cat",
                 Collections.singletonList("/sys/class/power_supply/BAT1/capacity"), null, null);

@@ -3,7 +3,8 @@ package com.kitsunecode.mms.core.utils;
 import com.google.gson.Gson;
 import com.kitsunecode.mms.core.Main;
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
-import com.kitsunecode.mms.core.entities.CommandOutput;
+import com.kitsunecode.mms.core.entities.FunctionalInterfaces;
+import com.kitsunecode.mms.core.entities.Settings;
 import com.kitsunecode.mms.core.entities.WaifuData;
 import com.kitsunecode.mms.core.entities.annotations.Adapter;
 import com.kitsunecode.mms.core.entities.exceptions.BrokenAdapterException;
@@ -37,16 +38,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Util {
-
-    private static final CommandExecutor SH = new CommandExecutor();
 
     private static final Gson GSON = generateGson();
 
@@ -271,7 +268,6 @@ public class Util {
                     gp.lineTo(x + 1, y + 1);
                     gp.lineTo(x, y + 1);
                     gp.moveTo(x, y);
-
                 }
             }
             gp.closePath();
@@ -302,7 +298,7 @@ public class Util {
         try {
 
             byte[] hash = MessageDigest.getInstance("MD5")
-                    .digest(message.replace("\r", "")
+                    .digest(message.replace("\r", "") // Ignore carriage return
                             .getBytes(StandardCharsets.UTF_8));
             //converting byte array to Hexadecimal String
             StringBuilder sb = new StringBuilder();
@@ -330,86 +326,6 @@ public class Util {
             new BootFailedFrame(e);
             System.exit(7);
         }
-    }
-
-    public static void windowsStartupProcedure() throws IOException, URISyntaxException {
-
-        File mmsPath = Paths.get(System.getenv("APPDATA"), "mms").toFile();
-        File jarPathName = new File(Util.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-        File batRunnerFile = Paths.get(mmsPath.toString(), "startup.bat").toFile();
-        Path regfilepath = Paths.get("regfile");
-
-        if (!mmsPath.exists() && !mmsPath.mkdir()) {
-            throw new RuntimeException("Cannot create file in APPDATA (" + mmsPath.toString() + ")");
-        }
-
-        String regString = readResourceString("utilfiles/regtemplate");
-        String batString = readResourceString("utilfiles/battemplate");
-
-        if (regString == null || batString == null) {
-            throw new RuntimeException("Cannot read template files.");
-        }
-
-        System.out.println(md5(regString));
-        System.out.println("a5a7fd3bb5d3e83dac4b258599199620");
-
-        System.out.println(md5(batString));
-        System.out.println("b99081f74bbe2c77d05266cbcd01363e");
-
-        if (!"25120671a9a31ccb19c4aac41bc13178".equals(md5(regString))
-                || !"0f3aa7cbef25f2d25f0df1de6cafbef1".equals(md5(batString))) {
-            throw new RuntimeException("Corrupted resources found");
-        }
-
-        regString = regString.replace("{batpath}", batRunnerFile.toString().replace("\\", "\\\\"));
-        batString = batString.replace("{jarpath}", jarPathName.getParent())
-                             .replace("{jarname}", jarPathName.getName());
-
-        Files.write(batRunnerFile.toPath(), batString.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        Files.write(regfilepath, regString.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-
-        try {
-            if (SH.executeCommand("reg", "IMPORT", regfilepath.toString()).getExitCode() != 0) {
-                System.out.println("String used:\n" + regString);
-                throw new RuntimeException("Cannot add the boot key to the registry");
-            }
-        } finally {
-            regfilepath.toFile().delete();
-        }
-    }
-
-    public static void unixStartupProcedure() {
-        System.out.println("NOT IMPLEMENTED YET");
-    }
-
-    public static void startupProcedure() throws Exception {
-        if(isWindows()) {
-            windowsStartupProcedure();
-        } else {
-            unixStartupProcedure();
-        }
-    }
-
-    public static void logToFile() throws IOException {
-        if(!Paths.get("logs").toFile().exists()) {
-            if (!Paths.get("logs").toFile().mkdir()){
-                System.out.println("Cannot create logs directory, check you MMS folder");
-                System.out.println("Logging to console or /dev/null if the console is not attached");
-                return;
-            }
-        }
-
-
-        // Creating a File object that represents the disk file.
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss.'log'");
-        File output = new File("logs", dateFormat.format(new Date()));
-        if (!output.createNewFile()) {
-            throw new RuntimeException("Cannot create log file!");
-        }
-        System.out.println("Sending logs to file: " + output.getAbsolutePath());
-        PrintStream o = new PrintStream(output);
-        System.setOut(o);
-        System.setErr(o);
     }
 
 }

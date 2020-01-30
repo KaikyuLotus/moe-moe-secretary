@@ -1,8 +1,8 @@
 package com.kitsunecode.mms.core.entities.swing;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
-import com.kitsunecode.mms.core.entities.CommandOutput;
 import com.kitsunecode.mms.core.entities.Dialog;
+import com.kitsunecode.mms.core.entities.Settings;
 import com.kitsunecode.mms.core.utils.*;
 import com.kitsunecode.mms.core.entities.WaifuData;
 
@@ -15,10 +15,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 

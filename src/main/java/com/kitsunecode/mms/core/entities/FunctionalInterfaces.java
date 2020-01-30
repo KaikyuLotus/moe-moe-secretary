@@ -1,4 +1,4 @@
-package com.kitsunecode.mms.core.utils;
+package com.kitsunecode.mms.core.entities;
 
 public class FunctionalInterfaces {
 

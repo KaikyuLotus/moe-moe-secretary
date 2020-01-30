@@ -1,9 +1,10 @@
 package com.kitsunecode.mms.core;
 
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
+import com.kitsunecode.mms.core.utils.BootProcedures;
 import com.kitsunecode.mms.core.utils.FileWatcher;
 import com.kitsunecode.mms.core.entities.swing.Secretary;
-import com.kitsunecode.mms.core.utils.Settings;
+import com.kitsunecode.mms.core.entities.Settings;
 import com.kitsunecode.mms.core.utils.Util;
 
 import java.nio.file.Paths;
@@ -33,8 +34,8 @@ public class Main {
     public static void main(String[] args) {
 
         Util.catchMoeMoeExceptionsAndExit(() -> {
-            Util.logToFile();
-            Util.startupProcedure();
+            BootProcedures.logToFile();
+            BootProcedures.startupProcedure();
         });
 
         initialize();

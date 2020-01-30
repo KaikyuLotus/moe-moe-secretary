@@ -1,7 +1,6 @@
 package com.kitsunecode.mms.core.entities;
 
 import com.google.gson.annotations.SerializedName;
-import com.kitsunecode.mms.core.entities.Dialog;
 
 import java.util.List;
 

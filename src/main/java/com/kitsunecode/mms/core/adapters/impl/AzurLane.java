@@ -4,7 +4,7 @@ import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.entities.Dialog;
 import com.kitsunecode.mms.core.entities.WaifuData;
 import com.kitsunecode.mms.core.entities.annotations.Adapter;
-import com.kitsunecode.mms.core.utils.Settings;
+import com.kitsunecode.mms.core.entities.Settings;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

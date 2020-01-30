@@ -3,7 +3,7 @@ package com.kitsunecode.mms.core.adapters;
 import com.kitsunecode.mms.core.entities.Dialog;
 import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 import com.kitsunecode.mms.core.entities.WaifuData;
-import com.kitsunecode.mms.core.utils.Settings;
+import com.kitsunecode.mms.core.entities.Settings;
 import com.kitsunecode.mms.core.utils.Util;
 import org.apache.commons.io.FileUtils;
 import org.jsoup.HttpStatusException;
