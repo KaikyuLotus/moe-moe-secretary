@@ -47,4 +47,8 @@ public class Dialog {
         this.dialog = dialog;
         return this;
     }
+
+    public void setAudio(String audio) {
+        this.audio = audio;
+    }
 }

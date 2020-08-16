@@ -18,10 +18,10 @@ import java.util.function.Function;
 
 public class Settings {
 
-    private static final String currentVersion = "1.4";
+    private static final String currentVersion = "1.6";
 
-    public static final String configFolder  = "config";
-    public static final String configPath    = "config/config.properties";
+    public static final String configFolder = "config";
+    public static final String configPath = "config/config.properties";
     public static final String configBckPath = "config/config_bck.properties";
 
     private static Properties properties = null;
@@ -63,7 +63,6 @@ public class Settings {
                     config.toFile().delete();
                 }
             }
-
 
 
             s = Main.class.getClassLoader().getResourceAsStream(configPath);
@@ -309,6 +308,20 @@ public class Settings {
         return get("waifu.extradialogs", true);
     }
 
-    public static boolean isAutoStartupEnabled() { return get("waifu.autoStartupEnabled", true); }
+    public static boolean isAutoStartupEnabled() {
+        return get("waifu.autoStartupEnabled", true);
+    }
+
+    public static String getGithubRepo() {
+        return get("github.repo", (String) null);
+    }
+
+    public static String getGithubBranch() {
+        return get("github.branch", (String) null);
+    }
+
+    public static String getUserNickname() {
+        return get("user.nickname", "<user.nickname is missing from config file>");
+    }
 
 }

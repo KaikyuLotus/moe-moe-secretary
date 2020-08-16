@@ -159,8 +159,7 @@ public final class Util {
         return url;
     }
 
-    public static WaifuData deserializeWaifu(String data) {
-        String fileFormat = Settings.getFileFormat();
+    public static WaifuData deserializeWaifu(String data, String fileFormat) {
         if ("YAML".equals(fileFormat)) {
             return YAML.loadAs(data, WaifuData.class);
         } else if ("JSON".equals(fileFormat)) {
@@ -210,6 +209,10 @@ public final class Util {
     public static String downloadString(String url) throws IOException {
         CloseableHttpClient client = HttpClients.createDefault();
         try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode != 200) {
+                throw new RuntimeException(url + " returned status code " + statusCode);
+            }
             HttpEntity entity = response.getEntity();
             if (entity != null) {
                 return IOUtils.toString(entity.getContent(), Charset.defaultCharset());
@@ -227,9 +230,10 @@ public final class Util {
                             "Found class '" + clazz.getName() + "' annotated with @Adapter but that does not extend IWaifuAdapter");
                 }
                 if (adapterName.equals(clazz.getSimpleName())) {
-                    return (IWaifuAdapter) clazz.getConstructor(String.class).newInstance(shipName);
+                    IWaifuAdapter adapter = (IWaifuAdapter) clazz.getConstructor(String.class).newInstance(shipName);
+                    adapter.init();
+                    return adapter;
                 }
-
             }
             throw new StartFailedException("The chosen adapter is not a WaifuAdapter!");
         } catch (NoSuchMethodException e) {
@@ -301,6 +305,7 @@ public final class Util {
         if (dialog.contains("{@battery.level}")) {
             parsedDialog = parsedDialog.replace("{@battery.level}", HWUtils.getBatteryPercentage() + "");
         }
+        parsedDialog = parsedDialog.replace("{@user.nickname}", Settings.getUserNickname());
         return parsedDialog;
     }
 

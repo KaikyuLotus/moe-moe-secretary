@@ -29,9 +29,9 @@ public class Baloon extends JLabel {
         setHorizontalAlignment(SwingConstants.CENTER);
     }
 
-    public Rectangle getDesiredSize(int parentWidth, int parentHeight) {
+    public Rectangle getDesiredSize(int leftOffset, int parentWidth, int parentHeight) {
         return new Rectangle(
-                (parentWidth / 2 - Settings.getBaloonWidth() / 2) + Settings.getBaloonXOffset(),
+                leftOffset + (parentWidth / 2 - Settings.getBaloonWidth() / 2) + Settings.getBaloonXOffset(),
                 parentHeight - Settings.getBaloonYOffset(),
                 Settings.getBaloonWidth(),
                 Settings.getBaloonHeight() * 3

@@ -38,7 +38,9 @@ public abstract class IWaifuAdapter {
         this.name = name;
 
         Util.checkFolders(this.name); // Create folders
+    }
 
+    public final void init() {
         try {
             if (hasSavedFile()) {
                 data = getDataFromFile();
@@ -80,7 +82,8 @@ public abstract class IWaifuAdapter {
         System.out.println("Reading waifu " + getName() + " data...");
         String jsonData = String.join("\n", Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
         System.out.println("Readed " + (jsonData.length() * 2) + " bytes of waifu data!");
-        return Util.deserializeWaifu(jsonData);
+        String fileFormat = Settings.getFileFormat();
+        return Util.deserializeWaifu(jsonData, fileFormat);
     }
 
     public final boolean hasSavedFile() {
