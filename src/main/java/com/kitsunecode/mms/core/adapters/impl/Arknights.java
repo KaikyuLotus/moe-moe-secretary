@@ -25,9 +25,9 @@ import java.util.stream.Collectors;
 @Adapter
 public class Arknights extends IWaifuAdapter {
 
-    private static final String CHAR_DATA_URL    = "https://raw.githubusercontent.com/Aceship/AN-EN-Tags/master/json/gamedata/en/excel/character_table.json";
-    private static final String SKIN_DATA_URL    = "https://raw.githubusercontent.com/Aceship/AN-EN-Tags/master/json/excel/skin_table.json";
-    private static final String CHWD_EN_DATA_URL = "https://raw.githubusercontent.com/Aceship/AN-EN-Tags/master/json/gamedata/en/excel/charword_table.json";
+    private static final String CHAR_DATA_URL    = "https://raw.githubusercontent.com/Aceship/AN-EN-Tags/master/json/gamedata/en_US/gamedata/excel/character_table.json";
+    private static final String SKIN_DATA_URL    = "https://raw.githubusercontent.com/Aceship/AN-EN-Tags/master/json/gamedata/en_US/gamedata/excel/skin_table.json";
+    private static final String CHWD_EN_DATA_URL = "https://raw.githubusercontent.com/Aceship/AN-EN-Tags/master/json/gamedata/en_US/gamedata/excel/charword_table.json";
 
     public Arknights(String name) throws IOException {
         super(name);
