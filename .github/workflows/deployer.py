@@ -79,16 +79,21 @@ def github_deploy_failed():
     broadcast_message("GitHub deploy failed, please check the logs.")
 
 
-if "DISABLE_TELEGRAM" in os.environ and os.environ["DISABLE_TELEGRAM"].lower() == "true":
-    exit(0)
+def main():
+    if "DISABLE_TELEGRAM" in os.environ and os.environ["DISABLE_TELEGRAM"].lower() == "true":
+        return
 
-if mode == "github_deploy_failed":
-    github_deploy_failed()
-elif mode == "maven_build_failed":
-    maven_build_failed()
-elif mode == "telegram_deploy_failed":
-    telegram_deploy_failed()
-elif mode == "deploy_to_telegram":
-    deploy_to_telegram()
-else:
-    raise NotImplementedError(f"Mode '{mode}' is not implemented.")
+    if mode == "github_deploy_failed":
+        github_deploy_failed()
+    elif mode == "maven_build_failed":
+        maven_build_failed()
+    elif mode == "telegram_deploy_failed":
+        telegram_deploy_failed()
+    elif mode == "deploy_to_telegram":
+        deploy_to_telegram()
+    else:
+        raise NotImplementedError(f"Mode '{mode}' is not implemented.")
+
+
+if __name__ == "__main__":
+    main()
