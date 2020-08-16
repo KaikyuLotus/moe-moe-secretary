@@ -40,16 +40,21 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class Util {
+public final class Util {
 
     private static final Gson GSON = generateGson();
 
     private static final Yaml YAML = generateYaml();
 
     private static final String AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36";
+
+    private Util() {
+        // Private impl
+    }
 
     private static Gson generateGson() {
         return new Gson();
@@ -172,7 +177,7 @@ public class Util {
     }
 
     public static boolean isWindows() {
-        return System.getProperty("os.name").toLowerCase().contains("win");
+        return System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("win");
     }
 
     public static void openUrl(String url) {

@@ -17,8 +17,13 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Locale;
 
-public class BootProcedures {
+public final class BootProcedures {
+
+    private BootProcedures() {
+        // Private impl
+    }
 
     public static void windowsRegiterAutoStartup() throws IOException, URISyntaxException {
 
@@ -92,15 +97,13 @@ public class BootProcedures {
     }
 
     public static void logToFile() throws IOException {
-        if(!Paths.get("logs").toFile().exists()) {
-            if (!Paths.get("logs").toFile().mkdir()){
-                System.out.println("Cannot create logs directory, check you MMS folder");
-                System.out.println("Logging to console or /dev/null if the console is not attached");
-                return;
-            }
+        if(!Paths.get("logs").toFile().exists() && !Paths.get("logs").toFile().mkdir()) {
+            System.out.println("Cannot create logs directory, check you MMS folder");
+            System.out.println("Logging to console or /dev/null if the console is not attached");
+            return;
         }
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss.'log'");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss.'log'", Locale.ENGLISH);
         Comparator<File> fileDateComparator = (e1, e2) ->
                 dateFormat.parse(e2.getName(), new ParsePosition(0)).compareTo(dateFormat.parse(e1.getName(), new ParsePosition(0)));
 

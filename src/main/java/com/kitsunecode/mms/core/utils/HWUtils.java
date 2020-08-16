@@ -5,9 +5,13 @@ import com.kitsunecode.mms.core.entities.CommandOutput;
 
 import java.util.Collections;
 
-public class HWUtils {
+public final class HWUtils {
 
     private static final CommandExecutor EXECUTOR = new CommandExecutor();
+
+    private HWUtils() {
+        // Private impl
+    }
 
     private static int getBatteryPercentageWindows() {
         CommandOutput output = EXECUTOR.executeCommand("powershell",

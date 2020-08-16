@@ -94,7 +94,7 @@ public class Arknights extends IWaifuAdapter {
         Matcher matcher = Pattern.compile("_(\\d)(\\+*).png").matcher(skinUrl);
         if (!matcher.find()) return 20; // Extra skin
         double nValue = Double.parseDouble(matcher.group(1));
-        boolean hasPlus = !matcher.group(2).equals("");
+        boolean hasPlus = !"".equals(matcher.group(2));
         return (hasPlus) ? nValue + 0.5d : nValue; // Special skin with order or standard skin
     }
 

@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class Secretary extends JFrame implements MouseListener, MouseMotionListener,
@@ -155,16 +156,16 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     }
 
     private Image loadSkin(int index) throws IOException {
-
-        if (index < 0) {
-            index = waifuInterface.getSkinCount() - 1;
-        } else if (index >= waifuInterface.getSkinCount()) {
-            index = 0;
+        int updatedIndex = index;
+        if (updatedIndex < 0) {
+            updatedIndex = waifuInterface.getSkinCount() - 1;
+        } else if (updatedIndex >= waifuInterface.getSkinCount()) {
+            updatedIndex = 0;
         }
 
-        skinIndex = index;
+        skinIndex = updatedIndex;
 
-        byte[] imgData = Util.getShipImage(waifuInterface, index);
+        byte[] imgData = Util.getShipImage(waifuInterface, updatedIndex);
 
         buffImage = ImageIO.read(new ByteArrayInputStream(imgData));
         if (mirrored) {
@@ -189,13 +190,11 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         mirrored = !mirrored;
     }
 
-    public int getStartY() {
+    public final int getStartY() {
         int y = Util.getScreenSize().height - getHeight();
-        String settingPos = Settings.getWaifuStartY().toLowerCase();
-        if (!settingPos.equals("auto")) {
-            if (settingPos.matches("-?\\d+")) {
-                y += Integer.parseInt(settingPos);
-            }
+        String settingPos = Settings.getWaifuStartY().toLowerCase(Locale.ENGLISH);
+        if (!"auto".equals(settingPos) && settingPos.matches("-?\\d+")) {
+            y += Integer.parseInt(settingPos);
         }
 
         return y;
@@ -284,9 +283,9 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             );
 
             // Activate baloon only if there is text to show
-            baloon.toggle(!text.equals(""));
+            baloon.toggle(!"".equals(text));
             speekingThread = new Thread(() -> {
-                if (Settings.isVoiceEnabled() && dialog.getAudio() != null && !text.equals("")) {
+                if (Settings.isVoiceEnabled() && dialog.getAudio() != null && !"".equals(text)) {
                     audioUtils.play(this, dialog.getAudio(), Settings.getVoiceVolume());
                 } else {
                     Util.sleep(Settings.getDialogsBaloonNoVoiceDuration());
@@ -387,6 +386,8 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
                 case 's':
                     flipSkin();
                     break;
+                default:
+                    break;
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -398,31 +399,36 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         if (e.getButton() == 2) {
             dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
         }
-
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
+        // No action
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
+        // No action
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
+        // No action
     }
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
+        // No action
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
+        // No action
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
+        // No action
     }
 
     @Override

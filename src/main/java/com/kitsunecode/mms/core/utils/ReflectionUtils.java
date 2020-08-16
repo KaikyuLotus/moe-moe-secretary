@@ -14,13 +14,17 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Set;
 
-public class ReflectionUtils {
+public final class ReflectionUtils {
 
     private static final Path EXTERNAL_LIB_PATH = Paths.get("adapters");
 
     private static Reflections reflections;
 
-    private static Reflections getReflect() {
+    private ReflectionUtils() {
+        // Private impl
+    }
+
+    private synchronized static Reflections getReflect() {
         if (reflections == null) {
             ConfigurationBuilder config = new ConfigurationBuilder()
                     .addUrls(ClasspathHelper.forJavaClassPath())

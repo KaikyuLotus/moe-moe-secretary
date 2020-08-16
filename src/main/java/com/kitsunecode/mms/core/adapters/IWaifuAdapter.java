@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 
@@ -25,7 +26,7 @@ public abstract class IWaifuAdapter {
     private static final String ON_LOW_BATTERY_EVENT_KEY = "onLowBattery";
     private static final String ON_HIGH_CPU_USAGE_KEY = "onHighCpu";
 
-    private long startTimeMillis;
+    private final long startTimeMillis;
 
     protected String name;
     protected WaifuData data;
@@ -55,26 +56,26 @@ public abstract class IWaifuAdapter {
             if (e.getStatusCode() == 404) {
                 message += ", probably this waifu does not exist";
             }
-            throw new StartFailedException(message);
+            throw new StartFailedException(message, e);
         } catch (StartFailedException e) {
             throw e;
         } catch (Exception e) {
-            throw new StartFailedException(e.getClass().getSimpleName() + ": " + e.getMessage());
+            throw new StartFailedException(e.getClass().getSimpleName() + ": " + e.getMessage(), e);
         }
     }
 
     public File getDataFile() {
-        return Paths.get("resources", getName(), "data." + Settings.getFileFormat().toLowerCase()).toFile();
+        return Paths.get("resources", getName(), "data." + Settings.getFileFormat().toLowerCase(Locale.ENGLISH)).toFile();
     }
 
-    public void saveDataToFile() throws IOException {
+    public final void saveDataToFile() throws IOException {
         File file = getDataFile();
         WaifuData waifuData = getWaifuData();
         System.out.println("Saving waifu " + getName() + " data...");
         FileUtils.writeStringToFile(file, Util.serializeWaifuData(waifuData), "UTF-8");
     }
 
-    public WaifuData getDataFromFile() throws IOException {
+    public final WaifuData getDataFromFile() throws IOException {
         File file = getDataFile();
         System.out.println("Reading waifu " + getName() + " data...");
         String jsonData = String.join("\n", Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
@@ -82,7 +83,7 @@ public abstract class IWaifuAdapter {
         return Util.deserializeWaifu(jsonData);
     }
 
-    public boolean hasSavedFile() {
+    public final boolean hasSavedFile() {
         return getDataFile().exists();
     }
 

@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.function.Function;
 
@@ -273,7 +274,7 @@ public class Settings {
     }
 
     public static String getFileFormat() {
-        String format = get("adapter.file.format", "JSON").toUpperCase();
+        String format = get("adapter.file.format", "JSON").toUpperCase(Locale.ENGLISH);
         if (!format.equals("JSON") && !format.equals("YAML")) {
             throw new IllegalArgumentException("adapter.file.format must be JSON or YAML");
         }
