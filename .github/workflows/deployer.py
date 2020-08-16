@@ -50,7 +50,11 @@ def deploy_to_telegram():
               f"Short commit: `{short_commit}`"
 
     for target_chat_id in target_chat_ids:
-        bot.send_document(target_chat_id, open(artifact, 'rb'), caption=caption, parse_mode="markdown")
+        bot.send_document(
+            target_chat_id, open(artifact, 'rb'),
+            caption=caption,
+            parse_mode="markdown"
+        )
         bot.send_sticker(target_chat_id, sticker)
 
 
@@ -84,4 +88,4 @@ elif mode == "telegram_deploy_failed":
 elif mode == "deploy_to_telegram":
     deploy_to_telegram()
 else:
-    raise NotImplemented(f"Mode '{mode}' is not implemented.")
+    raise NotImplementedError(f"Mode '{mode}' is not implemented.")

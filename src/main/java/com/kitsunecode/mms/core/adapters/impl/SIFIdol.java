@@ -80,7 +80,7 @@ public class SIFIdol extends IWaifuAdapter {
                 continue;
             }
 
-            if (elem.tag().getName().equals("h3")) {
+            if ("h3".equals(elem.tag().getName())) {
                 isDialog = false;
                 continue;
             }

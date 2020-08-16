@@ -85,7 +85,7 @@ public class Arknights extends IWaifuAdapter {
     public List<Dialog> getDialogs(String event) {
         return super.getDialogs(event).stream()
                 .filter(e -> e.getLanguage().equalsIgnoreCase(Settings.getArknightsLanguage()))
-                .filter(e -> !event.equals("onLogin") || e.getEvent().equalsIgnoreCase(event))
+                .filter(e -> !"onLogin".equals(event) || e.getEvent().equalsIgnoreCase(event))
                 .map((e) -> e.setDialog(e.getDialog().replace("{@nickname}", Settings.getArknightsNickname())))
                 .collect(Collectors.toList());
     }
@@ -102,7 +102,4 @@ public class Arknights extends IWaifuAdapter {
         return skins.stream().sorted(Comparator.comparingDouble(this::calculateSkinValue)).collect(Collectors.toList());
     }
 
-    private void replaceNickname(Dialog dialog) {
-
-    }
 }

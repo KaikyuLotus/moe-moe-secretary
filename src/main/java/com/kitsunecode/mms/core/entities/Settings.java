@@ -275,7 +275,7 @@ public class Settings {
 
     public static String getFileFormat() {
         String format = get("adapter.file.format", "JSON").toUpperCase(Locale.ENGLISH);
-        if (!format.equals("JSON") && !format.equals("YAML")) {
+        if (!"JSON".equals(format) && !"YAML".equals(format)) {
             throw new IllegalArgumentException("adapter.file.format must be JSON or YAML");
         }
         return format;

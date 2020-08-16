@@ -13,6 +13,10 @@ public class Main {
 
     private static Secretary secretary = null;
 
+    private Main() {
+        // Private impl
+    }
+
     private static void initialize() {
         if (secretary != null) {
             secretary.close();

@@ -95,10 +95,10 @@ public class AzurLane extends IWaifuAdapter {
             String dialogText = row.selectFirst(DIALOG_TRANSL_COL).text();
             String dialogTextNative = row.selectFirst(DIALOG_NATIVE_COL).text();
 
-            if (!dialogText.equals("")) {
+            if (!"".equals(dialogText)) {
                 dialogList.add(new Dialog(lang, dialogText, eventText, audioUrl));
             }
-            if (!dialogTextNative.equals("")) {
+            if (!"".equals(dialogTextNative)) {
                 dialogList.add(new Dialog(lang + " Native", dialogTextNative, eventText, audioUrl));
             }
         }

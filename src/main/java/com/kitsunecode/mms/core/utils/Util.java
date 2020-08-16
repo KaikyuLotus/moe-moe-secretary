@@ -27,7 +27,10 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -35,7 +38,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -156,9 +161,9 @@ public final class Util {
 
     public static WaifuData deserializeWaifu(String data) {
         String fileFormat = Settings.getFileFormat();
-        if (fileFormat.equals("YAML")) {
+        if ("YAML".equals(fileFormat)) {
             return YAML.loadAs(data, WaifuData.class);
-        } else if (fileFormat.equals("JSON")){
+        } else if ("JSON".equals(fileFormat)) {
             return GSON.fromJson(data, WaifuData.class);
         } else {
             throw new IllegalArgumentException("Invalid adapter file type");
@@ -167,9 +172,9 @@ public final class Util {
 
     public static String serializeWaifuData(WaifuData data) {
         String fileFormat = Settings.getFileFormat();
-        if (fileFormat.equals("YAML")) {
+        if ("YAML".equals(fileFormat)) {
             return YAML.dump(data);
-        } else if (fileFormat.equals("JSON")){
+        } else if ("JSON".equals(fileFormat)) {
             return GSON.toJson(data);
         } else {
             throw new IllegalArgumentException("Invalid adapter file type");
@@ -228,16 +233,16 @@ public final class Util {
             }
             throw new StartFailedException("The chosen adapter is not a WaifuAdapter!");
         } catch (NoSuchMethodException e) {
-            throw new StartFailedException("Adapter has no constructor that takes the name as parameter");
+            throw new StartFailedException("Adapter has no constructor that takes the name as parameter", e);
         } catch (IllegalAccessException | InstantiationException e) {
-            throw new StartFailedException("Critical error while instancing the waifu");
+            throw new StartFailedException("Critical error while instancing the waifu", e);
         } catch (InvocationTargetException e) {
             if (e.getCause() instanceof StartFailedException) {
                 throw (StartFailedException) e.getCause(); // Throw already handled exception
             }
-            throw new StartFailedException(e.getCause().getMessage());
+            throw new StartFailedException(e.getCause().getMessage(), e);
         } catch (Exception e) {
-            throw new StartFailedException("Critical error while creating the adapter: " + e.getMessage());
+            throw new StartFailedException("Critical error while creating the adapter: " + e.getMessage(), e);
         }
     }
 
@@ -299,7 +304,7 @@ public final class Util {
         return parsedDialog;
     }
 
-    public static String md5(String message){
+    public static String md5(String message) {
         try {
 
             byte[] hash = MessageDigest.getInstance("MD5")
@@ -307,8 +312,8 @@ public final class Util {
                             .getBytes(StandardCharsets.UTF_8));
             //converting byte array to Hexadecimal String
             StringBuilder sb = new StringBuilder();
-            for(byte b : hash){
-                sb.append(String.format("%02x", b&0xff));
+            for (byte b : hash) {
+                sb.append(String.format("%02x", b & 0xff));
             }
             return sb.toString();
         } catch (NoSuchAlgorithmException ex) {
@@ -318,9 +323,10 @@ public final class Util {
     }
 
     public static String readResourceString(String resourceFile) throws IOException {
-        InputStream is = Main.class.getClassLoader().getResourceAsStream(resourceFile);
-        if (is == null) return null;
-        return IOUtils.toString(is, StandardCharsets.UTF_8);
+        try (InputStream is = Main.class.getClassLoader().getResourceAsStream(resourceFile)) {
+            if (is == null) return null;
+            return IOUtils.toString(is, StandardCharsets.UTF_8);
+        }
     }
 
     public static void catchMoeMoeExceptionsAndExit(FunctionalInterfaces.CheckedRunnable runnable) {
