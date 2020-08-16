@@ -11,7 +11,7 @@ import java.util.Collections;
  * I fucking hate javazoom.spi
  * Diocane. :)
  */
-public class JarSpiFixer {
+public final class JarSpiFixer {
 
     private static final String JAR_FILE           = "target/moe-moe-secretary.jar";
     private static final String CONV_PROVIDER_FILE = "META-INF/services/javax.sound.sampled.spi.FormatConversionProvider";

@@ -92,7 +92,7 @@ public class BootFailedFrame extends JDialog implements MouseListener {
         setVisible(true);
     }
 
-    public JLabel setupTextMessage(String message, String error) {
+    public final JLabel setupTextMessage(String message, String error) {
         JLabel textMsg = new JLabel(message, SwingConstants.CENTER);
         textMsg.setFont(new Font(fontName, Font.PLAIN, fontSize));
         textMsg.setBackground(msgBgColor);

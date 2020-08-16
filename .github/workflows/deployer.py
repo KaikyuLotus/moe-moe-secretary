@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
 import json
+import os
 import sys
-
 from random import choice
+
 from telegram import Bot
 
 mode = sys.argv[1]
@@ -78,6 +78,9 @@ def maven_build_failed():
 def github_deploy_failed():
     broadcast_message("GitHub deploy failed, please check the logs.")
 
+
+if "DISABLE_TELEGRAM" in os.environ and os.environ["DISABLE_TELEGRAM"].lower() == "true":
+    exit(0)
 
 if mode == "github_deploy_failed":
     github_deploy_failed()

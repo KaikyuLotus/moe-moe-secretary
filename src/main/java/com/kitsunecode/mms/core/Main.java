@@ -9,7 +9,7 @@ import com.kitsunecode.mms.core.utils.Util;
 
 import java.nio.file.Paths;
 
-public class Main {
+public final class Main {
 
     private static Secretary secretary = null;
 
