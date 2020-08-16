@@ -16,15 +16,19 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.function.Function;
 
-public class Settings {
+public final class Settings {
 
-    private static final String currentVersion = "1.4";
+    private static final String currentVersion = "1.6";
 
-    public static final String configFolder  = "config";
-    public static final String configPath    = "config/config.properties";
+    public static final String configFolder = "config";
+    public static final String configPath = "config/config.properties";
     public static final String configBckPath = "config/config_bck.properties";
 
     private static Properties properties = null;
+
+    private Settings() {
+        // Private impl
+    }
 
     private static void load(InputStream is) throws IOException {
         properties.load(is);
@@ -65,14 +69,13 @@ public class Settings {
             }
 
 
-
             s = Main.class.getClassLoader().getResourceAsStream(configPath);
             if (s != null) {
                 FileUtils.copyInputStreamToFile(s, config.toFile());
             }
             return properties;
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -309,6 +312,20 @@ public class Settings {
         return get("waifu.extradialogs", true);
     }
 
-    public static boolean isAutoStartupEnabled() { return get("waifu.autoStartupEnabled", true); }
+    public static boolean isAutoStartupEnabled() {
+        return get("waifu.autoStartupEnabled", true);
+    }
+
+    public static String getGithubRepo() {
+        return get("github.repo", (String) null);
+    }
+
+    public static String getGithubBranch() {
+        return get("github.branch", (String) null);
+    }
+
+    public static String getUserNickname() {
+        return get("user.nickname", "<user.nickname is missing from config file>");
+    }
 
 }

@@ -41,6 +41,8 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     private int skinIndex;
 
+    private int leftOffset;
+
     private Baloon baloon;
     private SecretaryLabel secretaryLabel;
 
@@ -177,8 +179,11 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             i = buffImage.getScaledInstance(-1, Settings.getWaifuHeight(), Image.SCALE_AREA_AVERAGING);
         }
 
-        setSize(i.getWidth(null), i.getHeight(null));
-        setLocation(getX(), Util.getYStartPosition(i.getHeight(null)));
+        int width = Math.max(Settings.getBaloonWidth(), i.getWidth(null));
+        leftOffset = (int) ((width - i.getWidth(null)) / 2f);
+
+        setSize(width, i.getHeight(null));
+        setLocation(leftOffset + getX(), Util.getYStartPosition(i.getHeight(null)));
 
         return i;
     }
@@ -218,10 +223,10 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
         ImageIcon icn = new ImageIcon(loadSkin(skinIndex));
         secretaryLabel = new SecretaryLabel(icn, this);
-        secretaryLabel.setBounds(secretaryLabel.getDesiredBounds(icn.getIconWidth(), icn.getIconHeight()));
+        secretaryLabel.setBounds(secretaryLabel.getDesiredBounds(leftOffset, icn.getIconWidth(), icn.getIconHeight()));
 
         baloon = new Baloon(getWidth(), getHeight());
-        baloon.setBounds(baloon.getDesiredSize(icn.getIconWidth(), icn.getIconHeight()));
+        baloon.setBounds(baloon.getDesiredSize(leftOffset, icn.getIconWidth(), icn.getIconHeight()));
 
         add(baloon);
         add(secretaryLabel);
@@ -257,8 +262,16 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     public void reloadSkin() throws IOException {
         if (waifuInterface.getSkinCount() == 1) return;
         secretaryLabel.setIcon(new ImageIcon(loadSkin(skinIndex)));
-        secretaryLabel.setBounds(secretaryLabel.getDesiredBounds(secretaryLabel.getIcon().getIconWidth(), secretaryLabel.getIcon().getIconHeight()));
-        baloon.setBounds(baloon.getDesiredSize(secretaryLabel.getIcon().getIconWidth(), secretaryLabel.getIcon().getIconHeight()));
+        secretaryLabel.setBounds(secretaryLabel.getDesiredBounds(
+                leftOffset,
+                secretaryLabel.getIcon().getIconWidth(),
+                secretaryLabel.getIcon().getIconHeight())
+        );
+        baloon.setBounds(baloon.getDesiredSize(
+                leftOffset,
+                secretaryLabel.getIcon().getIconWidth(),
+                secretaryLabel.getIcon().getIconHeight())
+        );
         setLocation(getX(), getStartY());
     }
 
@@ -445,13 +458,19 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     }
 
     @Override
-    public void windowClosed(WindowEvent e) { }
+    public void windowClosed(WindowEvent e) {
+        // No action
+    }
 
     @Override
-    public void windowIconified(WindowEvent e) { }
+    public void windowIconified(WindowEvent e) {
+        // No action
+    }
 
     @Override
-    public void windowDeiconified(WindowEvent e) { }
+    public void windowDeiconified(WindowEvent e) {
+        // No action
+    }
 
     @Override
     public void windowActivated(WindowEvent e) {

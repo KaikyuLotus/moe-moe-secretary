@@ -19,9 +19,9 @@ public class SecretaryLabel extends JLabel {
         this.parentFrame = parentFrame;
     }
 
-    public Rectangle getDesiredBounds(int parentWidth, int parentHeight) {
+    public Rectangle getDesiredBounds(int leftOffset, int parentWidth, int parentHeight) {
         return new Rectangle(
-                0,
+                leftOffset,
                 parentHeight - this.getIcon().getIconHeight(),
                 this.getIcon().getIconWidth(),
                 this.getIcon().getIconHeight());
