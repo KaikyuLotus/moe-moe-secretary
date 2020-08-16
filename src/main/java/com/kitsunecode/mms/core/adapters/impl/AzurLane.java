@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Adapter
@@ -109,14 +110,14 @@ public class AzurLane extends IWaifuAdapter {
     @Override
     public String getSkin(int skinIndex) {
         return this.data.getSkins().stream()
-                .filter(e -> Settings.isAzurChibi() == e.toLowerCase().contains("chibi"))
+                .filter(e -> Settings.isAzurChibi() == e.toLowerCase(Locale.ENGLISH).contains("chibi"))
                 .collect(Collectors.toList()).get(skinIndex);
     }
 
     @Override
     public int getSkinCount() {
         return (int) this.data.getSkins().stream()
-                .filter(e -> Settings.isAzurChibi() == e.toLowerCase().contains("chibi"))
+                .filter(e -> Settings.isAzurChibi() == e.toLowerCase(Locale.ENGLISH).contains("chibi"))
                 .count();
     }
 

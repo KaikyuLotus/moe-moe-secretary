@@ -13,6 +13,7 @@ import org.jsoup.select.Selector;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Adapter
@@ -56,19 +57,18 @@ public class SIFIdol extends IWaifuAdapter {
     }
 
     private String elaborateDialog(String dialog, String info, boolean hasJap) {
+        String elaboratedDialog = dialog;
         if (hasJap) {
-            if (!dialog.contains(" ")) {
+            if (!elaboratedDialog.contains(" ")) {
                 return null;
             }
-            dialog = dialog.split(" ", 2)[1];
+            elaboratedDialog = elaboratedDialog.split(" ", 2)[1];
         }
 
-        if (info != null && !info.equals("")) {
-            if (info.contains("#") && !info.contains(this.name)) {
-                return null;
-            }
+        if (info != null && !"".equals(info) && info.contains("#") && !info.contains(this.name)) {
+            return null;
         }
-        return dialog;
+        return elaboratedDialog;
     }
 
     private List<Dialog> getDialogsFromWiki(Document doc, String section, String mmsEventKey) {
@@ -105,7 +105,7 @@ public class SIFIdol extends IWaifuAdapter {
 
     private List<String> getIdolSkinUrls(Document doc) {
         return Selector.select(SKIN_LINKS, doc).stream()
-                .filter(e -> e.text().toLowerCase().contains("transparent: "))
+                .filter(e -> e.text().toLowerCase(Locale.ENGLISH).contains("transparent: "))
                 .map(e -> "https:" + e.attr("href").split("\\?")[0])
                 .collect(Collectors.toList());
     }
@@ -113,6 +113,10 @@ public class SIFIdol extends IWaifuAdapter {
     private String getIdolName(Document doc) {
         Elements nameElem = Selector.select(NAME_SELECTOR, doc);
         return nameElem.isEmpty() ? null : nameElem.text();
+    }
+
+    public String getIdolName() {
+        return idolName;
     }
 
     @Override

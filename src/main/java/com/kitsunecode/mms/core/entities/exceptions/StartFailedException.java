@@ -8,6 +8,10 @@ public class StartFailedException extends RuntimeException {
         super(message);
     }
 
+    public StartFailedException(String message, Exception ex) {
+        super(message, ex);
+    }
+
     public StartFailedException(String message, String url) {
         super(message);
         this.httpHelpUrl = url;

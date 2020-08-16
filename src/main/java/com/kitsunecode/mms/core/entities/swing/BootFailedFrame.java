@@ -10,19 +10,20 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 public class BootFailedFrame extends JDialog {
 
-    private int fullWidth = 565;
-    private int fullHeight = 700;
+    private static final int fullWidth = 565;
+    private static final int fullHeight = 700;
 
-    private int width = 565;
-    private int height = 450;
+    private static final int width = 565;
+    private static final int height = 450;
 
-    private int fontSize = 18;
-    private Color msgBgColor = new Color(0.0f, 0.0f, 0.0f, 0.95f);
-    private Color msgFgColor = new Color(1.0f, 1.0f, 1.0f, 0.60f);
-    private String fontName = "Bahnschrift Light";
+    private static final int fontSize = 18;
+    private static final Color msgBgColor = new Color(0.0f, 0.0f, 0.0f, 0.95f);
+    private static final Color msgFgColor = new Color(1.0f, 1.0f, 1.0f, 0.60f);
+    private static final String fontName = "Bahnschrift Light";
 
 
     public BootFailedFrame(Exception ex) {
@@ -34,18 +35,16 @@ public class BootFailedFrame extends JDialog {
         setSize(new Dimension(width, height + 200));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setUndecorated(true);
-        setBackground(new Color(0,0,0,0));
+        setBackground(new Color(0, 0, 0, 0));
         JLabel pane = new JLabel();
 
-        InputStream is = BootFailedFrame.class.getClassLoader().getResourceAsStream("images/error-waifu-lq.png");
-        if (is != null) {
-            try {
-                pane.setIcon(new ImageIcon(ImageIO.read(is)));
-                pane.setVerticalAlignment(SwingConstants.TOP);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try (InputStream is = BootFailedFrame.class.getClassLoader().getResourceAsStream("images/error-waifu-lq.png")) {
+            pane.setIcon(new ImageIcon(ImageIO.read(Objects.requireNonNull(is))));
+            pane.setVerticalAlignment(SwingConstants.TOP);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
 
         pane.setBounds(0, 0, fullWidth, fullHeight);
         pane.setSize(new Dimension(width, height));
@@ -58,7 +57,7 @@ public class BootFailedFrame extends JDialog {
         textMsg.setOpaque(true);
         textMsg.setVisible(true);
         textMsg.setBounds(0, 400, 564, (error.length() >= 100) ? 180 : 120);
-        textMsg.setBorder(BorderFactory.createMatteBorder(2,2,2,2, new Color(1,1,1, 0.5f)));
+        textMsg.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(1, 1, 1, 0.5f)));
 
         add(textMsg, BorderLayout.CENTER);
         add(pane, BorderLayout.CENTER);
@@ -74,16 +73,24 @@ public class BootFailedFrame extends JDialog {
                     }
 
                     @Override
-                    public void mousePressed(MouseEvent mouseEvent) { }
+                    public void mousePressed(MouseEvent mouseEvent) {
+                        // No action
+                    }
 
                     @Override
-                    public void mouseReleased(MouseEvent mouseEvent) { }
+                    public void mouseReleased(MouseEvent mouseEvent) {
+                        // No action
+                    }
 
                     @Override
-                    public void mouseEntered(MouseEvent mouseEvent) { }
+                    public void mouseEntered(MouseEvent mouseEvent) {
+                        // No action
+                    }
 
                     @Override
-                    public void mouseExited(MouseEvent mouseEvent) { }
+                    public void mouseExited(MouseEvent mouseEvent) {
+                        // No action
+                    }
                 });
             }
         }
@@ -95,16 +102,24 @@ public class BootFailedFrame extends JDialog {
             }
 
             @Override
-            public void mousePressed(MouseEvent mouseEvent) { }
+            public void mousePressed(MouseEvent mouseEvent) {
+                // No action
+            }
 
             @Override
-            public void mouseReleased(MouseEvent mouseEvent) { }
+            public void mouseReleased(MouseEvent mouseEvent) {
+                // No action
+            }
 
             @Override
-            public void mouseEntered(MouseEvent mouseEvent) { }
+            public void mouseEntered(MouseEvent mouseEvent) {
+                // No action
+            }
 
             @Override
-            public void mouseExited(MouseEvent mouseEvent) { }
+            public void mouseExited(MouseEvent mouseEvent) {
+                // No action
+            }
         });
 
         setLocationRelativeTo(null);

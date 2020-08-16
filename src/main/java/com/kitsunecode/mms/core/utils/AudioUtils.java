@@ -20,7 +20,7 @@ public class AudioUtils {
 
     public void play(Secretary secretary, String url, int volValue) {
 
-        if (url != null && !url.equals("")) {
+        if (url != null && !"".equals(url)) {
 
             String fileName = Util.fileFromUrl(url);
             try {
