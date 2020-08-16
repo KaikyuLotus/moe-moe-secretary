@@ -2,14 +2,8 @@ package com.kitsunecode.mms.core.utils;
 
 import com.kitsunecode.mms.core.entities.swing.Secretary;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.*;
 import javax.sound.sampled.DataLine.Info;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -37,9 +31,10 @@ public class AudioUtils {
                             baseFormat.getSampleRate(),
                             false);
                     // Get AudioInputStream that will be decoded by underlying VorbisSPI
-                    AudioInputStream din = AudioSystem.getAudioInputStream(decodedFormat, in);
-                    System.out.println("Playing audio...");
-                    rawplay(secretary, decodedFormat, din, volValue);
+                    try (AudioInputStream din = AudioSystem.getAudioInputStream(decodedFormat, in)) {
+                        System.out.println("Playing audio...");
+                        rawplay(secretary, decodedFormat, din, volValue);
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -50,16 +45,16 @@ public class AudioUtils {
     }
 
     private void setVolume(SourceDataLine line, int value) {
-
+        int finalValue = value;
         FloatControl gainControl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
 
         if (volume == null) {
-            if (value > 100 || value < 0) {
+            if (finalValue > 100 || finalValue < 0) {
                 System.out.println("Invalid volume value, using 30% as default");
-                value = 30;
+                finalValue = 30;
             }
             // Range / 100 * % + minimum
-            volume = (gainControl.getMaximum() - -30.0f) / 100.0f * value + -30.0f;
+            volume = (gainControl.getMaximum() - -30.0f) / 100.0f * finalValue + -30.0f;
         }
 
         gainControl.setValue(volume);
@@ -69,8 +64,7 @@ public class AudioUtils {
                          AudioInputStream din, int volValue) throws IOException, LineUnavailableException {
         byte[] data = new byte[4096];
 
-        SourceDataLine line = getLine(targetFormat);
-        if (line != null) {
+        try (SourceDataLine line = getLine(targetFormat)) {
             // Start
             line.open(targetFormat);
             line.start();
@@ -81,7 +75,6 @@ public class AudioUtils {
             while (nBytesRead != -1 && secretary.isRunning()) {
                 nBytesRead = din.read(data, 0, data.length);
                 if (nBytesRead != -1) line.write(data, 0, nBytesRead);
-
             }
 
             new Thread(() -> {

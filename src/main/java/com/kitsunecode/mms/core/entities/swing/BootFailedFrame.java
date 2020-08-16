@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
-public class BootFailedFrame extends JDialog {
+public class BootFailedFrame extends JDialog implements MouseListener {
 
     private static final int fullWidth = 565;
     private static final int fullHeight = 700;
@@ -45,19 +45,11 @@ public class BootFailedFrame extends JDialog {
             e.printStackTrace();
         }
 
-
         pane.setBounds(0, 0, fullWidth, fullHeight);
         pane.setSize(new Dimension(width, height));
 
         String errorFull = "<html><div style='text-align: center;'><p style='padding-left: 16px; padding-right: 16px;'><font size='4'>An error occurred during the execution:</font><br>&Prime;" + error + "&Prime;<br><br><font size='2'>Click anywhere to close...</font></p></div></html>";
-        JLabel textMsg = new JLabel(errorFull, SwingConstants.CENTER);
-        textMsg.setFont(new Font(fontName, Font.PLAIN, fontSize));
-        textMsg.setBackground(msgBgColor);
-        textMsg.setForeground(msgFgColor);
-        textMsg.setOpaque(true);
-        textMsg.setVisible(true);
-        textMsg.setBounds(0, 400, 564, (error.length() >= 100) ? 180 : 120);
-        textMsg.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(1, 1, 1, 0.5f)));
+        JLabel textMsg = setupTextMessage(errorFull, error);
 
         add(textMsg, BorderLayout.CENTER);
         add(pane, BorderLayout.CENTER);
@@ -95,37 +87,45 @@ public class BootFailedFrame extends JDialog {
             }
         }
 
-        addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent mouseEvent) {
-                dispose();
-            }
-
-            @Override
-            public void mousePressed(MouseEvent mouseEvent) {
-                // No action
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent mouseEvent) {
-                // No action
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent mouseEvent) {
-                // No action
-            }
-
-            @Override
-            public void mouseExited(MouseEvent mouseEvent) {
-                // No action
-            }
-        });
-
         setLocationRelativeTo(null);
-
         setModal(true);
         setVisible(true);
+    }
 
+    public final JLabel setupTextMessage(String message, String error) {
+        JLabel textMsg = new JLabel(message, SwingConstants.CENTER);
+        textMsg.setFont(new Font(fontName, Font.PLAIN, fontSize));
+        textMsg.setBackground(msgBgColor);
+        textMsg.setForeground(msgFgColor);
+        textMsg.setOpaque(true);
+        textMsg.setVisible(true);
+        textMsg.setBounds(0, 400, 564, (error.length() >= 100) ? 180 : 120);
+        textMsg.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(1, 1, 1, 0.5f)));
+        return textMsg;
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        dispose();
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        // No action
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        // No action
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        // No action
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        // No action
     }
 }

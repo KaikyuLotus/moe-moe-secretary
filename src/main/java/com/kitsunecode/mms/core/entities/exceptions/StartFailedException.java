@@ -4,6 +4,10 @@ public class StartFailedException extends RuntimeException {
 
     private String httpHelpUrl = null;
 
+    public StartFailedException(String message, Throwable e) {
+        super(message, e);
+    }
+
     public StartFailedException(String message) {
         super(message);
     }

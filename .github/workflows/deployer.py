@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
 import json
+import os
 import sys
-
 from random import choice
+
 from telegram import Bot
 
 mode = sys.argv[1]
@@ -50,7 +50,11 @@ def deploy_to_telegram():
               f"Short commit: `{short_commit}`"
 
     for target_chat_id in target_chat_ids:
-        bot.send_document(target_chat_id, open(artifact, 'rb'), caption=caption, parse_mode="markdown")
+        bot.send_document(
+            target_chat_id, open(artifact, 'rb'),
+            caption=caption,
+            parse_mode="markdown"
+        )
         bot.send_sticker(target_chat_id, sticker)
 
 
@@ -75,13 +79,21 @@ def github_deploy_failed():
     broadcast_message("GitHub deploy failed, please check the logs.")
 
 
-if mode == "github_deploy_failed":
-    github_deploy_failed()
-elif mode == "maven_build_failed":
-    maven_build_failed()
-elif mode == "telegram_deploy_failed":
-    telegram_deploy_failed()
-elif mode == "deploy_to_telegram":
-    deploy_to_telegram()
-else:
-    raise NotImplemented(f"Mode '{mode}' is not implemented.")
+def main():
+    if "DISABLE_TELEGRAM" in os.environ and os.environ["DISABLE_TELEGRAM"].lower() == "true":
+        return
+
+    if mode == "github_deploy_failed":
+        github_deploy_failed()
+    elif mode == "maven_build_failed":
+        maven_build_failed()
+    elif mode == "telegram_deploy_failed":
+        telegram_deploy_failed()
+    elif mode == "deploy_to_telegram":
+        deploy_to_telegram()
+    else:
+        raise NotImplementedError(f"Mode '{mode}' is not implemented.")
+
+
+if __name__ == "__main__":
+    main()
