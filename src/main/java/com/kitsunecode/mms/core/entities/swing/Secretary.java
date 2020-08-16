@@ -458,13 +458,19 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     }
 
     @Override
-    public void windowClosed(WindowEvent e) { }
+    public void windowClosed(WindowEvent e) {
+        // No action
+    }
 
     @Override
-    public void windowIconified(WindowEvent e) { }
+    public void windowIconified(WindowEvent e) {
+        // No action
+    }
 
     @Override
-    public void windowDeiconified(WindowEvent e) { }
+    public void windowDeiconified(WindowEvent e) {
+        // No action
+    }
 
     @Override
     public void windowActivated(WindowEvent e) {

@@ -16,7 +16,7 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.function.Function;
 
-public class Settings {
+public final class Settings {
 
     private static final String currentVersion = "1.6";
 
@@ -25,6 +25,10 @@ public class Settings {
     public static final String configBckPath = "config/config_bck.properties";
 
     private static Properties properties = null;
+
+    private Settings() {
+        // Private impl
+    }
 
     private static void load(InputStream is) throws IOException {
         properties.load(is);
@@ -71,7 +75,7 @@ public class Settings {
             }
             return properties;
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
