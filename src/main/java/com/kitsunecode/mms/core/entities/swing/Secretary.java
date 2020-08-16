@@ -298,7 +298,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             // Activate baloon only if there is text to show
             baloon.toggle(!"".equals(text));
             speekingThread = new Thread(() -> {
-                if (Settings.isVoiceEnabled() && dialog.getAudio() != null && !"".equals(text)) {
+                if (Settings.isVoiceEnabled() && dialog.getAudio() != null && !"".equals(dialog.getAudio()) && !"".equals(text)) {
                     audioUtils.play(this, dialog.getAudio(), Settings.getVoiceVolume());
                 } else {
                     Util.sleep(Settings.getDialogsBaloonNoVoiceDuration());

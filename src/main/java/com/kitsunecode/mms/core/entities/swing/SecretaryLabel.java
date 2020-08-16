@@ -133,9 +133,9 @@ public class SecretaryLabel extends JLabel {
         }
     }
 
-    // May be useful
-    public void onVisible() {
 
+    public void onVisible() {
+        // May be useful
     }
 
     public void paint(Graphics g) {
