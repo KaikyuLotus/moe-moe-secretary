@@ -29,7 +29,7 @@ public class MirageMemorial extends IWaifuAdapter {
     @Override
     protected WaifuData loadFromCustomSource() throws IOException {
         System.out.println("Getting servant from wiki");
-        Document skinsDoc = Jsoup.connect(BASE_URL + "Special:Images?file=" + name + ".png").get();
+        Document skinsDoc = Jsoup.connect(BASE_URL + "Special:Images?file=" + getName() + ".png").get();
         return new WaifuData(Collections.emptyList(), loadSkinUrls(skinsDoc));
     }
 
@@ -46,11 +46,11 @@ public class MirageMemorial extends IWaifuAdapter {
             if (image != null) return Collections.singletonList(image);
         }
 
-        throw new StartFailedException("Cannot find servant named " + name);
+        throw new StartFailedException("Cannot find servant named " + getName());
     }
 
     private String getImageUrlFromDocument(Document doc) {
-        Element image = Selector.select(String.format(IMAGE_SELECTOR, name), doc).first();
+        Element image = Selector.select(String.format(IMAGE_SELECTOR, getName()), doc).first();
         if (image == null) {
             return null;
         }

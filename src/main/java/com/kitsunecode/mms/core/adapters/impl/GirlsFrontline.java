@@ -39,9 +39,9 @@ public class GirlsFrontline extends IWaifuAdapter {
      */
     protected WaifuData loadFromCustomSource() throws IOException {
         System.out.println("Getting weapon home page");
-        Document mainDoc = Jsoup.connect(BASE_URL + "/wiki/" + name).get();
+        Document mainDoc = Jsoup.connect(BASE_URL + "/wiki/" + getName()).get();
         System.out.println("Getting weapon quotes");
-        Document quotesDoc = Jsoup.connect(BASE_URL + "/wiki/" + name + "/Quotes").get();
+        Document quotesDoc = Jsoup.connect(BASE_URL + "/wiki/" + getName() + "/Quotes").get();
         System.out.println("Parsing data...");
 
         return new WaifuData(loadDialogs(quotesDoc), loadImageSources(mainDoc));
@@ -107,7 +107,7 @@ public class GirlsFrontline extends IWaifuAdapter {
                 .stream()
                 .map(e -> e.attr("href"))
                 .filter(a -> !a.contains("_S"))
-                .filter(a -> a.contains(name))
+                .filter(a -> a.contains(getName()))
                 .map(this::getFullImageLink)
                 .collect(Collectors.toList());
     }

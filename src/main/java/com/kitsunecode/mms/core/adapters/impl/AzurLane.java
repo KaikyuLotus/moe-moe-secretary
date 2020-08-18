@@ -46,9 +46,9 @@ public class AzurLane extends IWaifuAdapter {
     @Override
     protected WaifuData loadFromCustomSource() throws IOException {
         System.out.println("Getting ship quotes");
-        Document quotesDoc = Jsoup.connect(BASE_URL + "/" + name + "/Quotes").get();
+        Document quotesDoc = Jsoup.connect(BASE_URL + "/" + getName() + "/Quotes").get();
         System.out.println("Getting ship images");
-        Document skinsDoc = Jsoup.connect(BASE_URL + "/" + name + "/Gallery").get();
+        Document skinsDoc = Jsoup.connect(BASE_URL + "/" + getName() + "/Gallery").get();
         System.out.println("Parsing data...");
         return new WaifuData(loadDialogs(quotesDoc), loadSkinUrls(skinsDoc));
     }

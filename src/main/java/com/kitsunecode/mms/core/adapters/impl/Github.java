@@ -28,7 +28,7 @@ public class Github extends IWaifuAdapter {
             throw new StartFailedException("github.url or github.branch are not been set in the configuration file");
         }
         return new URIBuilder("https://raw.githubusercontent.com/")
-                .setPath(repo + "/" + branch + "/" + name)
+                .setPath(repo + "/" + branch + "/" + getName())
                 .build()
                 .normalize()
                 .toString();

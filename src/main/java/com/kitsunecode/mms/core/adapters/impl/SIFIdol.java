@@ -39,7 +39,7 @@ public class SIFIdol extends IWaifuAdapter {
 
     @Override
     protected WaifuData loadFromCustomSource() throws IOException {
-        Document mainDoc = Jsoup.connect(String.format(CARD_URL, this.name)).get();
+        Document mainDoc = Jsoup.connect(String.format(CARD_URL, getName())).get();
         this.idolName = getIdolName(mainDoc);
 
         List<String> urls = getIdolSkinUrls(mainDoc);
@@ -65,7 +65,7 @@ public class SIFIdol extends IWaifuAdapter {
             elaboratedDialog = elaboratedDialog.split(" ", 2)[1];
         }
 
-        if (info != null && !"".equals(info) && info.contains("#") && !info.contains(this.name)) {
+        if (info != null && !"".equals(info) && info.contains("#") && !info.contains(getName())) {
             return null;
         }
         return elaboratedDialog;
