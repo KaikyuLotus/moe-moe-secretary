@@ -54,6 +54,7 @@ public abstract class IWaifuAdapter {
                 throw new StartFailedException("No images found for this waifu");
             }
 
+            afterInit();
         } catch (HttpStatusException e) {
             String message = "Wiki status code: " + e.getStatusCode();
             if (e.getStatusCode() == 404) {
@@ -65,10 +66,6 @@ public abstract class IWaifuAdapter {
         } catch (Exception e) {
             throw new StartFailedException(e.getClass().getSimpleName() + ": " + e.getMessage(), e);
         }
-    }
-
-    public void afterInit() {
-        // Stub
     }
 
     public File getDataFile() {
@@ -183,4 +180,5 @@ public abstract class IWaifuAdapter {
         return ON_LOGIN_EVENT_KEY;
     }
 
+    public abstract  void afterInit();
 }
