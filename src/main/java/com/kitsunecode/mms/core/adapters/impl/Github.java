@@ -21,6 +21,11 @@ public class Github extends IWaifuAdapter {
         folderUrl = createWaifuFolderUrl();
     }
 
+    @Override
+    public void afterInit() {
+        // Empty impl
+    }
+
     private String createWaifuFolderUrl() throws URISyntaxException {
         String repo = Settings.getGithubRepo();
         String branch = Settings.getGithubBranch();

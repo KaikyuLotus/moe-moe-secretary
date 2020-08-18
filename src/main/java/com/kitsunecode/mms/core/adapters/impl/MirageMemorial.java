@@ -27,6 +27,11 @@ public class MirageMemorial extends IWaifuAdapter {
     }
 
     @Override
+    public void afterInit() {
+        // Empty impl
+    }
+
+    @Override
     protected WaifuData loadFromCustomSource() throws IOException {
         System.out.println("Getting servant from wiki");
         Document skinsDoc = Jsoup.connect(BASE_URL + "Special:Images?file=" + getName() + ".png").get();

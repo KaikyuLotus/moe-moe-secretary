@@ -42,6 +42,11 @@ public class SinoAlice extends IWaifuAdapter {
     }
 
     @Override
+    public void afterInit() {
+        // Empty impl
+    }
+
+    @Override
     public String getName() {
         return waifuId;
     }

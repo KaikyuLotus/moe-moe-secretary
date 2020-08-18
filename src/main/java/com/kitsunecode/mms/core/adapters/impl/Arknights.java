@@ -34,6 +34,11 @@ public class Arknights extends IWaifuAdapter {
     }
 
     @Override
+    public void afterInit() {
+        // Empty impl
+    }
+
+    @Override
     protected WaifuData loadFromCustomSource() throws InterruptedException {
         System.out.println("Getting Arknights character data");
         AtomicReference<CharacterMap> characterMap = new AtomicReference<>();

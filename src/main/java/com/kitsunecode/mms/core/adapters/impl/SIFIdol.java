@@ -38,6 +38,11 @@ public class SIFIdol extends IWaifuAdapter {
     }
 
     @Override
+    public void afterInit() {
+        // Empty impl
+    }
+
+    @Override
     protected WaifuData loadFromCustomSource() throws IOException {
         Document mainDoc = Jsoup.connect(String.format(CARD_URL, getName())).get();
         this.idolName = getIdolName(mainDoc);

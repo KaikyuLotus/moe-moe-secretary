@@ -34,6 +34,11 @@ public class GirlsFrontline extends IWaifuAdapter {
         super(name);
     }
 
+    @Override
+    public void afterInit() {
+        // Empty impl
+    }
+
     /**
      * Loads data from Wiki, we MUST use it only once in a while
      */

@@ -44,6 +44,11 @@ public class AzurLane extends IWaifuAdapter {
     }
 
     @Override
+    public void afterInit() {
+        // Empty impl
+    }
+
+    @Override
     protected WaifuData loadFromCustomSource() throws IOException {
         System.out.println("Getting ship quotes");
         Document quotesDoc = Jsoup.connect(BASE_URL + "/" + getName() + "/Quotes").get();
