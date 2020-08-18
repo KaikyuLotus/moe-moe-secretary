@@ -28,20 +28,21 @@ public abstract class IWaifuAdapter {
 
     private final long startTimeMillis;
 
-    protected String name;
+    private final String configName;
+
     protected WaifuData data;
 
     protected abstract WaifuData loadFromCustomSource() throws Exception;
 
     public IWaifuAdapter(String name) throws IOException {
         this.startTimeMillis = System.currentTimeMillis();
-        this.name = name;
-
-        Util.checkFolders(this.name); // Create folders
+        this.configName = name;
     }
 
     public final void init() {
         try {
+            Util.checkFolders(getName());
+
             if (hasSavedFile()) {
                 data = getDataFromFile();
             } else {
@@ -53,6 +54,7 @@ public abstract class IWaifuAdapter {
                 throw new StartFailedException("No images found for this waifu");
             }
 
+            afterInit();
         } catch (HttpStatusException e) {
             String message = "Wiki status code: " + e.getStatusCode();
             if (e.getStatusCode() == 404) {
@@ -151,11 +153,11 @@ public abstract class IWaifuAdapter {
     }
 
     public String getShowableName() {
-        return this.name;
+        return this.configName;
     }
 
     public String getName() {
-        return name;
+        return configName;
     }
 
     public String onTouchEventKey() {
@@ -178,4 +180,5 @@ public abstract class IWaifuAdapter {
         return ON_LOGIN_EVENT_KEY;
     }
 
+    public abstract  void afterInit();
 }

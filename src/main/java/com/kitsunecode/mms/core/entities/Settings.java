@@ -4,21 +4,23 @@ import com.kitsunecode.mms.core.Main;
 import org.apache.commons.io.FileUtils;
 
 import java.awt.*;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.function.Function;
 
 public final class Settings {
 
-    private static final String currentVersion = "1.6";
+    private static final String currentVersion = "1.7";
 
     public static final String configFolder = "config";
     public static final String configPath = "config/config.properties";
@@ -30,7 +32,7 @@ public final class Settings {
         // Private impl
     }
 
-    private static void load(InputStream is) throws IOException {
+    private static void load(InputStreamReader is) throws IOException {
         properties.load(is);
     }
 
@@ -42,11 +44,9 @@ public final class Settings {
         try {
             properties = new Properties();
 
-            InputStream s;
-
             System.out.println("Loading default config first");
-            s = Main.class.getClassLoader().getResourceAsStream(configPath);
-            if (s != null) {
+            try (InputStream is = Main.class.getClassLoader().getResourceAsStream(configPath);
+                 InputStreamReader s = new InputStreamReader(Objects.requireNonNull(is), StandardCharsets.UTF_8)) {
                 load(s);
             }
 
@@ -58,21 +58,26 @@ public final class Settings {
             Path config = Paths.get(configPath);
             if (config.toFile().exists()) {
                 System.out.println("Found custom config file, loading it...");
-                byte[] bytes = Files.readAllBytes(config);
-                if (new String(bytes).contains("Version: " + currentVersion)) {
-                    load(new ByteArrayInputStream(bytes));
-                    return properties;
-                } else {
-                    Files.write(Paths.get(configBckPath), bytes); // Backup old file
-                    config.toFile().delete();
+                try (InputStreamReader in = new InputStreamReader(Files.newInputStream(config), StandardCharsets.UTF_8)) {
+
+                    String currentFileContent = new String(Files.readAllBytes(config), StandardCharsets.UTF_8);
+
+                    boolean isCorrectVersion = currentFileContent.contains("Version: " + currentVersion);
+                    if (isCorrectVersion) {
+                        load(in);
+                        return properties;
+                    } else {
+                        // Backup old file
+                        Files.write(Paths.get(configBckPath), currentFileContent.getBytes(StandardCharsets.UTF_8));
+                        config.toFile().delete();
+                    }
                 }
             }
 
-
-            s = Main.class.getClassLoader().getResourceAsStream(configPath);
-            if (s != null) {
-                FileUtils.copyInputStreamToFile(s, config.toFile());
+            try (InputStream s = Main.class.getClassLoader().getResourceAsStream(configPath)) {
+                FileUtils.copyInputStreamToFile(Objects.requireNonNull(s), config.toFile());
             }
+
             return properties;
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -83,7 +88,7 @@ public final class Settings {
         properties = null;
     }
 
-    private static <T> T getProperty(String property, T defaultValue, Function<String, T> converter) {
+    public static <T> T getProperty(String property, T defaultValue, Function<String, T> converter) {
         String stringValue = get().getProperty(property);
         if (stringValue == null) {
             if (defaultValue == null) {
@@ -94,6 +99,10 @@ public final class Settings {
         T value = converter.apply(stringValue);
         if (value == null) return defaultValue;
         return value;
+    }
+
+    public static String get(String property, String defVal) {
+        return getProperty(property, defVal, (data) -> data);
     }
 
     private static Color get(String property, Color defVal) {
@@ -122,10 +131,6 @@ public final class Settings {
 
     private static float get(String property, float defVal) {
         return getProperty(property, defVal, Float::parseFloat);
-    }
-
-    private static String get(String property, String defVal) {
-        return getProperty(property, defVal, (data) -> data);
     }
 
     private static String[] get(String property, String[] defVal, String divider) {

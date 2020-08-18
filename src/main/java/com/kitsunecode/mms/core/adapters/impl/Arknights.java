@@ -34,6 +34,11 @@ public class Arknights extends IWaifuAdapter {
     }
 
     @Override
+    public void afterInit() {
+        // Empty impl
+    }
+
+    @Override
     protected WaifuData loadFromCustomSource() throws InterruptedException {
         System.out.println("Getting Arknights character data");
         AtomicReference<CharacterMap> characterMap = new AtomicReference<>();
@@ -74,7 +79,7 @@ public class Arknights extends IWaifuAdapter {
         }
 
         System.out.println("Parsing data...");
-        Character character = characterMap.get().getWithName(name);
+        Character character = characterMap.get().getWithName(getName());
         List<Skin> skins = skinData.get().ofCharacter(character);
         List<String> skinsUrls = skins.stream().map(Skin::composeUrl).collect(Collectors.toList());
         List<Dialog> dialogs = charwordMap.get().ofCharacter(character).parallelStream().map(Charword::asDialog).collect(Collectors.toList());

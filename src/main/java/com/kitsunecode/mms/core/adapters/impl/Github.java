@@ -21,6 +21,11 @@ public class Github extends IWaifuAdapter {
         folderUrl = createWaifuFolderUrl();
     }
 
+    @Override
+    public void afterInit() {
+        // Empty impl
+    }
+
     private String createWaifuFolderUrl() throws URISyntaxException {
         String repo = Settings.getGithubRepo();
         String branch = Settings.getGithubBranch();
@@ -28,7 +33,7 @@ public class Github extends IWaifuAdapter {
             throw new StartFailedException("github.url or github.branch are not been set in the configuration file");
         }
         return new URIBuilder("https://raw.githubusercontent.com/")
-                .setPath(repo + "/" + branch + "/" + name)
+                .setPath(repo + "/" + branch + "/" + getName())
                 .build()
                 .normalize()
                 .toString();

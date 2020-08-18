@@ -30,6 +30,7 @@ public class BootFailedFrame extends JDialog implements MouseListener {
 
         String error = ex.getMessage() != null ? ex.getMessage() : "Null Pointer Exception";
 
+        setAlwaysOnTop(true);
         setLayout(null);
         setResizable(false);
         setSize(new Dimension(width, height + 200));
@@ -48,7 +49,7 @@ public class BootFailedFrame extends JDialog implements MouseListener {
         pane.setBounds(0, 0, fullWidth, fullHeight);
         pane.setSize(new Dimension(width, height));
 
-        String errorFull = "<html><div style='text-align: center;'><p style='padding-left: 16px; padding-right: 16px;'><font size='4'>An error occurred during the execution:</font><br>&Prime;" + error + "&Prime;<br><br><font size='2'>Click anywhere to close...</font></p></div></html>";
+        String errorFull = "<html><div style='text-align: center;'><p style='padding-left: 16px; padding-right: 16px;'><font size='4'>An error occurred during the execution:</font><br>&Prime;" + error + "&Prime;<br><br><font size='2'>Click the nekogirl to close...</font></p></div></html>";
         JLabel textMsg = setupTextMessage(errorFull, error);
 
         add(textMsg, BorderLayout.CENTER);
@@ -88,6 +89,7 @@ public class BootFailedFrame extends JDialog implements MouseListener {
         }
 
         setLocationRelativeTo(null);
+        addMouseListener(this);
         setModal(true);
         setVisible(true);
     }

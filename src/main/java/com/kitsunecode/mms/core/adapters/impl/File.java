@@ -18,6 +18,11 @@ public class File extends IWaifuAdapter {
     }
 
     @Override
+    public void afterInit() {
+        // Empty impl
+    }
+
+    @Override
     protected WaifuData loadFromCustomSource() {
         throw new StartFailedException("File adapter needs a configuration folder, please click here to open the guide!",
                 "https://telegra.ph/Moe-Moe-Secretary-File-Adapter-Configuration-01-12");
