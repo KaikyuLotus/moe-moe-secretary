@@ -27,11 +27,11 @@ public class AzurLane extends IWaifuAdapter {
     private static final String IMAGES_SELECTOR = "div.tabbertab a.image > img";
     private static final String TABLE_ROWS_JAP = "div[title='Japanese Server'] > table:nth-child(3) > * tr";
     private static final String TABLE_ROWS_CN = "div[title='Chinese Server'] > table:nth-child(3) > * tr";
+    private static final String TABLE_ROWS_EN = "div[title='English Server'] > table:nth-child(3) > * tr";
 
     private static final String AUDIO_COL = "td:nth-child(2) > a";
     private static final String EVENT_COL = "td:nth-child(1)";
-    private static final String DIALOG_NATIVE_COL = "td:nth-child(3)";
-    private static final String DIALOG_TRANSL_COL = "td:nth-child(4)";
+    private static final String DIALOG_COL = "td:nth-child(3)";
 
     private static final String WIKI_ON_CLICK_EVENT_KEY = "Secretary (Touch)";
     private static final String WIKI_ON_LOGIN_EVENT_KEY = "Login";
@@ -73,6 +73,7 @@ public class AzurLane extends IWaifuAdapter {
         List<Dialog> dialogList = new ArrayList<>();
         dialogList.addAll(loadDialogs(doc, TABLE_ROWS_CN, "Chinese"));
         dialogList.addAll(loadDialogs(doc, TABLE_ROWS_JAP, "Japanese"));
+        dialogList.addAll(loadDialogs(doc, TABLE_ROWS_EN, "English"));
         return dialogList;
     }
 
@@ -97,14 +98,10 @@ public class AzurLane extends IWaifuAdapter {
                     .replace(WIKI_ON_CLICK_EVENT_KEY, onTouchEventKey())
                     .replace(WIKI_ON_LOGIN_EVENT_KEY, onLoginEventKey());
 
-            String dialogText = row.selectFirst(DIALOG_TRANSL_COL).text();
-            String dialogTextNative = row.selectFirst(DIALOG_NATIVE_COL).text();
+            String dialogText = row.selectFirst(DIALOG_COL).text();
 
             if (!"".equals(dialogText)) {
                 dialogList.add(new Dialog(lang, dialogText, eventText, audioUrl));
-            }
-            if (!"".equals(dialogTextNative)) {
-                dialogList.add(new Dialog(lang + " Native", dialogTextNative, eventText, audioUrl));
             }
         }
 
