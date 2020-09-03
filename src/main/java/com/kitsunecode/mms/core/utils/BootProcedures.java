@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -89,7 +88,7 @@ public final class BootProcedures {
     }
 
     public static void startupProcedure() throws Exception {
-        if(Util.isWindows()) {
+        if (Util.isWindows()) {
             windowsStartupProcedure();
         } else {
             unixStartupProcedure();
@@ -97,7 +96,7 @@ public final class BootProcedures {
     }
 
     public static void logToFile() throws IOException {
-        if(!Paths.get("logs").toFile().exists() && !Paths.get("logs").toFile().mkdir()) {
+        if (!Paths.get("logs").toFile().exists() && !Paths.get("logs").toFile().mkdir()) {
             System.out.println("Cannot create logs directory, check you MMS folder");
             System.out.println("Logging to console or /dev/null if the console is not attached");
             return;
@@ -122,10 +121,12 @@ public final class BootProcedures {
             return;
         }
 
-        System.out.println("Sending logs to file: " + output.getAbsolutePath());
-        PrintStream o = new PrintStream(output);
-        System.setOut(o);
-        System.setErr(o);
+        if (!System.getenv().containsKey("IDE")) {
+            System.out.println("Sending logs to file: " + output.getAbsolutePath());
+            PrintStream o = new PrintStream(output);
+            System.setOut(o);
+            System.setErr(o);
+        }
     }
 
 }

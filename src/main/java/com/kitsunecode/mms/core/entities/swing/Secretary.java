@@ -3,8 +3,10 @@ package com.kitsunecode.mms.core.entities.swing;
 import com.kitsunecode.mms.core.adapters.IWaifuAdapter;
 import com.kitsunecode.mms.core.entities.Dialog;
 import com.kitsunecode.mms.core.entities.Settings;
-import com.kitsunecode.mms.core.utils.*;
 import com.kitsunecode.mms.core.entities.WaifuData;
+import com.kitsunecode.mms.core.entities.audio.Audio;
+import com.kitsunecode.mms.core.entities.audio.AudioPlayer;
+import com.kitsunecode.mms.core.utils.Util;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -13,6 +15,7 @@ import java.awt.event.*;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -22,7 +25,7 @@ import java.util.Random;
 public class Secretary extends JFrame implements MouseListener, MouseMotionListener,
         MouseWheelListener, KeyListener, WindowListener {
 
-    private final AudioUtils audioUtils = new AudioUtils();
+    private final AudioPlayer audioPlayer = new AudioPlayer();
 
     private final IWaifuAdapter waifuInterface;
 
@@ -32,8 +35,6 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     private int yClickPosition;
     private int dragDiffX = 0;
     private int dragDiffY = 0;
-
-    private int yDifference = 0;
 
     private boolean running;
     private boolean alwaysOnTop;
@@ -51,7 +52,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     private boolean isManual = false;
     private boolean isDragging = false;
 
-    private Thread speekingThread;
+    private Audio currentAudio;
 
     /**
      * Application start point
@@ -78,10 +79,6 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
         if (Settings.isWaifuWelcomeEnabled()) {
             onLogin(); // Say Hi!
-        }
-
-        if (Settings.isExtraDialogsEnabled()) {
-            extraDialogsThread();
         }
 
     }
@@ -128,32 +125,16 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             Util.sleep(5000); // Wait 5 seconds before starting idle loop
             while (running) {
                 secretaryLabel.waitIdle();
-                speak(waifuInterface.getDialogs(waifuInterface.onIdleEventKey()));
+                speak(waifuInterface.getDialogs(waifuInterface.onIdleEventKey()), null);
                 secretaryLabel.waitSpeak();
             }
         }).start();
     }
 
-
-    private void extraDialogsThread() {
-//        CommandExecutor executor = new CommandExecutor();
-//        new Thread(() -> {
-//            while (running) {
-//                try {
-//                    speak( waifuInterface.getDialogs(waifuInterface.onLowBatteryEventKey()));
-//                    Util.sleep(Settings.getWaifuEventsRefreshRate());
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                    return;
-//                }
-//            }
-//        }).start();
-    }
-
     private void onLogin() {
         new Thread(() -> {
-            Util.sleep(Settings.getWaifuWelcomeDelay());
-            speak(waifuInterface.getDialogs(waifuInterface.onLoginEventKey()));
+            Util.sleep(Math.max(Settings.getWaifuWelcomeDelay(), 1000));
+            speak(waifuInterface.getDialogs(waifuInterface.onLoginEventKey()), null);
         }).start();
     }
 
@@ -208,7 +189,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     private void swingSetup() throws IOException {
         setTitle(waifuInterface.getShowableName());
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         // Listeners
         addMouseListener(this);
@@ -275,8 +256,57 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         setLocation(getX(), getStartY());
     }
 
-    public void speak(List<com.kitsunecode.mms.core.entities.Dialog> dialogs) {
-        if (secretaryLabel.isSpeaking() || !Settings.isDialogsEnabled() || !running) {
+    private void speakStateChanged(boolean speaking) {
+        if (!speaking) {
+            baloon.toggle(false);
+        }
+        secretaryLabel.speak(speaking);
+    }
+
+    private void speakNoVoice() {
+        new Thread(() -> {
+            speakStateChanged(true);
+            Util.sleep(Settings.getDialogsBaloonNoVoiceDuration());
+            speakStateChanged(false);
+        }).start();
+    }
+
+    private void internalSpeak(Dialog dialog, Runnable optionalCallback) {
+        String text = Util.parseDialog(dialog.getDialog());
+        if (!"".equals(text)) {
+            baloon.toggle(true);
+            baloon.setText(Settings.getBaloonFormatString().replace("[[text]]", text + "<br>&zwnj;"));
+        }
+
+        if (!Settings.isVoiceEnabled() || dialog.getAudio() == null || "".equals(dialog.getAudio())) {
+            speakNoVoice();
+            return;
+        }
+
+        String fileName = Util.fileFromUrl(dialog.getAudio());
+        File audioFile = waifuInterface.downloadFile(dialog.getAudio(), fileName);
+
+        Audio audio = new Audio(audioFile, Settings.getVoiceVolume()) {
+            @Override
+            public void onStart() {
+                speakStateChanged(true);
+            }
+
+            @Override
+            public void onFinish() {
+                speakStateChanged(false);
+                currentAudio = null;
+                if (optionalCallback != null) {
+                    optionalCallback.run();
+                }
+            }
+        };
+        currentAudio = audio;
+        audioPlayer.play(audio);
+    }
+
+    public void speak(List<Dialog> dialogs, Runnable optionalCallback) {
+        if (secretaryLabel.isSpeaking() || !Settings.isDialogsEnabled()) {
             return;
         }
 
@@ -285,42 +315,16 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         }
 
         Dialog dialog = dialogs.get(new Random().nextInt(dialogs.size()));
-
-        SwingUtilities.invokeLater(() -> {
-            secretaryLabel.speak(true);
-
-            String text = Util.parseDialog(dialog.getDialog());
-
-            baloon.setText(
-                    Settings.getBaloonFormatString().replace("[[text]]",text + "<br>&zwnj;")
-            );
-
-            // Activate baloon only if there is text to show
-            baloon.toggle(!"".equals(text));
-            speekingThread = new Thread(() -> {
-                if (Settings.isVoiceEnabled() && dialog.getAudio() != null && !"".equals(dialog.getAudio()) && !"".equals(text)) {
-                    audioUtils.play(this, dialog.getAudio(), Settings.getVoiceVolume());
-                } else {
-                    Util.sleep(Settings.getDialogsBaloonNoVoiceDuration());
-                }
-
-                baloon.toggle(false);
-                secretaryLabel.speak(false);
-            });
-            speekingThread.start();
-        });
+        internalSpeak(dialog, optionalCallback);
     }
 
     public boolean isDragging() {
         return isDragging;
     }
 
-    public void close() {
-        this.running = false;
-        if (speekingThread != null && speekingThread.isAlive()) {
-            speekingThread.interrupt();
-        }
+    private void internalClose() {
         try {
+            this.running = false;
             waifuInterface.getWaifuData().setPosition(getX());
             waifuInterface.getWaifuData().setAlwaysOnTop(alwaysOnTop);
             waifuInterface.getWaifuData().setFloatingEnabled(floatingToggle);
@@ -330,23 +334,35 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        System.out.println("Closed");
-        this.dispose();
+
+        System.exit(0);
+    }
+
+    public void close() {
+        boolean wasSpeaking = currentAudio != null && currentAudio.isPlaying();
+
+        List<Dialog> logoutDialogs = waifuInterface.getDialogs(waifuInterface.onLogoutEventKey());
+        if (logoutDialogs.size() == 0 || !Settings.isLogoutDialogEnabled()) {
+            currentAudio.addCloseAction(this::internalClose);
+            return;
+        }
+
+        if (wasSpeaking) {
+            currentAudio.addCloseAction(() -> speak(logoutDialogs, this::internalClose));
+        } else {
+            speak(logoutDialogs, this::internalClose);
+        }
+
+        if (wasSpeaking) {
+            currentAudio.stop();
+        }
+
     }
 
     private void onClick() {
-
         if (Settings.isDialogsOnClick()) {
-            speak(waifuInterface.getDialogs(waifuInterface.onTouchEventKey()));
+            speak(waifuInterface.getDialogs(waifuInterface.onTouchEventKey()), null);
         }
-    }
-
-    public IWaifuAdapter getWaifuInterface() {
-        return waifuInterface;
-    }
-
-    public boolean isRunning() {
-        return running;
     }
 
     // Region: Swing Mouse Events
@@ -360,6 +376,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseReleased(MouseEvent e) {
+        isDragging = false;
         if (e.getButton() == 2) {
             dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
             return;
@@ -368,14 +385,12 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             secretaryLabel.speakJump();
             onClick();
         }
-        isDragging = false;
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
         isDragging = true;
         setLocation(e.getXOnScreen() - dragDiffX, Settings.isWaifuYDragEnabled() ? e.getYOnScreen() - dragDiffY : getY());
-        yDifference = e.getYOnScreen() + dragDiffY;
     }
 
     @Override
@@ -487,11 +502,6 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     }
 
     // Endregion
-
-
-    public int getYDifference() {
-        return yDifference;
-    }
 
     public boolean isFloatingToggle() {
         return floatingToggle;
