@@ -313,10 +313,6 @@ public final class Settings {
         return get("arknights.nickname", "Doctah");
     }
 
-    public static boolean isExtraDialogsEnabled() {
-        return get("waifu.extradialogs", true);
-    }
-
     public static boolean isAutoStartupEnabled() {
         return get("waifu.autoStartupEnabled", true);
     }
@@ -331,6 +327,10 @@ public final class Settings {
 
     public static String getUserNickname() {
         return get("user.nickname", "<user.nickname is missing from config file>");
+    }
+
+    public static boolean isLogoutDialogEnabled() {
+        return get("waifu.logout.dialog.enabled", true);
     }
 
 }

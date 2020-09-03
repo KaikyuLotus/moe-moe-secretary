@@ -1,9 +1,9 @@
 package com.kitsunecode.mms.core.adapters;
 
 import com.kitsunecode.mms.core.entities.Dialog;
-import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
-import com.kitsunecode.mms.core.entities.WaifuData;
 import com.kitsunecode.mms.core.entities.Settings;
+import com.kitsunecode.mms.core.entities.WaifuData;
+import com.kitsunecode.mms.core.entities.exceptions.StartFailedException;
 import com.kitsunecode.mms.core.utils.Util;
 import org.apache.commons.io.FileUtils;
 import org.jsoup.HttpStatusException;
@@ -22,6 +22,7 @@ public abstract class IWaifuAdapter {
 
     private static final String ON_IDLE_EVENT_KEY = "onIdle";
     private static final String ON_LOGIN_EVENT_KEY = "onLogin";
+    private static final String ON_LOGOUT_EVENT_KEY = "onLogout";
     private static final String ON_CLICK_EVENT_KEY = "onClick";
     private static final String ON_LOW_BATTERY_EVENT_KEY = "onLowBattery";
     private static final String ON_HIGH_CPU_USAGE_KEY = "onHighCpu";
@@ -34,7 +35,7 @@ public abstract class IWaifuAdapter {
 
     protected abstract WaifuData loadFromCustomSource() throws Exception;
 
-    public IWaifuAdapter(String name) throws IOException {
+    public IWaifuAdapter(String name) {
         this.startTimeMillis = System.currentTimeMillis();
         this.configName = name;
     }
@@ -102,9 +103,8 @@ public abstract class IWaifuAdapter {
      * @param url      The file's url
      * @param fileName File's name
      * @return File's byte array
-     * @throws IOException If something goes wrong while reading/wrinting
      */
-    public File downloadFile(String url, String fileName) throws IOException {
+    public File downloadFile(String url, String fileName) {
         String specificFolder = (Util.isUrl(url)) ? (url.endsWith(".ogg") || url.endsWith(".mp3") ? "audios" : "skins") : "";
         File resourceFile = Paths.get("resources", getName(), specificFolder, fileName).toFile();
 
@@ -168,6 +168,10 @@ public abstract class IWaifuAdapter {
         return ON_IDLE_EVENT_KEY;
     }
 
+    public String onLogoutEventKey() {
+        return ON_LOGOUT_EVENT_KEY;
+    }
+
     public String onLowBatteryEventKey() {
         return ON_LOW_BATTERY_EVENT_KEY;
     }
@@ -180,5 +184,5 @@ public abstract class IWaifuAdapter {
         return ON_LOGIN_EVENT_KEY;
     }
 
-    public abstract  void afterInit();
+    public abstract void afterInit();
 }
