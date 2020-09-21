@@ -306,11 +306,11 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     }
 
     public void speak(List<Dialog> dialogs, Runnable optionalCallback) {
-        if (secretaryLabel.isSpeaking() || !Settings.isDialogsEnabled()) {
-            return;
-        }
 
-        if (dialogs.isEmpty()) {
+        if (secretaryLabel.isSpeaking() || !Settings.isDialogsEnabled() || dialogs.isEmpty()) {
+            if (optionalCallback != null) {
+                optionalCallback.run();
+            }
             return;
         }
 
@@ -342,21 +342,22 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         boolean wasSpeaking = currentAudio != null && currentAudio.isPlaying();
 
         List<Dialog> logoutDialogs = waifuInterface.getDialogs(waifuInterface.onLogoutEventKey());
+
         if (logoutDialogs.size() == 0 || !Settings.isLogoutDialogEnabled()) {
-            currentAudio.addCloseAction(this::internalClose);
+            if (wasSpeaking) {
+                currentAudio.stop();
+            }
+            internalClose();
             return;
         }
 
         if (wasSpeaking) {
             currentAudio.addCloseAction(() -> speak(logoutDialogs, this::internalClose));
-        } else {
-            speak(logoutDialogs, this::internalClose);
-        }
-
-        if (wasSpeaking) {
             currentAudio.stop();
+            return;
         }
 
+        speak(logoutDialogs, this::internalClose);
     }
 
     private void onClick() {

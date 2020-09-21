@@ -12,7 +12,7 @@ jobs:
 
     env: # Or as an environment variable
       BOT_TOKEN: ${{ secrets.DEPLOY_BOT_TOKEN }}
-      TARGET_CHAT_IDS: "[487353090, -1001342632426, -1001428497276]"
+      TARGET_CHAT_IDS: "[487353090, -1001342632426]"
       COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
       ARTIFACT: "target/moe-moe-secretary.jar"
 
