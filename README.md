@@ -17,7 +17,7 @@
 - [Screenshots](#screenshots)
 
 ### Installing
-In order to install Moe Moe Secretary, please download the latest jar from the [Github Releases](TODO)\
+In order to install Moe Moe Secretary, please download the latest jar from the [Github Releases](https://github.com/KaikyuLotus/moe-moe-secretary/releases/latest)\
 You'll need a JRE (1.8+) installed, you can get it [here](https://adoptopenjdk.net/installation.html#x64_win-jre).\
 Place the JAR file in a secure place, better if it's in a folder
  
