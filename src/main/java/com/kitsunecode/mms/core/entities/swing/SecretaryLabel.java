@@ -59,7 +59,6 @@ public class SecretaryLabel extends JLabel {
                     continue;
                 }
                 int position = screenHeight - parentFrame.getY();
-                // System.out.println(String.format("%s : %s : %s", startY, position, maxY));
 
                 if (raise.get()) {
                     // Se sta salendo controlla se ha raggiunto il massimo
