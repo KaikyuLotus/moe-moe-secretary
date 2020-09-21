@@ -73,8 +73,7 @@ The following table shows the adapter names to be used in the .properties file a
 
 #### Azur Lane Adapter
 This adapter takes the data from https://azurlane.koumakan.jp \
-Ship names are the same as in-game names,\
-if you can't really find one take a look [here](https://azurlane.koumakan.jp/List_of_Ships).
+Ship names are the same as in-game names, if you can't really find one take a look [here](https://azurlane.koumakan.jp/List_of_Ships).
 
 #### Arknights Adapter
 This adapter takes the data from https://github.com/Aceship/AN-EN-Tags \

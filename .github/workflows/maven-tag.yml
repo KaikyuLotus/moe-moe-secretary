@@ -2,8 +2,8 @@ name: Java CI
 
 on:
   push:
-    branches:
-      - master
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -48,3 +48,33 @@ jobs:
     - name: GitHub deploy failed
       if: failure()
       run: python3 .github/workflows/deployer.py github_deploy_failed
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: New Moe Moe Secretary release
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: target/moe-moe-secretary.jar
+        asset_name: moe-moe-secretary.jar
+        asset_content_type: application/java-archive
+
+    - name: Deploy to Telegram
+      run: python3 .github/workflows/deployer.py deploy_to_telegram
+
+    - name: Telegram deploy failed
+      if: failure()
+      run: python3 .github/workflows/deployer.py telegram_deploy_failed
