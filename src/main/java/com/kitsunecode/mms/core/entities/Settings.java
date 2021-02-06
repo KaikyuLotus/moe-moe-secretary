@@ -20,7 +20,7 @@ import java.util.function.Function;
 
 public final class Settings {
 
-    private static final String currentVersion = "1.7";
+    private static final String currentVersion = "1.8";
 
     public static final String configFolder = "config";
     public static final String configPath = "config/config.properties";
