@@ -30,7 +30,7 @@ public class GirlsFrontline extends IWaifuAdapter {
     private static final String WIKI_ON_LOGIN_EVENT_KEY = "Greeting";
     private static final String WIKI_ON_IDLE_EVENT_KEY  = "Secretary";
 
-    public GirlsFrontline(String name) throws IOException  {
+    public GirlsFrontline(String name)  {
         super(name);
     }
 

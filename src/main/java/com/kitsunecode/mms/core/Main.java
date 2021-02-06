@@ -13,27 +13,31 @@ public final class Main {
 
     private static Secretary secretary = null;
 
+    private static final Object lock = new Object();
+
     private Main() {
         // Private impl
     }
 
     private static void initialize() {
-        if (secretary != null) {
-            secretary.close();
+        synchronized (lock) {
+            if (secretary != null) {
+                secretary.lightClose();
+            }
+
+            Settings.reload();
+
+            String adapter = Settings.getAdapter();
+            String name = Settings.getWaifuName();
+
+            System.out.println("Starting " + adapter + " with name " + name);
+
+            Util.catchMoeMoeExceptionsAndExit(() -> {
+                BootProcedures.startupProcedure();
+                IWaifuAdapter waifu = Util.getWaifuFromAdapterName(adapter, name);
+                secretary = new Secretary(waifu);
+            });
         }
-
-        Settings.reload();
-
-        String adapter = Settings.getAdapter();
-        String name = Settings.getWaifuName();
-
-        System.out.println("Starting " + adapter + " with name " + name);
-
-        Util.catchMoeMoeExceptionsAndExit(() -> {
-            BootProcedures.startupProcedure();
-            IWaifuAdapter waifu = Util.getWaifuFromAdapterName(adapter, name);
-            secretary = new Secretary(waifu);
-        });
     }
 
     public static void main(String[] args) {

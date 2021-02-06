@@ -45,10 +45,11 @@ public class FileWatcher {
 
                     for (WatchEvent<?> evt : key.pollEvents()) {
                         Path filename = (Path) evt.context();
-                        if (evt.kind() == StandardWatchEventKinds.OVERFLOW || !filename.toString().equals(dir.toFile().getName())) {
+                        if (evt.count() > 1 || evt.kind() == StandardWatchEventKinds.OVERFLOW || !filename.toString().equals(dir.toFile().getName())) {
                             Thread.yield();
                             continue;
                         }
+                        System.out.println("File changed");
                         runnable.run();
                     }
 

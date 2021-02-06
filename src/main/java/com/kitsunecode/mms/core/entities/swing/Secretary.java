@@ -125,6 +125,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             Util.sleep(5000); // Wait 5 seconds before starting idle loop
             while (running) {
                 secretaryLabel.waitIdle();
+                if (!running) return;
                 speak(waifuInterface.getDialogs(waifuInterface.onIdleEventKey()), null);
                 secretaryLabel.waitSpeak();
             }
@@ -134,6 +135,7 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
     private void onLogin() {
         new Thread(() -> {
             Util.sleep(Math.max(Settings.getWaifuWelcomeDelay(), 1000));
+            if (!running) return;
             speak(waifuInterface.getDialogs(waifuInterface.onLoginEventKey()), null);
         }).start();
     }
@@ -315,14 +317,22 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
         }
 
         Dialog dialog = dialogs.get(new Random().nextInt(dialogs.size()));
-        internalSpeak(dialog, optionalCallback);
+         internalSpeak(dialog, optionalCallback);
     }
 
     public boolean isDragging() {
         return isDragging;
     }
 
+    private void internalCloseExit() {
+        internalClose(true);
+    }
+
     private void internalClose() {
+        internalClose(false);
+    }
+
+    private void internalClose(boolean exit) {
         try {
             this.running = false;
             waifuInterface.getWaifuData().setPosition(getX());
@@ -335,7 +345,20 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             ex.printStackTrace();
         }
 
-        System.exit(0);
+
+        dispose();
+        if (exit) {
+            System.exit(0);
+        }
+    }
+
+    public void lightClose() {
+        boolean wasSpeaking = currentAudio != null && currentAudio.isPlaying();
+        if (wasSpeaking) {
+            currentAudio.stop();
+        }
+        running = false;
+        dispose();
     }
 
     public void close() {
@@ -347,17 +370,17 @@ public class Secretary extends JFrame implements MouseListener, MouseMotionListe
             if (wasSpeaking) {
                 currentAudio.stop();
             }
-            internalClose();
+            internalCloseExit();
             return;
         }
 
         if (wasSpeaking) {
-            currentAudio.addCloseAction(() -> speak(logoutDialogs, this::internalClose));
+            currentAudio.addCloseAction(() -> speak(logoutDialogs, this::internalCloseExit));
             currentAudio.stop();
             return;
         }
 
-        speak(logoutDialogs, this::internalClose);
+        speak(logoutDialogs, this::internalCloseExit);
     }
 
     private void onClick() {

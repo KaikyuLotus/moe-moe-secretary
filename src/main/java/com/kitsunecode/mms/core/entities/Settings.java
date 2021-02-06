@@ -225,6 +225,10 @@ public final class Settings {
         return get("dialogs.onIdle", true);
     }
 
+    public static  boolean isOnlyAudioDialogs() {
+        return get("dialogs.onlyAudioDialogs", false);
+    }
+
     public static int getDialogsBaloonNoVoiceDuration() {
         return get("dialogs.baloon.noVoiceDuration", 3);
     }
