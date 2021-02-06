@@ -55,6 +55,7 @@ The following table shows the adapter names to be used in the .properties file a
 | Adapter Name            | Chapter                                             | 
 | :---:                   | :---:                                               |
 | AzurLane                | [Azur Lane Chapter](#azur-lane-adapter)             |
+| GenshinImpact           | [Genshin Impact Chapter](#genshin-impact-adapter)             |
 | Arknights               | [Arknights Chapter](#arknights-adapter)             |
 | SinoAlice               | [SinoAlice Chapter](#sinoalice-adapter)             |
 | SIFIdol                 | [SIFIdol Chapter](#school-idol-festival-adapter)    |
@@ -74,6 +75,11 @@ The following table shows the adapter names to be used in the .properties file a
 #### Azur Lane Adapter
 This adapter takes the data from https://azurlane.koumakan.jp \
 Ship names are the same as in-game names, if you can't really find one take a look [here](https://azurlane.koumakan.jp/List_of_Ships).
+
+#### Genshin Impact Adapter
+This adapter takes the data from https://genshin-impact.fandom.com \
+Character names are the same as in-game names, if you can't really find one take a look [here](https://genshin-impact.fandom.com/wiki/Characters).
+
 
 #### Arknights Adapter
 This adapter takes the data from https://github.com/Aceship/AN-EN-Tags \
@@ -146,8 +152,8 @@ We also have a CI bot, so you can update your MMS version directly from Telegram
 Also check the FAQs
 
 ### FAQ
-- **Q**: I don't want my waifu to start on my PC startup, how to disable it?\
-**A**: Set `waifu.autoStartupEnabled` to `false` in your config.properties
+- **Q**: I want my waifu to start on my PC startup, how to do it?\
+**A**: Set `waifu.autoStartupEnabled` to `true` in your config.properties
 - **Q**: MMS requires internet access to work?\
 **A**: Yes, it does, if you don't want it you could use the file adapter.
 - **Q**: Can you add <**character name**>?\
