@@ -84,21 +84,26 @@ public class GenshinImpact extends IWaifuAdapter {
 
         List<Dialog> dialogs = new ArrayList<>();
 
-        for (Element table : Selector.select("table.wikitable", document)) {
-            for (Element row : table.child(0).getElementsByTag("tr").stream().skip(1).toArray(Element[]::new)) {
-                // String event = row.getElementsByTag("th").text();
-                Element td = row.getElementsByTag("td").first();
-                Element audioSpan = td.getElementsByTag("span").stream().findAny().orElse(null);
-                String audioUrl = null;
-                if (audioSpan != null) {
-                    audioUrl = audioSpan.getElementsByTag("a").first().attr("href").split("/revision")[0];
-                    audioSpan.remove();
-                }
+        List<Element> rows = Selector.select("table.wikitable", document)
+                .first()
+                .child(0)
+                .getElementsByTag("tr")
+                .stream()
+                .skip(1)
+                .collect(Collectors.toList());
 
-                String dialog = row.getElementsByTag("td").text();
-
-                dialogs.add(new Dialog("en", dialog, onTouchEventKey(), audioUrl));
+        for (Element row : rows) {
+            Element td = row.getElementsByTag("td").first();
+            Element audioSpan = td.getElementsByTag("span").stream().findAny().orElse(null);
+            String audioUrl = null;
+            if (audioSpan != null) {
+                audioUrl = audioSpan.getElementsByTag("a").first().attr("href").split("/revision")[0];
+                audioSpan.remove();
             }
+
+            String dialog = row.getElementsByTag("td").text();
+
+            dialogs.add(new Dialog("en", dialog, onTouchEventKey(), audioUrl));
         }
 
         return dialogs;
