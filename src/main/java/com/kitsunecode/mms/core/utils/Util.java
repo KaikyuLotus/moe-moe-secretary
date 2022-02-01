@@ -344,4 +344,13 @@ public final class Util {
         }
     }
 
+    public static String safeFileName(String fileName) {
+        char[] chars = new char[]{'#', '<', '$', '+', '%', '>', '!',
+                '`', '&', '*', '\'', '|', '\\', '/', '{', '}', '?', '"', '=', ':', ' ', '@'};
+        for (char c : chars) {
+            fileName = fileName.replace(c, '_');
+        }
+        return fileName;
+    }
+
 }

@@ -105,8 +105,8 @@ public abstract class IWaifuAdapter {
      * @return File's byte array
      */
     public File downloadFile(String url, String fileName) {
-        String specificFolder = (Util.isUrl(url)) ? (url.endsWith(".ogg") || url.endsWith(".mp3") ? "audios" : "skins") : "";
-        File resourceFile = Paths.get("resources", getName(), specificFolder, fileName).toFile();
+        String specificFolder = (Util.isUrl(url)) ? (url.endsWith(".png") || url.endsWith(".jpg") ? "skins" : "audios") : "";
+        File resourceFile = Paths.get("resources", getName(), specificFolder, Util.safeFileName(fileName)).toFile();
 
         // Use local if exists
         if (resourceFile.exists()) {
