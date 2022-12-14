@@ -29,7 +29,7 @@
         <vorbisspi.version>1.0.3.3</vorbisspi.version>
         <jsoup.version>1.13.1</jsoup.version>
         <commons-io.version>2.7</commons-io.version>
-        <snakeyaml.version>1.25</snakeyaml.version>
+        <snakeyaml.version>1.32</snakeyaml.version>
         <httpclient.version>4.5.11</httpclient.version>
         <tritonus.version>0.3.7-2</tritonus.version>
         <mp3spi.version>1.9.5-1</mp3spi.version>
