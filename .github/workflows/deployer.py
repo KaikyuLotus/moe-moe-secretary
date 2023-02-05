@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import asyncio
 import json
 import os
 import sys
@@ -38,7 +39,7 @@ fail_stickers = [
 bot = Bot(token)
 
 
-def deploy_to_telegram():
+async def deploy_to_telegram():
     sticker = choice(success_stickers)
     print(f"Sending '{artifact}' to the following chat IDs: {target_chat_ids}")
     print(f"Issued by user {actor}")
@@ -50,50 +51,50 @@ def deploy_to_telegram():
               f"Short commit: `{short_commit}`"
 
     for target_chat_id in target_chat_ids:
-        bot.send_document(
+        await bot.send_document(
             target_chat_id, open(artifact, 'rb'),
             caption=caption,
             parse_mode="markdown"
         )
-        bot.send_sticker(target_chat_id, sticker)
+        await bot.send_sticker(target_chat_id, sticker)
 
 
-def broadcast_message(fail_message):
+async def broadcast_message(fail_message):
     sticker = choice(fail_stickers)
     print(fail_message)
     for target_chat_id in target_chat_ids:
-        bot.send_message(target_chat_id, fail_message, parse_mode="markdown")
-        bot.send_sticker(target_chat_id, sticker)
+        await bot.send_message(target_chat_id, fail_message, parse_mode="markdown")
+        await bot.send_sticker(target_chat_id, sticker)
     print("Notifications sent")
 
 
-def telegram_deploy_failed():
-    broadcast_message("Telegram deploy failed, please check the logs.")
+async def telegram_deploy_failed():
+    await broadcast_message("Telegram deploy failed, please check the logs.")
 
 
-def maven_build_failed():
-    broadcast_message("Maven build failed, please check the logs.")
+async def maven_build_failed():
+    await broadcast_message("Maven build failed, please check the logs.")
 
 
-def github_deploy_failed():
-    broadcast_message("GitHub deploy failed, please check the logs.")
+async def github_deploy_failed():
+    await broadcast_message("GitHub deploy failed, please check the logs.")
 
 
-def main():
+async def main():
     if "DISABLE_TELEGRAM" in os.environ and os.environ["DISABLE_TELEGRAM"].lower() == "true":
         return
 
     if mode == "github_deploy_failed":
-        github_deploy_failed()
+        await github_deploy_failed()
     elif mode == "maven_build_failed":
-        maven_build_failed()
+        await maven_build_failed()
     elif mode == "telegram_deploy_failed":
-        telegram_deploy_failed()
+        await telegram_deploy_failed()
     elif mode == "deploy_to_telegram":
-        deploy_to_telegram()
+        await deploy_to_telegram()
     else:
         raise NotImplementedError(f"Mode '{mode}' is not implemented.")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

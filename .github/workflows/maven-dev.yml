@@ -17,15 +17,15 @@ jobs:
       ARTIFACT: "target/moe-moe-secretary.jar"
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3.3.0
 
     - name: Set up JDK 11
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v3.9.0
       with:
         java-version: 11
 
     - name: Install Python 3.7
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4.5.0
       with:
         python-version: '3.7'
 
@@ -40,7 +40,7 @@ jobs:
       run: python3 .github/workflows/deployer.py maven_build_failed
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v1.0.0
+      uses: actions/upload-artifact@v3.1.2
       with:
         name: "moe-moe-secretary.jar"
         path: "target/moe-moe-secretary.jar"
