@@ -2,7 +2,7 @@ package com.kitsunecode.mms.core.adapters.impl.adapterentities.arknights.skin;
 
 public class Skin {
 
-    private static final String SKIN_URL = "https://raw.githubusercontent.com/Aceship/AN-EN-Tags/master/img/characters/%s.png";
+    private static final String SKIN_URL = "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/characters/%s.png";
 
     private String skinId;
     private String charId;

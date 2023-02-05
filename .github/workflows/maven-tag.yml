@@ -17,15 +17,16 @@ jobs:
       ARTIFACT: "target/moe-moe-secretary.jar"
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3.3.0
 
     - name: Set up JDK 11
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v3.9.0
       with:
+        distribution: 'temurin'
         java-version: 11
 
     - name: Install Python 3.7
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4.5.0
       with:
         python-version: '3.7'
 
@@ -40,7 +41,7 @@ jobs:
       run: python3 .github/workflows/deployer.py maven_build_failed
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v1.0.0
+      uses: actions/upload-artifact@v3.1.2
       with:
         name: "moe-moe-secretary.jar"
         path: "target/moe-moe-secretary.jar"
@@ -51,26 +52,16 @@ jobs:
 
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v0.1.15
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        name: Release ${{ github.ref }}
         body: New Moe Moe Secretary release
         draft: false
         prerelease: false
-
-    - name: Upload Release Asset
-      id: upload-release-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: target/moe-moe-secretary.jar
-        asset_name: moe-moe-secretary.jar
-        asset_content_type: application/java-archive
+        files: target/moe-moe-secretary.jar
 
     - name: Deploy to Telegram
       run: python3 .github/workflows/deployer.py deploy_to_telegram
