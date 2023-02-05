@@ -21,25 +21,25 @@ import java.util.stream.Collectors;
 @Adapter
 public class AzurLane extends IWaifuAdapter {
 
-    private static final String BASE_URL = "https://azurlane.koumakan.jp";
+    private static final String BASE_URL = "https://azurlane.koumakan.jp/wiki";
 
-
-    private static final String IMAGES_SELECTOR = "div.tabbertab a.image > img";
-    private static final String TABLE_ROWS_JAP = "div[title='Japanese Server'] > table:nth-child(3) > * tr";
-    private static final String TABLE_ROWS_CN = "div[title='Chinese Server'] > table:nth-child(3) > * tr";
-    private static final String TABLE_ROWS_EN = "div[title='English Server'] > table:nth-child(3) > * tr";
+    private static final String IMAGES_SELECTOR = "div[id='mw-content-text'] > div[class='mw-parser-output'] > div > section > article";
+    private static final String IMAGE_SELECTOR = "div.shipskin-image > a.image > img";
+    private static final String TABLE_ROWS_JAP = "article[data-title='Japanese Server'] > table:nth-child(3) > * tr";
+    private static final String TABLE_ROWS_CN = "article[data-title='Chinese Server'] > table:nth-child(3) > * tr";
+    private static final String TABLE_ROWS_EN = "article[data-title='English Server'] > table:nth-child(3) > * tr";
 
     private static final String AUDIO_COL = "td:nth-child(2) > a";
-    private static final String EVENT_COL = "td:nth-child(1)";
+    private static final String EVENT_COL = "th:nth-child(1)";
     private static final String DIALOG_COL = "td:nth-child(3)";
 
     private static final String WIKI_ON_CLICK_EVENT_KEY = "Secretary (Touch)";
     private static final String WIKI_ON_LOGIN_EVENT_KEY = "Login";
-    private static final String WIKI_ON_IDLE_EVENT_KEY  = "Idle";
+    private static final String WIKI_ON_IDLE_EVENT_KEY = "Idle";
 
     private static final String lang = Settings.getWaifuLanguage();
 
-    public AzurLane(String name) throws IOException  {
+    public AzurLane(String name) throws IOException {
         super(name);
     }
 
@@ -60,9 +60,10 @@ public class AzurLane extends IWaifuAdapter {
 
     private List<String> loadSkinUrls(Document doc) {
         return Selector.select(IMAGES_SELECTOR, doc).stream()
+                .map(e -> e.select(IMAGE_SELECTOR).first())
                 .map(e -> e.hasAttr("srcset") ? e.attr("srcset") : e.attr("src"))
                 .map(set -> Arrays.stream(set.split(","))
-                        .map(s -> BASE_URL + s.trim().split(" ")[0])
+                        .map(s -> s.trim().split(" ")[0])
                         .reduce((first, second) -> second)
                         .orElse(null))
                 .collect(Collectors.toList());
@@ -83,9 +84,19 @@ public class AzurLane extends IWaifuAdapter {
         System.out.println("Loading dialogs of language " + lang);
 
         Elements rows = Selector.select(selector, doc);
+        // TODO: Find a better way
+        // Some quote pages (for example Bremerton and Enterprise) have
+        // an additional p tag and the table is shifted
+        if (rows.size() == 0) {
+            selector = selector.replace("(3)", "(4)");
+            rows = Selector.select(selector, doc);
+        }
         rows.remove(0);
 
         for (Element row : rows) {
+            if (row.childrenSize() < 3) {
+                continue;
+            }
             Element audioElem = row.select(AUDIO_COL).first();
             String audioUrl = audioElem != null ? audioElem.attr("href") : "";
             String eventText = row.selectFirst(EVENT_COL).text().trim();
