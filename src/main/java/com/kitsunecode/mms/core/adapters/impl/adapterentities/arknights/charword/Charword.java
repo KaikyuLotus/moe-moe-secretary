@@ -4,7 +4,7 @@ import com.kitsunecode.mms.core.entities.Dialog;
 
 public class Charword {
 
-    private static final String VOICE_URL = "https://raw.githubusercontent.com/Aceship/AN-EN-Tags/master/etc/voice/%s.mp3";
+    private static final String VOICE_URL = "https://raw.githubusercontent.com/Aceship/Arknight-voices/main/voice/%s.mp3";
 
     private String charWordId;
     private String charId;
