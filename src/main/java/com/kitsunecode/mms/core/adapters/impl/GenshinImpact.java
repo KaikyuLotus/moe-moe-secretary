@@ -20,9 +20,10 @@ public class GenshinImpact extends IWaifuAdapter {
 
     private static final String BASE_URL = "https://genshin-impact.fandom.com";
 
-    private static final String IMAGES_SELECTOR = "a[title='Portrait'] img";
-    private static final String FEMALE_IMAGE_SELECTOR = "a[title='Female Portrait'] img";
-    private static final String MALE_IMAGE_SELECTOR = "a[title='Male Portrait'] img";
+    private static final String IMAGES_SELECTOR = "a[title='Wish'] img";
+    private static final String INGAME_IMAGE_SELECTOR = "a[title='In-Game'] img";
+    private static final String FEMALE_IMAGE_SELECTOR = "a[title='In-Game (Lumine)'] img";
+    private static final String MALE_IMAGE_SELECTOR = "a[title='In-Game (Aether)'] img";
 
     public GenshinImpact(String name) {
         super(name);
@@ -45,6 +46,7 @@ public class GenshinImpact extends IWaifuAdapter {
     private List<String> loadSkinUrls(Document mainDoc, Document outfitsDoc) {
         List<String> urls = Stream.of(
                         Selector.select(IMAGES_SELECTOR, mainDoc).first(),
+                        Selector.select(INGAME_IMAGE_SELECTOR, mainDoc).first(),
                         Selector.select(MALE_IMAGE_SELECTOR, mainDoc).first(),
                         Selector.select(FEMALE_IMAGE_SELECTOR, mainDoc).first()
                 ).filter(Objects::nonNull)
@@ -62,13 +64,13 @@ public class GenshinImpact extends IWaifuAdapter {
                 String path = row.getElementsByTag("td").first().getElementsByTag("a").first().attr("href");
                 try {
                     Document outfitDoc = Jsoup.connect(BASE_URL + path).get();
-                    Element portraitElement = Selector.select("a[title='Portrait']", outfitDoc).first();
+                    Element portraitElement = Selector.select("a[title='Wish']", outfitDoc).first();
                     if (portraitElement != null) {
                         urls.add(portraitElement.attr("href").split("/revision")[0]);
                     }
-                    Element previewElement = Selector.select("a[title='Preview']", outfitDoc).first();
-                    if (previewElement != null) {
-                        urls.add(previewElement.attr("href").split("/revision")[0]);
+                    Element ingameElement = Selector.select("a[title='In-Game']", outfitDoc).first();
+                    if (ingameElement != null) {
+                        urls.add(ingameElement.attr("href").split("/revision")[0]);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -89,11 +91,14 @@ public class GenshinImpact extends IWaifuAdapter {
                 .child(0)
                 .getElementsByTag("tr")
                 .stream()
-                .skip(1)
+                .skip(2)
                 .collect(Collectors.toList());
 
         for (Element row : rows) {
             Element td = row.getElementsByTag("td").first();
+            if(td == null) {
+                continue;
+            }
             Element audioSpan = td.getElementsByTag("span").stream().findAny().orElse(null);
             String audioUrl = null;
             if (audioSpan != null) {
